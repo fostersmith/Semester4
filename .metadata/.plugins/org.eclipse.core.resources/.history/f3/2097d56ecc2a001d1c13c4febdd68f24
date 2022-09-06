@@ -1,0 +1,15 @@
+package review;
+
+public class Apartment {
+
+	private String streetAddr, apptmtNum;
+	private float rent;
+	
+	public ApartmentException(String streetAddr, String apptmtNum, float rent) {
+		super();
+		this.streetAddr = streetAddr;
+		this.apptmtNum = apptmtNum;
+		this.rent = rent;
+	}
+	
+}

@@ -1,0 +1,20 @@
+/*
+ * Foster Smith
+ * 09.02.22
+ * EmployeeDataEntry.java
+ * CH13 #12
+ */
+
+package review;
+
+public class EmployeeDataEntry {
+
+	public static void main(String[] args) {
+		
+		String escape = "EXIT";
+		
+		System.out.println("Enter employee data, or '"+ESCAPE+"' to quit");
+		
+	}
+	
+}
