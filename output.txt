@@ -1,0 +1,188 @@
+        1 file(s) copied.
+/* 
+ * Foster Smith 
+ * 09.02.22 
+ * Apartment.java 
+ * CH13 #6 
+ */ 
+package review; 
+public class Apartment { 
+	private String streetAddr, apptmtNum; 
+	private float rent; 
+	private int bedrooms; 
+	 
+	public Apartment(String streetAddr, String apptmtNum, int bedrooms, float rent) throws ApartmentException { 
+		if(apptmtNum.length() != 3 || bedrooms < 1 || bedrooms > 4 || rent < 500f || rent > 2500f) 
+			throw new ApartmentException("\nAddress: " + streetAddr + 
+					"\nApartment #: "+apptmtNum + 
+					"\nBedrooms: "+bedrooms+ 
+					"\nRent: "+rent+"\n"); 
+		this.streetAddr = streetAddr; 
+		this.apptmtNum = apptmtNum; 
+		this.bedrooms = bedrooms; 
+		this.rent = rent; 
+	} 
+	 
+} 
+/* 
+ * Foster Smith 
+ * 09.02.22 
+ * ApartmentException.java 
+ * CH13 #6 
+ */ 
+package review; 
+public class ApartmentException extends Exception { 
+	public ApartmentException(String message) { 
+		super("Unable to construct apartment with following fields: " + message); 
+	} 
+	 
+} 
+/* 
+ * Foster Smith 
+ * 09.02.22 
+ * EmployeeDataEntry.java 
+ * CH13 #11 
+ */ 
+package review; 
+import java.util.Scanner; 
+public class EmployeeDataEntry { 
+	public static void main(String[] args) { 
+		 
+		final String ESCAPE = "EXIT"; 
+		 
+		System.out.println("Enter employee data, or '"+ESCAPE+"' to quit"); 
+		 
+		String entry; 
+		Scanner in = new Scanner(System.in); 
+		 
+		while(true) { 
+			 
+			try { 
+			 
+				int employeeNum; 
+				float payRate; 
+				 
+				System.out.print("Enter an Employee Number >> "); 
+				entry = in.nextLine(); 
+				if(entry.toUpperCase().contains(ESCAPE)) 
+					break; 
+				try { 
+					employeeNum = Integer.parseInt(entry); 
+					if(employeeNum < 1000) { 
+						throw new EmployeeException(EmployeeMessages.LOW_EMPNUM); 
+					} else if (employeeNum > 9999) { 
+						throw new EmployeeException(EmployeeMessages.HIGH_EMPNUM); 
+					} 
+				} catch(NumberFormatException e) { 
+					throw new EmployeeException(EmployeeMessages.NONNUMERIC_EMPNUM); 
+				} 
+				 
+				System.out.print("Enter an Hourly Pay Rate >> "); 
+				entry = in.nextLine(); 
+				if(entry.toUpperCase().contains(ESCAPE)) 
+					break; 
+				try { 
+					payRate = (float)Double.parseDouble(entry); 
+					if(payRate < 9f) { 
+						throw new EmployeeException(EmployeeMessages.LOW_PAY); 
+					} else if (payRate > 25f) { 
+						throw new EmployeeException(EmployeeMessages.HIGH_PAY); 
+					} 
+				} catch(NumberFormatException e) { 
+					throw new EmployeeException(EmployeeMessages.NONNUMERIC_PAY); 
+				} 
+				 
+				System.out.println("Valid employee data"); 
+			} catch(EmployeeException e) { 
+				System.out.println(e.getMessage()); 
+				break; 
+			} 
+		} 
+		 
+		in.close(); 
+	} 
+	 
+} 
+/* 
+ * Foster Smith 
+ * 09.02.22 
+ * EmployeeException.java 
+ * CH13 #11 
+ */ 
+package review; 
+public class EmployeeException extends Exception { 
+	public EmployeeException(String message) { 
+		super(message); 
+	} 
+	 
+} 
+package review; 
+public class EmployeeMessages { 
+	private static final String[] messages = { 
+			"The employee number is not numeric", 
+			"The employee number is less than 1000", 
+			"The employee number is more than 9999", 
+			"The hourly pay rate is not numeric", 
+			"The hourly pay rate is less than $9.00", 
+			"The hourly pay rate is more than 25.00" 
+	}; 
+	 
+	public static final String NONNUMERIC_EMPNUM = messages[0]; 
+	public static final String LOW_EMPNUM = messages[1]; 
+	public static final String HIGH_EMPNUM = messages[2]; 
+	public static final String NONNUMERIC_PAY = messages[3]; 
+	public static final String LOW_PAY = messages[4]; 
+	public static final String HIGH_PAY = messages[5]; 
+} 
+/* 
+ * Foster Smith 
+ * 09.02.22 
+ * OrderMessages.java 
+ * CH13 #12 
+ */ 
+package review; 
+public class OrderMessages { 
+	public static final String[] ORDER_MESSAGES = {"The item number ordered is not numeric, too low (less than 0), or too high (more\r\n" +  
+			"than 9999).",  
+			"The quantity is not numeric, too low (less than 1), or too high (more than 12).", 
+			"The item number is not a currently valid item"}; 
+	public static final int BAD_ITEM_NUM = 0; 
+	public static final int BAD_QUANTITY = 1; 
+	public static final int INVALID_ITEM = 2; 
+} 
+/* 
+ * Foster Smith 
+ * 09.02.22 
+ * ThrowApartmentException.java 
+ * CH13 #6 
+ */ 
+package review; 
+public class ThrowApartmentException { 
+	public static void main(String[] args) { 
+		 
+		int numApartments = 20; 
+		 
+		String[] addresses = {"Gesällvägen 3, 863 41 Sundsvall, Sweden", 
+				"2110 W Ikea Way, Tempe, AZ 85284", 
+				"6500 IKEA Way, Las Vegas, NV 89148", 
+				"586 Chem. de Touraine, Boucherville, QC J4B 5E4, Canada", 
+				"Via dell'Artigianato, 7, 20061 Carugate MI, Italy", 
+				"Krebsen 40, 9200 Aalborg, Denmark"}; 
+		String[] apptNums = {"534","2","232","0987654321","685","759"}; 
+		int[] bedrooms = {0, 3, 2, 4, 900, 1}; 
+		int[] rents = {615, 512, 2000, 12, 5465652, 782}; 
+		 
+		Apartment[] apartments = new Apartment[6]; 
+		 
+		for(int i = 0; i < apartments.length; ++i) { 
+			try { 
+				apartments[i] = new Apartment(addresses[i], apptNums[i], bedrooms[i], rents[i]); 
+				System.out.println("Successfully created apartment with address "+addresses[i]); 
+			} catch(ApartmentException e) { 
+				System.out.println(e.getMessage()); 
+			} 
+		} 
+				 
+	} 
+	 
+} 
