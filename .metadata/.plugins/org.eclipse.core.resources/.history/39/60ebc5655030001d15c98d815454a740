@@ -1,0 +1,43 @@
+package programs;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class CompareFolders {
+	
+	public static void main(String[] args) {
+		
+		Path a = Paths.get("testdataa\\fila.txt"),
+				b = Paths.get("testdataa\\filb.txt"),
+				c = Paths.get("testdatab\\filc.txt");
+		
+		a = a.toAbsolutePath();
+		b = b.toAbsolutePath();
+		c = c.toAbsolutePath();
+		
+		//compare a and c
+		if(a.getNameCount() == c.getNameCount()) {
+			for(int i = 0; i < a.getNameCount()-1; ++i) {
+				if(!a.getName(i).equals(b.getName(i))) {
+					System.out.println("a and c do not belong to the same folder"); 
+				}
+			}
+		} else { 
+			System.out.println("a and c do not belong to the same folder"); 
+		}
+	}
+	
+	public boolean compare(Path a, Path b) {
+		if(a.getNameCount() == b.getNameCount()) {
+			for(int i = 0; i < a.getNameCount()-1; ++i) {
+				if(!a.getName(i).equals(b.getName(i))) {
+					return false;
+				}
+			}
+			return true;
+		} else { 
+			return false;
+		}		
+	}
+	
+}
