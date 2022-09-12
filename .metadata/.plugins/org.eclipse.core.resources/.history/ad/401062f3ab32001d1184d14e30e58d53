@@ -64,7 +64,6 @@ public class StudentsStanding {
 			int studentid;
 			String first, last;
 			float gpa;
-			ByteBuffer out;
 			while(!done) {
 				System.out.print("Enter Student ID, or QUIT to quit >> ");
 				input = in.nextLine().trim().toUpperCase();
@@ -78,21 +77,6 @@ public class StudentsStanding {
 					last = in.nextLine();
 					System.out.print("("+studentid+") Enter GPA >> ");
 					gpa = Float.parseFloat(in.nextLine());
-					String entry = String.format("%3s", Integer.toString(studentid)).replace(" ", "0")+","
-							+ String.format("%-15s", first)+"," + String.format("%-15s", first)+","+
-							Float.toString(gpa);
-					out = ByteBuffer.wrap(entry.getBytes());
-					if(gpa > 2.0) {
-						badChannel.position(recordPos(studentid));
-						while(out.hasRemaining()) {
-							badChannel.write(out);
-						}
-					} else {
-						goodChannel.position(recordPos(studentid));
-						while(out.hasRemaining()) {
-							goodChannel.write(out);
-						}
-					}
 				}
 			}
 		} catch(Exception e) {

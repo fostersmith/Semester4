@@ -82,17 +82,6 @@ public class StudentsStanding {
 							+ String.format("%-15s", first)+"," + String.format("%-15s", first)+","+
 							Float.toString(gpa);
 					out = ByteBuffer.wrap(entry.getBytes());
-					if(gpa > 2.0) {
-						badChannel.position(recordPos(studentid));
-						while(out.hasRemaining()) {
-							badChannel.write(out);
-						}
-					} else {
-						goodChannel.position(recordPos(studentid));
-						while(out.hasRemaining()) {
-							goodChannel.write(out);
-						}
-					}
 				}
 			}
 		} catch(Exception e) {
