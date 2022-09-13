@@ -25,49 +25,52 @@ public class CreateItemFile {
 	static final String DEFAULT_DESC = "XXXXXXXXXXXXXXXXXXXX";
 	static final int NUMRECS = 1000;
 	
-	public static void main(String[] args) throws IOException /*:skull:*/ {
-		
-		//open
-		Path file = Paths.get("itemfile.txt");
-		FileChannel fc;
-		if(Files.exists(file)) {
-			fc = (FileChannel)Files.newByteChannel(file, WRITE, READ);
-		} else {
-			fc = (FileChannel)Files.newByteChannel(file, WRITE, READ, CREATE);
-			createFile(fc);
-		}
-		
-		//input
-		boolean done = false;
-		String input, desc;
-		int id;
-		Set<Integer> usedIDs = new HashSet<>();
-		Scanner in = new Scanner(System.in);
-		while(!done) {
-			System.out.print("Enter Item # or DONE to finish >> ");
-			input = in.nextLine().trim().toUpperCase();
-			if(!input.equals("DONE")) {
-				id = Integer.parseInt(input);
-				if(!usedIDs.contains(id)) {
-					if(getEntry(fc, id)[1].equals(DEFAULT_DESC)) {
-						System.out.println("Enter description");
-						System.out.print(" >> ");
-						desc = in.nextLine();
-						writeEntry(fc, id, desc);
-						usedIDs.add(id);
+	public static void main(String[] args) /*:skull:*/ {
+		try {
+			//open
+			Path file = Paths.get("itemfile.txt");
+			FileChannel fc;
+			if(Files.exists(file)) {
+				fc = (FileChannel)Files.newByteChannel(file, WRITE, READ);
+			} else {
+				fc = (FileChannel)Files.newByteChannel(file, WRITE, READ, CREATE);
+				createFile(fc);
+			}
+			
+			//input
+			boolean done = false;
+			String input, desc;
+			int id;
+			Set<Integer> usedIDs = new HashSet<>();
+			Scanner in = new Scanner(System.in);
+			while(!done) {
+				System.out.print("Enter Item # or DONE to finish >> ");
+				input = in.nextLine().trim().toUpperCase();
+				if(!input.equals("DONE")) {
+					id = Integer.parseInt(input);
+					if(!usedIDs.contains(id)) {
+						if(getEntry(fc, id)[1].equals(DEFAULT_DESC)) {
+							System.out.println("Enter description");
+							System.out.print(" >> ");
+							desc = in.nextLine();
+							writeEntry(fc, id, desc);
+							usedIDs.add(id);
+						} else {
+							System.out.println("ID already exists in file");
+							usedIDs.add(id);
+						}
 					} else {
-						System.out.println("ID already exists in file");
-						usedIDs.add(id);
+						System.out.println("ID already entered");
 					}
 				} else {
-					System.out.println("ID already entered");
+					done = true;
 				}
-			} else {
-				done = true;
 			}
+		
+			fc.close();
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
-	
-		fc.close();
 	}
 	
 	public static void createFile(FileChannel fc) throws IOException {

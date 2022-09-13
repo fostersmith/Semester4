@@ -41,7 +41,7 @@ public class CustomerItemOrder {
 				System.out.println("ID: "+custData[0]);
 				System.out.println("Name: "+custData[1].trim());
 				System.out.println("Zip Code: "+custData[2]);
-				System.out.println("----- Item Data -----");
+				System.out.println("------- Item Data -------");
 				System.out.println("Item #: "+itemData[0]);
 				System.out.println("Description: "+itemData[1]);
 				System.out.println("-------------------------");
