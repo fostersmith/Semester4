@@ -19,9 +19,6 @@ local.properties
 # Java annotation processor (APT)
 .factorypath
 
-# PDT-specific (PHP Development Tools)
-.buildpath
-
 # sbteclipse plugin
 #.target
 
