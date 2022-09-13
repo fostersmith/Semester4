@@ -23,28 +23,23 @@ local.properties
 .buildpath
 
 # sbteclipse plugin
-.target
+#.target
 
 # Tern plugin
-.tern-project
+#.tern-project
 
 # TeXlipse plugin
-.texlipse
+#.texlipse
 
 # STS (Spring Tool Suite)
-.springBeans
+#.springBeans
 
 # Code Recommenders
-.recommenders/
+#.recommenders/
 
 # Annotation Processing
-.apt_generated/
-.apt_generated_test/
-
-# Scala IDE specific (Scala & Java development for Eclipse)
-.cache-main
-.scala_dependencies
-.worksheet
+#.apt_generated/
+#.apt_generated_test/
 
 # Uncomment this line if you wish to ignore the project description file.
 # Typically, this file would be tracked if it contains build/dependency configurations:
