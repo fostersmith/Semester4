@@ -79,10 +79,11 @@ public class StudentsStanding {
 					System.out.print("("+studentid+") Enter GPA >> ");
 					gpa = Float.parseFloat(in.nextLine());
 					String entry = String.format("%3s", Integer.toString(studentid)).replace(" ", "0")+","
-							+ String.format("%-15s", first)+"," + String.format("%-15s", first)+","+
+							+ String.format("%-15s", first)+"," + String.format("%-15s", last)+","+
 							Float.toString(gpa);
+					System.out.println("writing '"+entry+"' to record");
 					out = ByteBuffer.wrap(entry.getBytes());
-					if(gpa > 2.0) {
+					if(gpa < 2.0) {
 						badChannel.position(recordPos(studentid));
 						while(out.hasRemaining()) {
 							badChannel.write(out);
@@ -95,13 +96,16 @@ public class StudentsStanding {
 					}
 				}
 			}
+			
+			goodChannel.close();
+			badChannel.close();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
 	public static long recordPos(int id) {
-		return (DEFAULT_STRING.length()+System.getProperty("line.separator").length())*id;
+		return (DEFAULT_STRING.length())*id;
 	}
 	
 }
