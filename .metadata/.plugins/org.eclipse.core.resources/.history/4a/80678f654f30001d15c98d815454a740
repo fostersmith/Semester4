@@ -1,0 +1,21 @@
+package programs;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class CompareFolders {
+	
+	public static void main(String[] args) {
+		
+		Path a = Paths.get("testdataa\\fila.txt"),
+				b = Paths.get("testdataa\\filb.txt"),
+				c = Paths.get("testdatab\\filc.txt");
+		
+		a = a.toAbsolutePath();
+		b = b.toAbsolutePath();
+		c = c.toAbsolutePath();
+		
+		System.out.println(a.toString().split("\\"));
+	}
+	
+}

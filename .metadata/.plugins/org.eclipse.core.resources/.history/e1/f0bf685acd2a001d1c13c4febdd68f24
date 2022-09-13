@@ -1,0 +1,21 @@
+package review;
+
+public class Apartment {
+
+	private String streetAddr, apptmtNum;
+	private float rent;
+	private int bedrooms;
+	
+	public Apartment(String streetAddr, String apptmtNum, int bedrooms, float rent) throws ApartmentException {
+		if(apptmtNum.length() != 3 || bedrooms < 1 || bedrooms > 4 || rent < 500f || rent > 2500f)
+			throw new ApartmentException("Address: " + streetAdddr +
+					"Apartment #: "+apptmtNum +
+					"Bedrooms: "+bedrooms+
+					"Rent: "+rent);
+		this.streetAddr = streetAddr;
+		this.apptmtNum = apptmtNum;
+		this.bedrooms = bedrooms;
+		this.rent = rent;
+	}
+	
+}

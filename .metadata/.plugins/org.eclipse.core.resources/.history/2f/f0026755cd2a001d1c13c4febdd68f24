@@ -1,0 +1,16 @@
+package review;
+
+public class Apartment {
+
+	private String streetAddr, apptmtNum;
+	private float rent;
+	private int bedrooms;
+	
+	public Apartment(String streetAddr, String apptmtNum, int bedrooms, float rent) {
+		this.streetAddr = streetAddr;
+		this.apptmtNum = apptmtNum;
+		this.bedrooms = bedrooms;
+		this.rent = rent;
+	}
+	
+}
