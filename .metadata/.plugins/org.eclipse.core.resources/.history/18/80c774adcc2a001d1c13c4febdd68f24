@@ -1,7 +1,0 @@
-package review;
-
-public class AppartmentException {
-
-	public ApartmentException(String )
-	
-}
