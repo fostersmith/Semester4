@@ -1,6 +1,7 @@
 package programs;
 
 import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.WRITE;
 
 import java.io.BufferedInputStream;
@@ -13,37 +14,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 public class CreateItemFile {
 	
 	static final String DEFAULT_RECORD = "000,XXXXXXXXXXXXXXXXXXXX\n";
+	static final String DEFAULT_DESC = "XXXXXXXXXXXXXXXXXXXX";
 	static final int NUMRECS = 1000;
 	
 	public static void main(String[] args) throws IOException /*:skull:*/ {
-		Map<Integer,String> items = new HashMap<>();
 		
 		//open
 		Path file = Paths.get("itemfile.txt");
 		FileChannel fc;
 		if(Files.exists(file)) {
-			// read existing files to items
-			BufferedReader reader = new BufferedReader(new InputStreamReader(new BufferedInputStream(Files.newInputStream(file))));
-			String entry = reader.readLine();
-			while(entry != null) {
-				if(!entry.equals(DEFAULT_RECORD.replace("\n",""))) {
-					String[] split = entry.split(",");
-					int id = Integer.parseInt(split[0]);
-					String description = split[1];
-					items.put(id, description);
-				}
-				entry = reader.readLine();
-			}
-			
-			fc = (FileChannel)Files.newByteChannel(file, WRITE);
+			fc = (FileChannel)Files.newByteChannel(file, WRITE, READ);
 		} else {
-			fc = (FileChannel)Files.newByteChannel(file, WRITE, CREATE);
+			fc = (FileChannel)Files.newByteChannel(file, WRITE, READ, CREATE);
 			createFile(fc);
 		}
 		
@@ -51,40 +41,33 @@ public class CreateItemFile {
 		boolean done = false;
 		String input, desc;
 		int id;
+		Set<Integer> usedIDs = new HashSet<>();
 		Scanner in = new Scanner(System.in);
 		while(!done) {
 			System.out.print("Enter Item # or DONE to finish >> ");
 			input = in.nextLine().trim().toUpperCase();
 			if(!input.equals("DONE")) {
 				id = Integer.parseInt(input);
-				if(!items.containsKey(id)) {
-					System.out.println("Enter description");
-					System.out.print(" >> ");
-					desc = in.nextLine();
-					items.put(id, desc); // more efficient to keep separate ledgers for old and new entries
+				if(!usedIDs.contains(id)) {
+					if(getEntry(fc, id)[1].equals(DEFAULT_DESC)) {
+						System.out.println("Enter description");
+						System.out.print(" >> ");
+						desc = in.nextLine();
+						writeEntry(fc, id, desc);
+						usedIDs.add(id);
+					} else {
+						System.out.println("ID already exists in file");
+						usedIDs.add(id);
+					}
 				} else {
-					System.out.println("ID already exists");
+					System.out.println("ID already entered");
 				}
 			} else {
 				done = true;
 			}
 		}
-		
-		//write
-		String entryStr;
-		ByteBuffer out;
-		for(Map.Entry<Integer,String> entry:items.entrySet()) {
-			id = entry.getKey();
-			desc = entry.getValue();
-			fc.position(getPosition(id));
-			entryStr = String.format("%3s", Integer.toString(id)).replace(" ", "0")+
-					","+String.format("%-20s", desc).substring(0, 20)+"\n";
-			out = ByteBuffer.wrap(entryStr.getBytes());
-			while(out.hasRemaining())
-				fc.write(out);
-		}
+	
 		fc.close();
-
 	}
 	
 	public static void createFile(FileChannel fc) throws IOException {
@@ -98,5 +81,22 @@ public class CreateItemFile {
 	
 	public static long getPosition(int id) {
 		return id*DEFAULT_RECORD.length();
+	}
+	
+	public static String[] getEntry(FileChannel fc, int id) throws IOException {
+		fc.position(getPosition(id));
+		byte[] bytes = DEFAULT_RECORD.substring(0, DEFAULT_RECORD.length()-1).getBytes();
+		ByteBuffer buffer = ByteBuffer.wrap(bytes);
+		fc.read(buffer);
+		return new String(bytes).split(",");
+	}
+	
+	public static void writeEntry(FileChannel fc, int id, String desc) throws IOException {
+		fc.position(getPosition(id));
+		String entryStr = String.format("%3s", Integer.toString(id)).replace(" ", "0")+
+				","+String.format("%-20s", desc).substring(0, 20)+"\n";
+		ByteBuffer out = ByteBuffer.wrap(entryStr.getBytes());
+		while(out.hasRemaining())
+			fc.write(out);
 	}
 }
