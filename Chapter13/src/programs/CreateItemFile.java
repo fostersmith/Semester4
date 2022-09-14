@@ -25,7 +25,7 @@ public class CreateItemFile {
 	static final String DEFAULT_DESC = "XXXXXXXXXXXXXXXXXXXX";
 	static final int NUMRECS = 1000;
 	
-	public static void main(String[] args) /*:skull:*/ {
+	public static void main(String[] args) {
 		try {
 			//open
 			Path file = Paths.get("itemfile.txt");
