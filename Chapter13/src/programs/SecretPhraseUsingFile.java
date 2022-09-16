@@ -22,15 +22,16 @@ public class SecretPhraseUsingFile {
 	
 	public static void main(String[] args) throws IOException {
 		ArrayList<String> phrases = new ArrayList<>();
-		Path f = Paths.get("Phrases.txt");
+		Path f = Paths.get("WordList1k.txt");
 		BufferedReader reader = new BufferedReader(new InputStreamReader(new BufferedInputStream(Files.newInputStream(f, READ))));
 		String phrase = reader.readLine();
 		while(phrase != null) {
 			phrases.add(phrase);
 			phrase = reader.readLine();
 		}
+	}
+	
+	public static void play(String phrase) {
 		
-		for(String s : phrases)
-			System.out.println(s);
 	}
 }
