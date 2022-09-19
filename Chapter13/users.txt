@@ -1,0 +1,3 @@
+foster,fosterscoolpassword
+jeff,abcd1234
+admin,adminpass
