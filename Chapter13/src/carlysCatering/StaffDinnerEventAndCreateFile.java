@@ -27,7 +27,7 @@ public class StaffDinnerEventAndCreateFile {
 		
 		for(int i = 0; i < 3; ++i) {
 			DinnerEvent e = createEvent();
-			saveEvent(e,writer);
+			saveEvent(e,writer,i==0);
 		}
 		writer.flush();
 		output.close();
@@ -78,14 +78,16 @@ public class StaffDinnerEventAndCreateFile {
 			System.out.println("\t"+em);
 	}
 	
-	public static void saveEvent(DinnerEvent e, BufferedWriter writer) throws IOException {
+	public static void saveEvent(DinnerEvent e, BufferedWriter writer, boolean isFirst) throws IOException {
 		
 		// Event #,Event Type,Guests,Price 
 		
 		String record = e.getEventNumber()+","
 				+e.getEventType()+","
 				+e.getGuests()+","
-				+e.getPrice()+"\n";
+				+e.getPrice();
+		if(!isFirst)
+			record += "\n";
 		writer.write(record);
 	}
 	
