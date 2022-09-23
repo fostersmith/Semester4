@@ -6,7 +6,6 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import lib.Duck;
+import lib.LoginException;
 
 public class DuckGame extends JPanel {
 
@@ -57,30 +57,24 @@ public class DuckGame extends JPanel {
 				filepath += ".dgc";
 				Path configfile = Paths.get(filepath);
 				if(Files.exists(configfile)) {
-					String username = JOptionPane.showInputDialog("Enter Username");
-					int password = Integer.parseInt(JOptionPane.showInputDialog("Enter Password"));
 					try {
-						
-						config = DuckGameConfig.readFromFile(configfile, password);
-						if(!config.username.equals(username)) {
-							JOptionPane.showMessageDialog(null, "Username or password was incorrect", "Login Error", JOptionPane.ERROR_MESSAGE);
-							config = null;
-						}
-						
-					} catch(IOException e) {
-						
-						JOptionPane.showMessageDialog(null, "An IO Error Occurred\n"+e, "Error", JOptionPane.ERROR_MESSAGE);
-						
+						config = doLogin(configfile);
+					} catch(NullPointerException e) {
+						cancel = true;
+					} catch (IOException e) {
+						JOptionPane.showMessageDialog(null, "An IO Exception Occurred\n"+e);
+					} catch (LoginException e) {
+						JOptionPane.showMessageDialog(null, "Invalid Credentials");
 					}
 				} else {
 					int opt = JOptionPane.showOptionDialog(null, "That file does not exist. Create a new one?", "No File Exists", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 					if(opt == JOptionPane.YES_OPTION) {
-						String username = JOptionPane.showInputDialog("Enter Username");
-						int password = Integer.parseInt(JOptionPane.showInputDialog("Enter Password"));
 						try {
-							config = DuckGameConfig.createBlankFile(configfile, username, password);
-						} catch (IOException e1) {
-							JOptionPane.showMessageDialog(null, "An IO Error Occurred\n"+e1, "Error", JOptionPane.ERROR_MESSAGE);
+							config = doAccountSetup(configfile);
+						} catch(NullPointerException e) {
+							cancel = true;
+						} catch (IOException e) {
+							JOptionPane.showMessageDialog(null, "An IO Exception Occurred\n"+e);
 						}
 					}
 				}
@@ -96,6 +90,50 @@ public class DuckGame extends JPanel {
 			f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			f1.setVisible(true);
 		}
+	}
+	
+	public static DuckGameConfig doLogin(Path file) throws NullPointerException, IOException, LoginException {
+		String input = JOptionPane.showInputDialog("Enter username");
+		if(input == null)
+			throw new NullPointerException();
+		String username = input;
+		int password = -1;
+		boolean done = false;
+		while(!done) {
+			input = JOptionPane.showInputDialog("Enter Password");
+			if(input == null)
+				throw new NullPointerException();
+			try {
+				password = Integer.parseInt(input);
+				done = true;
+			} catch(NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "Password must be numeric");			}
+		}
+		DuckGameConfig config = DuckGameConfig.readFromFile(file, password);
+		if(!config.username.equals(username))
+			throw new LoginException();
+		return config;
+	}
+	
+	public static DuckGameConfig doAccountSetup(Path file) throws NullPointerException, IOException {
+		String input = JOptionPane.showInputDialog("Enter Username");
+		if(input == null)
+			throw new NullPointerException();
+		String username = input;
+		int password = -1;
+		boolean done = false;
+		while(!done) {
+			input = JOptionPane.showInputDialog("Enter Password");
+			if(input == null)
+				throw new NullPointerException();
+			try {
+				password = Integer.parseInt(input);
+				done = true;
+			} catch(NumberFormatException e) {
+				JOptionPane.showMessageDialog(null, "Password must be numeric");			}
+		}
+		DuckGameConfig config = DuckGameConfig.createBlankFile(file, username, password);
+		return config;
 	}
 	
 }

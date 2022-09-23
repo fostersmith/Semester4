@@ -1,13 +1,18 @@
 package lib;
 
 import java.awt.Image;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class Duck {
+public class Duck extends Encryption {
 	
 	final static int WALKING = 0, SITTING = 1, STANDING = 2, STANDING2 = 3;
-	final int ID;
+	int ID;
 	Image[] walking;
 	Image sitting, standing, standing2;
 	int rarity;
@@ -16,7 +21,7 @@ public class Duck {
 	int state;
 	double[] velocity;
 	
-	public Duck(int iD, Path file, Image[] walking, Image sitting, Image standing, Image standing2, int rarity, double x, double y, double eggChance) {
+	private Duck(int iD, Path file, Image[] walking, Image sitting, Image standing, Image standing2, int rarity, double x, double y, double eggChance) {
 		super();
 		ID = iD;
 		this.walking = walking;
@@ -30,27 +35,28 @@ public class Duck {
 		state = STANDING;
 	}
 	
-	public static Duck readFromClientFile(Path file, int password) {
-		return null;
-	}
-	
-	/**
-	 * Saves the duck to a file encrypted with the given key
-	 * @param file
-	 * @param key
-	 * @throws IOException
-	 */
-	public void saveToServerFile(Path file, int serverKey) throws IOException {
+	public static Duck readFromFile(Path file, int supposedID, int password) throws IOException, LoginException {
+		InputStream input = new BufferedInputStream(Files.newInputStream(file));
+		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+		int id;
+		try {
+			id = Integer.parseInt(decrypt(reader.readLine(), password));
+			if(id != supposedID) 
+				throw new LoginException();
+		} catch(NumberFormatException e) {
+			throw new LoginException();
+		}
+		int rarity;
+		try {
+			rarity = Integer.parseInt(decrypt(reader.readLine(), password));
+		} catch(NumberFormatException e) {
+			throw new LoginException();
+		}
+		
 		
 	}
 	
-	/**
-	 * Saves the duck to a file with the server key encrypted with the password
-	 * @param file
-	 * @param key
-	 * @throws IOException
-	 */
-	public void saveToClientFile(Path file, int serverKey, int password) throws IOException {
+	public void saveToFile(Path file, int password) throws IOException {
 		
 	}
 	
