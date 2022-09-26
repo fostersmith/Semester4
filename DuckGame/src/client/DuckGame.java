@@ -1,8 +1,8 @@
 package client;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -10,44 +10,97 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import lib.Duck;
 import lib.LoginException;
 
-public class DuckGame extends JPanel {
+public class DuckGame extends JFrame implements ActionListener {
 
-	ArrayList<Duck> ducks;
-	BufferedImage canvas;
+	BufferedImage background;
 	DuckGameConfig config;
+	DuckScreen screen;
 	
-	public DuckGame(DuckGameConfig f) {
-		canvas = new BufferedImage(500,500,BufferedImage.TYPE_INT_ARGB);
-	}
+	// startup
+	JButton playButton, settingsButton;
 	
-	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		Graphics2D g2d = (Graphics2D)g;
-		render();
-		g2d.drawImage(canvas, 0, 0, canvas.getWidth(), canvas.getHeight(), null);
-	}
+	// settings
+	JButton addDuckButton, changePasswordButton, changeUsernameButton, saveButton;
+	
+	// gameplay
+	JButton nextButton, prevButton;
 	
 	@Override
-	public Dimension getPreferredSize() {
-		return new Dimension(canvas.getWidth(), canvas.getHeight());
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == nextButton) {
+			screen.focus++;
+			screen.focus %= screen.ducks.size();
+			screen.render();
+		} else if(e.getSource() == prevButton) {
+			screen.focus--;
+			screen.focus %= screen.ducks.size();
+			screen.render();
+		} else if(e.getSource() == addDuckButton) {
+			try {
+				Path file;
+				int id;
+				String s = JOptionPane.showInputDialog("Enter File Path:");
+				if(s == null)
+					throw new NullPointerException();
+				s += ".dck";
+				file = Paths.get(s);
+				if(!Files.exists(file))
+					throw new IOException("File does not exist");
+				s = JOptionPane.showInputDialog("Enter Duck ID");
+				if(s == null)
+					throw new NullPointerException();
+				id = Integer.parseInt(s);
+				Duck d = Duck.readFromFile(file, id, config.password);
+				config.ducks.add(file);
+				config.ids.add(id);
+				screen.ducks.add(d);
+			} catch(NullPointerException ex){
+				//canceled
+			} catch(Exception ex) {
+				JOptionPane.showMessageDialog(null, "An error occurred while adding duck.\nOriginal: "+e);
+			}
+		}
 	}
 	
-	public void render() {
-
+	public DuckGame(DuckGameConfig dgc) throws IOException, LoginException {
+		this.config = dgc;
+		try {
+			background = ImageIO.read(dgc.background.toFile());
+		} catch(IOException e) {
+			throw new IOException("Couldn't read background file\nOriginal Message: "+e);
+		}
+		ArrayList<Duck> ducks = new ArrayList<>();
+		try {
+			for(int i = 0; i < dgc.ducks.size(); ++i) {
+				ducks.add(Duck.readFromFile(dgc.ducks.get(i), dgc.ids.get(i), dgc.password));
+			}
+		} catch(Exception e) {
+			throw new LoginException("Error occurred while loading duck.\nOriginal: "+e);
+		}
+		screen = new DuckScreen(ducks, background);
 	}
 	
-	public void doTick() {
+	public void loadStartupMenu() {
+		this.removeAll();
+		this.setLayout(new GridLayout(1,2));
+	}
+	
+	public void loadSettings() {
 		
 	}
 	
+	public void loadGameplay() {
+		
+	}
+			
 	public static void main(String[] args) {
 		DuckGameConfig config = null;
 		boolean cancel = false;
@@ -82,13 +135,14 @@ public class DuckGame extends JPanel {
 				cancel = true;
 		}
 		if(!cancel) {
-			DuckGame game = new DuckGame(config);
-			JFrame f1 = new JFrame();
-			f1.add(game);
-			game.render();
-			f1.pack();
-			f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			f1.setVisible(true);
+			try {
+				DuckGame f1 = new DuckGame(config);
+				f1.pack();
+				f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				f1.setVisible(true);
+			} catch(Exception e) {
+				JOptionPane.showMessageDialog(null, "Error:\n\n"+e);
+			}
 		}
 	}
 	

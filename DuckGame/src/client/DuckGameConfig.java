@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import lib.Encryption;
 
@@ -23,18 +24,22 @@ public class DuckGameConfig extends Encryption {
 	String username;
 	Path background;
 	ArrayList<Path> ducks;
+	ArrayList<Integer> ids;
+	int password;
 	
-	private DuckGameConfig(Path background) {
+	private DuckGameConfig(Path background, int password) {
 		this.background = background;
 		ducks = new ArrayList<>();
+		this.password = password;
 	}
 	
-	private DuckGameConfig() {
+	private DuckGameConfig(int password) {
 		ducks = new ArrayList<>();
+		this.password = password;
 	}
 	
 	public static DuckGameConfig readFromFile(Path file, int password) throws IOException {
-		DuckGameConfig conf = new DuckGameConfig();
+		DuckGameConfig conf = new DuckGameConfig(password);
 		InputStream input = Files.newInputStream(file, READ);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 		String username = decrypt(reader.readLine(), password);
@@ -43,8 +48,10 @@ public class DuckGameConfig extends Encryption {
 		conf.background = Paths.get(bgpath);
 		String s;
 		while((s = reader.readLine())!=null) {
-			String duckPath = decrypt(s, password);
-			conf.ducks.add(Paths.get(duckPath));
+			String[] duck = decrypt(s, password).split(":");
+			int duckID = Integer.parseInt(duck[1]);
+			conf.ducks.add(Paths.get(duck[0]));
+			conf.ids.add(duckID);
 		}
 		return conf;
 	}
@@ -57,9 +64,9 @@ public class DuckGameConfig extends Encryption {
 		writer.newLine();
 		s = encrypt(config.background.toString(), password);
 		writer.write(s, 0, s.length());
-		for(Path p:config.ducks) {
+		for(int i = 0; i < config.ducks.size(); ++i) {
 			writer.newLine();
-			s = encrypt(p.toString(), password);
+			s = encrypt(config.ducks.get(i).toString()+":"+config.ids.get(i), password);
 			writer.write(s, 0, s.length());
 		}
 		writer.flush();
@@ -67,7 +74,7 @@ public class DuckGameConfig extends Encryption {
 	}
 
 	public static DuckGameConfig createBlankFile(Path file, String username, int password) throws IOException {
-		DuckGameConfig con = new DuckGameConfig(DEFAULT_BACKGROUND);
+		DuckGameConfig con = new DuckGameConfig(DEFAULT_BACKGROUND, password);
 		con.username = username;
 		writeToFile(con, file, password);
 		return con;
