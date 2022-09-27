@@ -1,15 +1,16 @@
 package client;
 
+import java.awt.AlphaComposite;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
 import lib.Duck;
+import lib.DuckSprite;
 
 public class DuckScreen extends JPanel {
 
@@ -39,7 +40,23 @@ public class DuckScreen extends JPanel {
 	}
 	
 	public void render() {
-
+		renderSpriteSheet(ducks.get(focus).currentSprite());
+		this.repaint();
+	}
+	
+	private void renderSpriteSheet(DuckSprite sprite) {
+		Graphics2D g = (Graphics2D)canvas.getGraphics();
+		g.drawImage(background, 0, 0, canvas.getWidth(), canvas.getHeight(), null);
+		int pxHeight = canvas.getHeight() / DuckSprite.HEIGHT;
+		int pxWidth = canvas.getHeight() / DuckSprite.WIDTH;
+		for(int x = 0; x < DuckSprite.WIDTH; ++x) {
+			for(int y = 0; y < DuckSprite.HEIGHT; ++y) {
+				g.setColor(sprite.getPixel(x, y));
+				int pxX = x * pxWidth;
+				int pxY = y * pxHeight;
+				g.fillRect(pxX, pxY, pxWidth, pxHeight);
+			}
+		}
 	}
 	
 	public void doTick() {

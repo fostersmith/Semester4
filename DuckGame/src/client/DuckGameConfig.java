@@ -14,8 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 
+import lib.Duck;
 import lib.Encryption;
 
 public class DuckGameConfig extends Encryption {
@@ -30,14 +30,16 @@ public class DuckGameConfig extends Encryption {
 	private DuckGameConfig(Path background, int password) {
 		this.background = background;
 		ducks = new ArrayList<>();
+		ids = new ArrayList<>();
 		this.password = password;
 	}
 	
 	private DuckGameConfig(int password) {
 		ducks = new ArrayList<>();
+		ids = new ArrayList<>();
 		this.password = password;
 	}
-	
+		
 	public static DuckGameConfig readFromFile(Path file, int password) throws IOException {
 		DuckGameConfig conf = new DuckGameConfig(password);
 		InputStream input = Files.newInputStream(file, READ);

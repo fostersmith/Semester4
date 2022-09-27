@@ -17,14 +17,15 @@ import java.util.ArrayList;
 
 public class Duck extends Encryption {
 	
-	final static int WALKING = 0, SITTING = 1, STANDING = 2, STANDING2 = 3;
+	public final static int WALKING = 0, SITTING = 1, STANDING = 2, STANDING2 = 3;
 	int ID;
-	DuckSprite[] walking;
-	DuckSprite sitting, standing, standing2;
+	public DuckSprite[] walking;
+	public DuckSprite sitting, standing, standing2;
 	int rarity;
 	double x, y;
 	double eggChance;
-	int state;
+	public int state;
+	public int walkIndex;
 	double[] velocity;
 	
 	private Duck(int iD, DuckSprite[] walking, DuckSprite sitting, DuckSprite standing, DuckSprite standing2, int rarity, double x, double y, double eggChance) {
@@ -38,7 +39,8 @@ public class Duck extends Encryption {
 		this.x = x;
 		this.y = y;
 		this.eggChance = eggChance;
-		state = STANDING;
+		state = SITTING;
+		walkIndex = 0;
 		velocity = new double[] {0d,0d};
 	}
 	private Duck() {
@@ -170,6 +172,20 @@ public class Duck extends Encryption {
 		
 		writer.flush();
 		output.close();
+	}
+	
+	public DuckSprite currentSprite() {
+		switch(state) {
+		case SITTING:
+			return sitting;
+		case STANDING:
+			return standing;
+		case STANDING2:
+			return standing2;
+		case WALKING:
+			return walking[walkIndex];
+		}
+		return null;
 	}
 	
 	public static void main(String[] args) throws IOException, LoginException {

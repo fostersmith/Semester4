@@ -23,6 +23,7 @@ public class DuckGame extends JFrame implements ActionListener {
 
 	BufferedImage background;
 	DuckGameConfig config;
+	Path confPath;
 	
 	// startup
 	JPanel startupPanel;
@@ -58,7 +59,13 @@ public class DuckGame extends JFrame implements ActionListener {
 		} else if(e.getSource() == playButton) {
 			loadGameplay();
 		} else if(e.getSource() == saveButton) {
-
+			try {
+				DuckGameConfig.writeToFile(config, confPath, config.password);
+				for(int i = 0; i < screen.ducks.size(); ++i)
+					Duck.saveToFile(screen.ducks.get(i), config.ducks.get(i), config.password);
+			} catch (IOException e1) {
+				JOptionPane.showMessageDialog(null, "An IO Error Occurred\nOriginal: "+e1);
+			}
 		} else if(e.getSource() == changePasswordButton) {
 			
 		} else if(e.getSource() == changeUsernameButton) {
@@ -68,7 +75,7 @@ public class DuckGame extends JFrame implements ActionListener {
 		}
 	}
 	
-	public DuckGame(DuckGameConfig dgc) throws IOException, LoginException {
+	public DuckGame(DuckGameConfig dgc, Path confPath) throws IOException, LoginException {
 		this.config = dgc;
 		try {
 			background = ImageIO.read(dgc.background.toFile());
@@ -84,6 +91,7 @@ public class DuckGame extends JFrame implements ActionListener {
 			throw new LoginException("Error occurred while loading duck.\nOriginal: "+e);
 		}
 		screen = new DuckScreen(ducks, background);
+		this.confPath = confPath;
 		
 		playButton = new JButton("Play");
 		settingsButton = new JButton("Settings");
@@ -117,11 +125,12 @@ public class DuckGame extends JFrame implements ActionListener {
 		prevButton = new JButton("Previous");
 		nextButton.addActionListener(this);
 		prevButton.addActionListener(this);
+		screen.render();
 		
-		gameButtonPanel = new JPanel(new GridLayout(2,1));
+		gameButtonPanel = new JPanel(new GridLayout(1,2));
 		gameButtonPanel.add(prevButton);
 		gameButtonPanel.add(nextButton);
-		gamePanel = new JPanel(new GridLayout(1,2));
+		gamePanel = new JPanel(new GridLayout(2,1));
 		gamePanel.add(screen);
 		gamePanel.add(gameButtonPanel);
 		
@@ -181,11 +190,12 @@ public class DuckGame extends JFrame implements ActionListener {
 	public static void main(String[] args) {
 		DuckGameConfig config = null;
 		boolean cancel = false;
+		Path configfile = null;
 		while(config == null && !cancel) {
 			String filepath = JOptionPane.showInputDialog("Enter the Path of the Configuration File");
 			if(filepath != null) {
 				filepath += ".dgc";
-				Path configfile = Paths.get(filepath);
+				configfile = Paths.get(filepath);
 				if(Files.exists(configfile)) {
 					try {
 						config = doLogin(configfile);
@@ -213,7 +223,7 @@ public class DuckGame extends JFrame implements ActionListener {
 		}
 		if(!cancel) {
 			try {
-				DuckGame f1 = new DuckGame(config);
+				DuckGame f1 = new DuckGame(config, configfile);
 				f1.pack();
 				f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				f1.setVisible(true);
