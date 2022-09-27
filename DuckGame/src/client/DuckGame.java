@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import lib.Duck;
 import lib.LoginException;
@@ -22,16 +23,20 @@ public class DuckGame extends JFrame implements ActionListener {
 
 	BufferedImage background;
 	DuckGameConfig config;
-	DuckScreen screen;
 	
 	// startup
-	JButton playButton, settingsButton;
+	JPanel startupPanel;
+	JButton playButton, settingsButton, saveButton;
 	
 	// settings
-	JButton addDuckButton, changePasswordButton, changeUsernameButton, saveButton;
+	JPanel settingsPanel;
+	JButton addDuckButton, changePasswordButton, changeUsernameButton, startupButton;
 	
 	// gameplay
+	JPanel gamePanel, gameButtonPanel;
 	JButton nextButton, prevButton;
+	DuckScreen screen;
+
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -44,29 +49,22 @@ public class DuckGame extends JFrame implements ActionListener {
 			screen.focus %= screen.ducks.size();
 			screen.render();
 		} else if(e.getSource() == addDuckButton) {
-			try {
-				Path file;
-				int id;
-				String s = JOptionPane.showInputDialog("Enter File Path:");
-				if(s == null)
-					throw new NullPointerException();
-				s += ".dck";
-				file = Paths.get(s);
-				if(!Files.exists(file))
-					throw new IOException("File does not exist");
-				s = JOptionPane.showInputDialog("Enter Duck ID");
-				if(s == null)
-					throw new NullPointerException();
-				id = Integer.parseInt(s);
-				Duck d = Duck.readFromFile(file, id, config.password);
-				config.ducks.add(file);
-				config.ids.add(id);
-				screen.ducks.add(d);
-			} catch(NullPointerException ex){
-				//canceled
-			} catch(Exception ex) {
-				JOptionPane.showMessageDialog(null, "An error occurred while adding duck.\nOriginal: "+e);
-			}
+			doAddDuck();
+		} else if(e.getSource() == settingsButton) {
+			loadSettings();
+			System.out.println("settings");
+		} else if(e.getSource() == startupButton) {
+			loadStartup();
+		} else if(e.getSource() == playButton) {
+			loadGameplay();
+		} else if(e.getSource() == saveButton) {
+
+		} else if(e.getSource() == changePasswordButton) {
+			
+		} else if(e.getSource() == changeUsernameButton) {
+			
+		} else if(e.getSource() == startupButton) {
+			
 		}
 	}
 	
@@ -86,19 +84,98 @@ public class DuckGame extends JFrame implements ActionListener {
 			throw new LoginException("Error occurred while loading duck.\nOriginal: "+e);
 		}
 		screen = new DuckScreen(ducks, background);
+		
+		playButton = new JButton("Play");
+		settingsButton = new JButton("Settings");
+		saveButton = new JButton("Save");
+		playButton.addActionListener(this);
+		settingsButton.addActionListener(this);
+		saveButton.addActionListener(this);
+		
+		startupPanel = new JPanel(new GridLayout(1,4));
+		startupPanel.add(playButton);
+		startupPanel.add(settingsButton);
+		startupPanel.add(saveButton);
+		
+		addDuckButton = new JButton("Add Duck");
+		changePasswordButton = new JButton("Change Password");
+		changeUsernameButton = new JButton("Change username");
+		startupButton = new JButton("Startup Menu");
+		addDuckButton.addActionListener(this);
+		changePasswordButton.addActionListener(this);
+		changeUsernameButton.addActionListener(this);
+		startupButton.addActionListener(this);
+		addDuckButton.addActionListener(this);
+		
+		settingsPanel = new JPanel(new GridLayout(1,3));
+		settingsPanel.add(addDuckButton);
+		settingsPanel.add(changePasswordButton);
+		settingsPanel.add(changeUsernameButton);
+		settingsPanel.add(startupButton);
+		
+		nextButton = new JButton("Next");
+		prevButton = new JButton("Previous");
+		nextButton.addActionListener(this);
+		prevButton.addActionListener(this);
+		
+		gameButtonPanel = new JPanel(new GridLayout(2,1));
+		gameButtonPanel.add(prevButton);
+		gameButtonPanel.add(nextButton);
+		gamePanel = new JPanel(new GridLayout(1,2));
+		gamePanel.add(screen);
+		gamePanel.add(gameButtonPanel);
+		
+		loadStartup();
+		
 	}
 	
-	public void loadStartupMenu() {
-		this.removeAll();
-		this.setLayout(new GridLayout(1,2));
+	public void loadStartup() {
+		this.getContentPane().removeAll();
+		this.add(startupPanel);
+		pack();
 	}
 	
 	public void loadSettings() {
-		
+		this.getContentPane().removeAll();
+		this.add(settingsPanel);
+		pack();
 	}
 	
 	public void loadGameplay() {
-		
+		this.getContentPane().removeAll();
+		this.add(gamePanel);
+		pack();
+	}
+	
+	public void doAddDuck() {
+		try {
+			Path file;
+			int id, password;
+			String s = JOptionPane.showInputDialog("Enter File Path:");
+			if(s == null)
+				throw new NullPointerException();
+			s += ".dck";
+			file = Paths.get(s);
+			if(!Files.exists(file))
+				throw new IOException("File does not exist");
+			s = JOptionPane.showInputDialog("Enter Duck ID");
+			if(s == null)
+				throw new NullPointerException();
+			id = Integer.parseInt(s);
+			s = JOptionPane.showInputDialog("Enter Duck's Previous Password");
+			if(s == null)
+				throw new NullPointerException();
+			password = Integer.parseInt(s);
+			Duck d = Duck.readFromFile(file, id, password);
+			config.ducks.add(file);
+			config.ids.add(id);
+			screen.ducks.add(d);
+			JOptionPane.showMessageDialog(null, "Success");
+		} catch(NullPointerException ex){
+			//canceled
+		} catch(Exception ex) {
+			JOptionPane.showMessageDialog(null, "An error occurred while adding duck.\nOriginal: "+ex);
+		}
 	}
 			
 	public static void main(String[] args) {
