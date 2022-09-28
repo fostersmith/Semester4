@@ -1,13 +1,15 @@
 package client;
 
-import java.awt.AlphaComposite;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import lib.Duck;
 import lib.DuckSprite;
@@ -18,12 +20,30 @@ public class DuckScreen extends JPanel {
 	BufferedImage background;
 	BufferedImage canvas;
 	int focus;
+	Timer ticks, render;
 	
 	public DuckScreen(ArrayList<Duck> ducks, BufferedImage background) {
 		canvas = new BufferedImage(background.getWidth(),background.getHeight(),BufferedImage.TYPE_INT_ARGB);
 		this.ducks = ducks;
 		this.background = background;
 		focus = 0;
+		ActionListener tickListener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				doTick();
+			}
+		};
+		ticks = new Timer(100, tickListener);
+		ActionListener renderListener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				render();
+			}
+		};
+		render = new Timer(50, renderListener);
+		
+		ticks.start();
+		render.start();
 	}
 	
 	@Override
@@ -38,12 +58,7 @@ public class DuckScreen extends JPanel {
 	public Dimension getPreferredSize() {
 		return new Dimension(canvas.getWidth(), canvas.getHeight());
 	}
-	
-	public void render() {
-		renderSpriteSheet(ducks.get(focus).currentSprite());
-		this.repaint();
-	}
-	
+		
 	private void renderSpriteSheet(DuckSprite sprite) {
 		Graphics2D g = (Graphics2D)canvas.getGraphics();
 		g.drawImage(background, 0, 0, canvas.getWidth(), canvas.getHeight(), null);
@@ -59,12 +74,23 @@ public class DuckScreen extends JPanel {
 		}
 	}
 	
-	public void doTick() {
+	public synchronized void doTick() {
 		
 	}
 	
-	public void reset() {
-		
+	public synchronized void render() {
+		renderSpriteSheet(ducks.get(focus).currentSprite());
+		this.repaint();
+	}
+	
+	public void stop() {
+		ticks.stop();
+		render.stop();
+	}
+	
+	public void start() {
+		ticks.restart();
+		render.restart();
 	}
 
 	

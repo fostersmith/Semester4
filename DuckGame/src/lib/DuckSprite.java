@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 
@@ -50,7 +51,6 @@ public class DuckSprite extends Encryption {
 		return sprite;
 	}
 	
-	//TESTME
 	public static void writeSpriteSegment(BufferedWriter writer, int password, DuckSprite sprite) throws IOException {
 		for(Color[] row:sprite.spritesheet) {
 			StringBuilder rowStr = new StringBuilder();
@@ -70,7 +70,7 @@ public class DuckSprite extends Encryption {
 		DuckSprite ds = new DuckSprite();
 		for(int x = 0; x < WIDTH; ++x)
 			for(int y = 0; y < HEIGHT; ++y)
-				ds.spritesheet[x][y] = new Color(bi.getRGB(x, y));
+				ds.spritesheet[x][y] = new Color(bi.getRGB(x, y), true);
 		return ds;
 	}
 	
@@ -82,4 +82,31 @@ public class DuckSprite extends Encryption {
 		spritesheet[x][y] = c;
 	}
 	
+	public static void refactorDuck(Path duck, int id, int password, Path sittingF, Path standingF, Path standing2F, Path[] walkF) throws IOException, LoginException {
+		Duck d = Duck.readFromFile(duck, id, password);
+		if(sittingF != null) {
+			d.sitting = readFromImage(sittingF);
+		}
+		if(standingF != null) {
+			d.standing = readFromImage(standingF);
+		}
+		if(standing2F!= null) {
+			d.standing2 = readFromImage(standing2F);
+		}
+		if(walkF != null) {
+			d.walking = new DuckSprite[walkF.length];
+			for(int i = 0; i < walkF.length; ++i)
+				d.walking[i] = readFromImage(walkF[i]);
+		}
+		Duck.saveToFile(d, duck, password);		
+	}
+	
+	public static void main(String[ ] args) throws IOException, LoginException {
+		Path sitting = Paths.get("duckwalk\\sitting.png");
+		Path standing = Paths.get("duckwalk\\standing.png");
+		Path standing2 = Paths.get("duckwalk\\standing2.png");
+		Path walk0 = Paths.get("duckwalk\\walk0.png");
+		Path walk1 = Paths.get("duckwalk\\walk1.png");
+		refactorDuck(Paths.get("testduck.dck"), 0, 0, sitting, standing, standing2, new Path[] {walk0, walk1});
+	}
 }

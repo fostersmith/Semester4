@@ -130,9 +130,9 @@ public class DuckGame extends JFrame implements ActionListener {
 		gameButtonPanel = new JPanel(new GridLayout(1,2));
 		gameButtonPanel.add(prevButton);
 		gameButtonPanel.add(nextButton);
-		gamePanel = new JPanel(new GridLayout(2,1));
+		gamePanel = new JPanel(new GridLayout(1,1));
 		gamePanel.add(screen);
-		gamePanel.add(gameButtonPanel);
+		//gamePanel.add(gameButtonPanel);
 		
 		loadStartup();
 		
