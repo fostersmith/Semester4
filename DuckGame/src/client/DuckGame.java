@@ -153,6 +153,7 @@ public class DuckGame extends JFrame implements ActionListener {
 	public void loadGameplay() {
 		this.getContentPane().removeAll();
 		this.add(gamePanel);
+		screen.start();
 		pack();
 	}
 	

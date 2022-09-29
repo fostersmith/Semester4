@@ -41,9 +41,6 @@ public class DuckScreen extends JPanel {
 			}
 		};
 		render = new Timer(50, renderListener);
-		
-		ticks.start();
-		render.start();
 	}
 	
 	@Override
@@ -75,7 +72,11 @@ public class DuckScreen extends JPanel {
 	}
 	
 	public synchronized void doTick() {
-		
+		System.out.println("tick");
+		if(Math.random() >= 0.75) {
+			ducks.get(focus).state = Duck.chooseState();
+			System.out.println("new state: "+ducks.get(focus).state);
+		}
 	}
 	
 	public synchronized void render() {

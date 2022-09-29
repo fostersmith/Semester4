@@ -1,6 +1,5 @@
 package lib;
 
-import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -186,6 +185,10 @@ public class Duck extends Encryption {
 			return walking[walkIndex];
 		}
 		return null;
+	}
+	
+	public static int chooseState() {
+		return (int)(Math.random()*4)+1;
 	}
 	
 	public static void main(String[] args) throws IOException, LoginException {
