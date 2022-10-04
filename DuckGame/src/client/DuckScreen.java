@@ -77,6 +77,8 @@ public class DuckScreen extends JPanel {
 			ducks.get(focus).state = Duck.chooseState();
 			System.out.println("new state: "+ducks.get(focus).state);
 		}
+		if(ducks.get(focus).state == Duck.WALKING)
+			ducks.get(focus).step();
 	}
 	
 	public synchronized void render() {

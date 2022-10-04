@@ -63,15 +63,27 @@ public class DuckGame extends JFrame implements ActionListener {
 				DuckGameConfig.writeToFile(config, confPath, config.password);
 				for(int i = 0; i < screen.ducks.size(); ++i)
 					Duck.saveToFile(screen.ducks.get(i), config.ducks.get(i), config.password);
+				JOptionPane.showMessageDialog(null,"Success");
 			} catch (IOException e1) {
 				JOptionPane.showMessageDialog(null, "An IO Error Occurred\nOriginal: "+e1);
 			}
 		} else if(e.getSource() == changePasswordButton) {
-			
+			String passwordStr = JOptionPane.showInputDialog(null, "Enter new password");
+			if(passwordStr != null) {
+				try {
+					int password = Integer.parseInt(passwordStr);
+					config.password = password;
+					JOptionPane.showMessageDialog(null, "Success. Changes will not be reflected until saved");
+				} catch (NumberFormatException e1) {
+					JOptionPane.showMessageDialog(null, "Invalid password. Changes will not take place");
+				}
+			}
 		} else if(e.getSource() == changeUsernameButton) {
-			
-		} else if(e.getSource() == startupButton) {
-			
+			String username = JOptionPane.showInputDialog(null, "Enter new username");
+			if(username != null) {
+				config.username = username;
+				JOptionPane.showMessageDialog(null, "Success. Changes will not be reflected until saved");
+			}			
 		}
 	}
 	
@@ -130,9 +142,9 @@ public class DuckGame extends JFrame implements ActionListener {
 		gameButtonPanel = new JPanel(new GridLayout(1,2));
 		gameButtonPanel.add(prevButton);
 		gameButtonPanel.add(nextButton);
-		gamePanel = new JPanel(new GridLayout(1,1));
+		gamePanel = new JPanel(new GridLayout(2,1));
 		gamePanel.add(screen);
-		//gamePanel.add(gameButtonPanel);
+		gamePanel.add(gameButtonPanel);
 		
 		loadStartup();
 		
@@ -251,7 +263,12 @@ public class DuckGame extends JFrame implements ActionListener {
 			} catch(NumberFormatException e) {
 				JOptionPane.showMessageDialog(null, "Password must be numeric");			}
 		}
-		DuckGameConfig config = DuckGameConfig.readFromFile(file, password);
+		DuckGameConfig config;
+		try {
+			config = DuckGameConfig.readFromFile(file, password);
+		} catch(Exception e) {
+			throw new IOException("An Error Occurred while loading file. Login information may be incorrect or file may be corrupted.");
+		}
 		if(!config.username.equals(username))
 			throw new LoginException();
 		return config;

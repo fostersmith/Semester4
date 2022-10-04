@@ -173,6 +173,11 @@ public class Duck extends Encryption {
 		output.close();
 	}
 	
+	public synchronized void step() {
+		walkIndex++;
+		walkIndex %= 2;
+	}
+	
 	public DuckSprite currentSprite() {
 		switch(state) {
 		case SITTING:
@@ -188,7 +193,7 @@ public class Duck extends Encryption {
 	}
 	
 	public static int chooseState() {
-		return (int)(Math.random()*4)+1;
+		return (int)(Math.random()*4);
 	}
 	
 	public static void main(String[] args) throws IOException, LoginException {
@@ -208,8 +213,8 @@ public class Duck extends Encryption {
 		d.standing2 = standing2;
 		d.walking = walking;
 		
-		Duck.saveToFile(d, file, 0);
+		Duck.saveToFile(d, file, 2);
 		
-		Duck d2 = Duck.readFromFile(file, 0, 0);
+		Duck d2 = Duck.readFromFile(file, 0, 2);
 	}
 }
