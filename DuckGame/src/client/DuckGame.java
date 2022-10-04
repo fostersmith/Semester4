@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,8 +36,9 @@ public class DuckGame extends JFrame implements ActionListener {
 	
 	// gameplay
 	JPanel gamePanel, gameButtonPanel;
-	JButton nextButton, prevButton;
+	JButton nextButton, prevButton, gameplayToStartupButton;
 	DuckScreen screen;
+	static final int GAME_BUTTON_HEIGHT = 40;
 
 	
 	@Override
@@ -54,7 +56,7 @@ public class DuckGame extends JFrame implements ActionListener {
 		} else if(e.getSource() == settingsButton) {
 			loadSettings();
 			System.out.println("settings");
-		} else if(e.getSource() == startupButton) {
+		} else if(e.getSource() == startupButton || e.getSource() == gameplayToStartupButton) {
 			loadStartup();
 		} else if(e.getSource() == playButton) {
 			loadGameplay();
@@ -85,6 +87,8 @@ public class DuckGame extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(null, "Success. Changes will not be reflected until saved");
 			}			
 		}
+		if(e.getSource() == gameplayToStartupButton)
+			screen.stop();
 	}
 	
 	public DuckGame(DuckGameConfig dgc, Path confPath) throws IOException, LoginException {
@@ -135,16 +139,23 @@ public class DuckGame extends JFrame implements ActionListener {
 		
 		nextButton = new JButton("Next");
 		prevButton = new JButton("Previous");
+		gameplayToStartupButton = new JButton("Return to Startup Menu");
 		nextButton.addActionListener(this);
 		prevButton.addActionListener(this);
+		gameplayToStartupButton.addActionListener(this);
 		screen.render();
 		
-		gameButtonPanel = new JPanel(new GridLayout(1,2));
+		gameButtonPanel = new JPanel(new GridLayout(1,3));
 		gameButtonPanel.add(prevButton);
 		gameButtonPanel.add(nextButton);
-		gamePanel = new JPanel(new GridLayout(2,1));
+		gameButtonPanel.add(gameplayToStartupButton);
+		gamePanel = new JPanel();
+		gamePanel.setLayout(null);
 		gamePanel.add(screen);
+		screen.setBounds(0,0,screen.background.getWidth(),screen.background.getHeight());
 		gamePanel.add(gameButtonPanel);
+		gameButtonPanel.setBounds(0, screen.background.getHeight(), screen.background.getWidth(), GAME_BUTTON_HEIGHT);
+		gamePanel.setPreferredSize(new Dimension(screen.background.getWidth(), screen.background.getHeight()+GAME_BUTTON_HEIGHT));
 		
 		loadStartup();
 		
@@ -237,8 +248,8 @@ public class DuckGame extends JFrame implements ActionListener {
 		if(!cancel) {
 			try {
 				DuckGame f1 = new DuckGame(config, configfile);
-				f1.pack();
 				f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				f1.setResizable(false);
 				f1.setVisible(true);
 			} catch(Exception e) {
 				JOptionPane.showMessageDialog(null, "Error:\n\n"+e);

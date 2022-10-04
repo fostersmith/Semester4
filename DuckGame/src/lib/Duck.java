@@ -197,14 +197,15 @@ public class Duck extends Encryption {
 	}
 	
 	public static void main(String[] args) throws IOException, LoginException {
-		Path file = Paths.get("testduck.dck");
+		Path file = Paths.get("duck2.dck");
 		Duck d = new Duck();
+		d.ID = 1;
 	
-		DuckSprite sitting = DuckSprite.readFromImage(Paths.get("duckwalk\\sitting.png"));
-		DuckSprite standing = DuckSprite.readFromImage(Paths.get("duckwalk\\standing.png"));
-		DuckSprite standing2 = DuckSprite.readFromImage(Paths.get("duckwalk\\standing2.png"));
-		DuckSprite walking0 = DuckSprite.readFromImage(Paths.get("duckwalk\\walk0.png"));
-		DuckSprite walking1 = DuckSprite.readFromImage(Paths.get("duckwalk\\walk1.png"));
+		DuckSprite sitting = DuckSprite.readFromImage(Paths.get("duck2\\duck2sitting.png"));
+		DuckSprite standing = DuckSprite.readFromImage(Paths.get("duck2\\duck2standing.png"));
+		DuckSprite standing2 = DuckSprite.readFromImage(Paths.get("duck2\\duck2standing2.png"));
+		DuckSprite walking0 = DuckSprite.readFromImage(Paths.get("duck2\\duck2walking0.png"));
+		DuckSprite walking1 = DuckSprite.readFromImage(Paths.get("duck2\\duck2walking1.png"));
 
 		DuckSprite[] walking = {walking0, walking1};
 		
@@ -213,8 +214,8 @@ public class Duck extends Encryption {
 		d.standing2 = standing2;
 		d.walking = walking;
 		
-		Duck.saveToFile(d, file, 2);
+		Duck.saveToFile(d, file, 0);
 		
-		Duck d2 = Duck.readFromFile(file, 0, 2);
+		Duck d2 = Duck.readFromFile(file, 1, 0);
 	}
 }

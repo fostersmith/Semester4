@@ -32,6 +32,7 @@ public class BruteForceConfigPass extends Encryption {
 		input.close();
 		for(int i = 0; i < maxIter; ++i) {
 			attempt = decrypt(cipher, i);
+			System.out.println(i+":"+attempt);
 			if(attempt.equals(username)) {
 				System.out.println("Password is "+i);
 				i = maxIter;

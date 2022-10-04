@@ -33,7 +33,7 @@ public class DuckScreen extends JPanel {
 				doTick();
 			}
 		};
-		ticks = new Timer(100, tickListener);
+		ticks = new Timer(200, tickListener);
 		ActionListener renderListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
