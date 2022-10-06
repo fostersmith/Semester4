@@ -40,6 +40,13 @@ public class DuckGameConfig extends Encryption {
 		this.password = password;
 	}
 		
+	/*
+	 * username
+	 * bgpath
+	 * duckpath-duckid
+	 * duckpath-duckid
+	 * ...
+	 */
 	public static DuckGameConfig readFromFile(Path file, int password) throws IOException {
 		DuckGameConfig conf = new DuckGameConfig(password);
 		InputStream input = Files.newInputStream(file, READ);
@@ -50,7 +57,7 @@ public class DuckGameConfig extends Encryption {
 		conf.background = Paths.get(bgpath);
 		String s;
 		while((s = reader.readLine())!=null) {
-			String[] duck = decrypt(s, password).split(":");
+			String[] duck = decrypt(s, password).split("-");
 			int duckID = Integer.parseInt(duck[1]);
 			conf.ducks.add(Paths.get(duck[0]));
 			conf.ids.add(duckID);
@@ -68,7 +75,7 @@ public class DuckGameConfig extends Encryption {
 		writer.write(s, 0, s.length());
 		for(int i = 0; i < config.ducks.size(); ++i) {
 			writer.newLine();
-			s = encrypt(config.ducks.get(i).toString()+":"+config.ids.get(i), password);
+			s = encrypt(config.ducks.get(i).toString()+"-"+config.ids.get(i), password);
 			writer.write(s, 0, s.length());
 		}
 		writer.flush();
@@ -80,6 +87,10 @@ public class DuckGameConfig extends Encryption {
 		con.username = username;
 		writeToFile(con, file, password);
 		return con;
+	}
+	
+	public static void main(String[] args) throws IOException {
+		DuckGameConfig coolconfig = DuckGameConfig.createBlankFile(Paths.get("coolconfig.dgc"), "foster", 0);
 	}
 	
 }

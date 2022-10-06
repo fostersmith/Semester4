@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -71,19 +72,31 @@ public class DuckScreen extends JPanel {
 		}
 	}
 	
+	private void renderNoDucks() {
+		Graphics2D g = (Graphics2D)canvas.getGraphics();
+		g.drawImage(background, 0, 0, canvas.getWidth(), canvas.getHeight(), null);
+		g.setColor(Color.RED);
+		g.drawString("You Have No Ducks", canvas.getWidth()/2-10, canvas.getHeight()/2);
+	}
+	
 	public synchronized void doTick() {
-		System.out.println("tick");
-		if(Math.random() >= 0.75) {
-			ducks.get(focus).state = Duck.chooseState();
-			System.out.println("new state: "+ducks.get(focus).state);
+		if(ducks.size() > 0) {
+			if(Math.random() >= 0.75) {
+				ducks.get(focus).state = Duck.chooseState();
+				System.out.println("new state: "+ducks.get(focus).state);
+			}
+			if(ducks.get(focus).state == Duck.WALKING)
+				ducks.get(focus).step();
 		}
-		if(ducks.get(focus).state == Duck.WALKING)
-			ducks.get(focus).step();
 	}
 	
 	public synchronized void render() {
-		renderSpriteSheet(ducks.get(focus).currentSprite());
-		this.repaint();
+		if(ducks.size() > 0) {
+			renderSpriteSheet(ducks.get(focus).currentSprite());
+			this.repaint();
+		} else {
+			renderNoDucks();
+		}
 	}
 	
 	public void stop() {

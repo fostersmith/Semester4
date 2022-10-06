@@ -43,11 +43,11 @@ public class DuckGame extends JFrame implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == nextButton) {
+		if(e.getSource() == nextButton && screen.ducks.size() > 0) {
 			screen.focus++;
 			screen.focus %= screen.ducks.size();
 			screen.render();
-		} else if(e.getSource() == prevButton) {
+		} else if(e.getSource() == prevButton && screen.ducks.size() > 0) {
 			screen.focus--;
 			screen.focus %= screen.ducks.size();
 			screen.render();
