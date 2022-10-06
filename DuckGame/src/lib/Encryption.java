@@ -5,7 +5,7 @@ import java.util.Random;
 
 public abstract class Encryption {
 	
-	private static final String USEABLE = "adcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=[]\\{}|;':\",./<>?";
+	private static final String USEABLE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=[]\\{}|;':\",./<>? ";
 	//private static final String SPACEFILLER = "^";
 	private static final int modulus = USEABLE.length();
 	private static final HashMap<Character, Integer> positions = makePositions();
@@ -19,7 +19,8 @@ public abstract class Encryption {
 		StringBuilder ciphertext = new StringBuilder();
 		for(int i = 0; i < plaintext.length(); ++i) {
 			char c = plaintext.charAt(i);
-			ciphertext.append(USEABLE.charAt((positions.get(c)+password)%modulus));
+			int pos = (positions.get(c)+password)%modulus;
+			ciphertext.append(USEABLE.charAt(pos));
 		}
 		return ciphertext.toString();
 	}
@@ -30,7 +31,7 @@ public abstract class Encryption {
 			char c = ciphertext.charAt(i);
 			int pos = (positions.get(c)-password)%modulus;
 			if(pos < 0) pos += modulus;
-			plaintext.append(positions.get(pos));
+			plaintext.append(USEABLE.charAt(pos));
 		}
 		return plaintext.toString();		
 	}
@@ -152,4 +153,5 @@ public abstract class Encryption {
 		System.out.println("["+key[0][0]+","+key[0][1]+"\n"+key[1][0]+","+key[1][1]+"]");
 		int[][] decrypt = getDecryptKey(key);
 	}*/
+	
 }

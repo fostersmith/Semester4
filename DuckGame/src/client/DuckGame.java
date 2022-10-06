@@ -32,7 +32,7 @@ public class DuckGame extends JFrame implements ActionListener {
 	
 	// settings
 	JPanel settingsPanel;
-	JButton addDuckButton, changePasswordButton, changeUsernameButton, startupButton;
+	JButton addDuckButton, changePasswordButton, changeUsernameButton, changeBackgroundButton, startupButton;
 	
 	// gameplay
 	JPanel gamePanel, gameButtonPanel;
@@ -86,6 +86,17 @@ public class DuckGame extends JFrame implements ActionListener {
 				config.username = username;
 				JOptionPane.showMessageDialog(null, "Success. Changes will not be reflected until saved");
 			}			
+		} else if(e.getSource() == changeBackgroundButton) {
+			String path = JOptionPane.showInputDialog(null, "Enter new path");
+			if(path != null) {
+				try {
+					screen.setBackground(path);
+					config.setBackground(path);
+					JOptionPane.showMessageDialog(null, "Success. Changes will not be reflected until saved");
+				} catch(IOException e1) {
+					JOptionPane.showMessageDialog(null, "Encountered an IOException and couldn't process the path. Check that the file exists and is an image");
+				}
+			}
 		}
 		if(e.getSource() == gameplayToStartupButton)
 			screen.stop();
@@ -124,17 +135,20 @@ public class DuckGame extends JFrame implements ActionListener {
 		addDuckButton = new JButton("Add Duck");
 		changePasswordButton = new JButton("Change Password");
 		changeUsernameButton = new JButton("Change username");
+		changeBackgroundButton = new JButton("Change Background");
 		startupButton = new JButton("Startup Menu");
 		addDuckButton.addActionListener(this);
 		changePasswordButton.addActionListener(this);
 		changeUsernameButton.addActionListener(this);
 		startupButton.addActionListener(this);
 		addDuckButton.addActionListener(this);
+		changeBackgroundButton.addActionListener(this);
 		
-		settingsPanel = new JPanel(new GridLayout(1,3));
+		settingsPanel = new JPanel(new GridLayout(1,4));
 		settingsPanel.add(addDuckButton);
 		settingsPanel.add(changePasswordButton);
 		settingsPanel.add(changeUsernameButton);
+		settingsPanel.add(changeBackgroundButton);
 		settingsPanel.add(startupButton);
 		
 		nextButton = new JButton("Next");

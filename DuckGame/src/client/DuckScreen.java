@@ -7,8 +7,12 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -42,6 +46,11 @@ public class DuckScreen extends JPanel {
 			}
 		};
 		render = new Timer(50, renderListener);
+	}
+	
+	public void setBackground(String path) throws IOException {
+		File f = Paths.get(path).toFile();
+		background = ImageIO.read(f);
 	}
 	
 	@Override
