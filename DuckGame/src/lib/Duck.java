@@ -26,6 +26,7 @@ public class Duck extends Encryption {
 	public int state;
 	public int walkIndex;
 	double[] velocity;
+	double theta;
 	
 	private Duck(int iD, DuckSprite[] walking, DuckSprite sitting, DuckSprite standing, DuckSprite standing2, int rarity, double x, double y, double eggChance) {
 		super();
@@ -41,6 +42,7 @@ public class Duck extends Encryption {
 		state = SITTING;
 		walkIndex = 0;
 		velocity = new double[] {0d,0d};
+		theta = 0;
 	}
 	private Duck() {
 		ID = 0;
@@ -54,6 +56,22 @@ public class Duck extends Encryption {
 		eggChance = 0d;
 		state = STANDING;
 		velocity = new double[] {0d,0d};
+	}
+	
+	public int getX() {
+		return (int)x;
+	}
+	
+	public int getY() {
+		return (int)y;
+	}
+	
+	public void setX(int x) {
+		this.x = x;
+	}
+	
+	public void setY(int y) {
+		this.y = y;
 	}
 	
 	/**
@@ -173,6 +191,16 @@ public class Duck extends Encryption {
 		output.close();
 	}
 	
+	public void walk(int speed) {
+		if(state == WALKING) {
+			theta += (Math.random()-0.5);
+			velocity[0] = Math.cos(theta) * speed;
+			velocity[1] = Math.sin(theta) * speed;
+			x += velocity[0];
+			y += velocity[1];
+		}
+	}
+	
 	public synchronized void step() {
 		walkIndex++;
 		walkIndex %= 2;
@@ -219,15 +247,15 @@ public class Duck extends Encryption {
 		
 		Duck d2 = Duck.readFromFile(file, 1, 0);
 		*/
-		Path file = Paths.get("testduck.dck");
+		Path file = Paths.get("mallard.dck");
 		Duck d = new Duck();
-		d.ID = 0;
+		d.ID = 3;
 	
-		DuckSprite sitting = DuckSprite.readFromImage(Paths.get("duckwalk\\sitting.png"));
-		DuckSprite standing = DuckSprite.readFromImage(Paths.get("duckwalk\\standing.png"));
-		DuckSprite standing2 = DuckSprite.readFromImage(Paths.get("duckwalk\\standing2.png"));
-		DuckSprite walking0 = DuckSprite.readFromImage(Paths.get("duckwalk\\walk0.png"));
-		DuckSprite walking1 = DuckSprite.readFromImage(Paths.get("duckwalk\\walk1.png"));
+		DuckSprite sitting = DuckSprite.readFromImage(Paths.get("mallard\\sitting.png"));
+		DuckSprite standing = DuckSprite.readFromImage(Paths.get("mallard\\standing.png"));
+		DuckSprite standing2 = DuckSprite.readFromImage(Paths.get("mallard\\standing2.png"));
+		DuckSprite walking0 = DuckSprite.readFromImage(Paths.get("mallard\\walking0.png"));
+		DuckSprite walking1 = DuckSprite.readFromImage(Paths.get("mallard\\walking1.png"));
 
 		DuckSprite[] walking = {walking0, walking1};
 		
@@ -236,9 +264,9 @@ public class Duck extends Encryption {
 		d.standing2 = standing2;
 		d.walking = walking;
 		
-		Duck.saveToFile(d, file, 0);
+		Duck.saveToFile(d, file, 4);
 		
-		Duck d2 = Duck.readFromFile(file, 0, 0);
+		Duck d2 = Duck.readFromFile(file, d.ID, 4);
 
 	}
 }

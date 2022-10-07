@@ -92,6 +92,8 @@ public class DuckGame extends JFrame implements ActionListener {
 				try {
 					screen.setBackground(path);
 					config.setBackground(path);
+					gameButtonPanel.setBounds(0, screen.background.getHeight(), screen.background.getWidth(), GAME_BUTTON_HEIGHT);
+					gamePanel.setPreferredSize(new Dimension(screen.background.getWidth(), screen.background.getHeight()+GAME_BUTTON_HEIGHT));
 					JOptionPane.showMessageDialog(null, "Success. Changes will not be reflected until saved");
 				} catch(IOException e1) {
 					JOptionPane.showMessageDialog(null, "Encountered an IOException and couldn't process the path. Check that the file exists and is an image");
