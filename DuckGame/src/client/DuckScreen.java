@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +21,7 @@ import javax.swing.Timer;
 import lib.Duck;
 import lib.DuckSprite;
 
-public class DuckScreen extends JPanel {
+public class DuckScreen extends JPanel implements MouseListener {
 
 	ArrayList<Duck> ducks;
 	BufferedImage background;
@@ -47,6 +49,7 @@ public class DuckScreen extends JPanel {
 			}
 		};
 		render = new Timer(50, renderListener);
+		addMouseListener(this);
 	}
 	
 	public void setBackground(String path) throws IOException {
@@ -85,11 +88,13 @@ public class DuckScreen extends JPanel {
 	private void renderSpriteSheet(DuckSprite sprite, int x0, int y0) {
 		Graphics2D g = (Graphics2D)canvas.getGraphics();
 		g.drawImage(background, 0, 0, canvas.getWidth(), canvas.getHeight(), null);
+		int pxHeight = duckHeight/DuckSprite.HEIGHT;
+		int pxWidth = duckWidth/DuckSprite.WIDTH;
 		for(int x = 0; x < DuckSprite.WIDTH; ++x) {
 			for(int y = 0; y < DuckSprite.HEIGHT; ++y) {
 				g.setColor(sprite.getPixel(x, y));
-				int pxX = x * duckWidth/DuckSprite.WIDTH + x0;
-				int pxY = y * duckHeight/DuckSprite.HEIGHT + y0;
+				int pxX = x * pxWidth + x0;
+				int pxY = y * pxHeight + y0;
 				g.fillRect(pxX, pxY, duckWidth/DuckSprite.WIDTH, duckHeight/DuckSprite.HEIGHT);
 			}
 		}
@@ -109,6 +114,7 @@ public class DuckScreen extends JPanel {
 				changeState = Math.random() > 0.9;
 			else
 				changeState = Math.random() > 0.75;
+			changeState = changeState && !ducks.get(focus).hasGoal();
 			if(changeState) {
 				ducks.get(focus).state = Duck.chooseState();
 				System.out.println("new state: "+ducks.get(focus).state);
@@ -144,6 +150,38 @@ public class DuckScreen extends JPanel {
 	public void start() {
 		ticks.restart();
 		render.restart();
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		System.out.println("click @ "+e.getX()+" "+e.getY());
+		if(ducks.size() > 0) {
+			ducks.get(focus).goTo(e.getX(), e.getY(),speed);
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

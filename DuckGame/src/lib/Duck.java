@@ -27,6 +27,8 @@ public class Duck extends Encryption {
 	public int walkIndex;
 	double[] velocity;
 	double theta;
+	boolean hasGoal;
+	int goalX, goalY;
 	
 	private Duck(int iD, DuckSprite[] walking, DuckSprite sitting, DuckSprite standing, DuckSprite standing2, int rarity, double x, double y, double eggChance) {
 		super();
@@ -43,6 +45,7 @@ public class Duck extends Encryption {
 		walkIndex = 0;
 		velocity = new double[] {0d,0d};
 		theta = 0;
+		hasGoal = false;
 	}
 	private Duck() {
 		ID = 0;
@@ -72,6 +75,13 @@ public class Duck extends Encryption {
 	
 	public void setY(int y) {
 		this.y = y;
+	}
+	
+	public void goTo(int gX, int gY, int speed) {
+		this.goalX = gX;
+		this.goalY = gY;
+		state = WALKING;
+		hasGoal = true;
 	}
 	
 	/**
@@ -193,11 +203,37 @@ public class Duck extends Encryption {
 	
 	public void walk(int speed) {
 		if(state == WALKING) {
-			theta += (Math.random()-0.5);
-			velocity[0] = Math.cos(theta) * speed;
-			velocity[1] = Math.sin(theta) * speed;
+			if(!hasGoal) {
+				theta += (Math.random()-0.5);
+				velocity[0] = Math.cos(theta) * speed;
+				velocity[1] = Math.sin(theta) * speed;
+			} else {
+				velocity[0] = goalX-x;
+				velocity[1] = goalY-y;
+				// v[0]^2 + v[1]^2 = speed^2
+				// v[0] = sqrt(-v[1]^2 + speed^2)
+				// v[1] = sqrt(-v[0]^2 + speed^2)
+				double temp = velocity[0];
+				double a = Math.pow(speed, 2)-Math.pow(velocity[1], 2);
+				if(a < 0)
+					velocity[0] = Math.sqrt(Math.abs(a))*-1;
+				else
+					velocity[0] = Math.sqrt(a);
+				double b = Math.pow(speed, 2)-Math.pow(temp, 2);
+				if(b < 0)
+					velocity[1] = Math.sqrt(Math.abs(b))*-1;
+				else
+					velocity[1] = Math.sqrt(b);
+				System.out.println("("+x+","+y+") ->" +"("+goalX+","+goalY+")"+" = ("+velocity[0]+","+velocity[1]+")");
+			}
 			x += velocity[0];
 			y += velocity[1];
+			if(hasGoal) {
+				if((goalX-speed-1 < x && goalX+speed+1 > x) && (goalY-speed-1 < y && goalY+speed+1 > y) ) {
+					hasGoal = false;
+					System.out.println("reached goal");
+				}
+			}
 		}
 	}
 	
@@ -224,6 +260,10 @@ public class Duck extends Encryption {
 		return (int)(Math.random()*4);
 	}
 	
+	public boolean hasGoal() {
+		return hasGoal;
+	}
+	
 	public static void main(String[] args) throws IOException, LoginException {
 		/*
 		Path file = Paths.get("duck2.dck");
@@ -247,7 +287,8 @@ public class Duck extends Encryption {
 		
 		Duck d2 = Duck.readFromFile(file, 1, 0);
 		*/
-		Path file = Paths.get("mallard.dck");
+		
+		/*Path file = Paths.get("mallard.dck");
 		Duck d = new Duck();
 		d.ID = 3;
 	
@@ -264,9 +305,9 @@ public class Duck extends Encryption {
 		d.standing2 = standing2;
 		d.walking = walking;
 		
-		Duck.saveToFile(d, file, 4);
+		Duck.saveToFile(d, file, 90);
 		
-		Duck d2 = Duck.readFromFile(file, d.ID, 4);
+		Duck d2 = Duck.readFromFile(file, d.ID, 90);*/
 
 	}
 }
