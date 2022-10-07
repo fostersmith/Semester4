@@ -100,6 +100,12 @@ public class DuckScreen extends JPanel implements MouseListener {
 		}
 	}
 	
+	private void renderLine(int x0, int y0, int x1, int y1, Color c) {
+		Graphics g = canvas.getGraphics();
+		g.setColor(c);
+		g.drawLine(x0, y0, x1, y1);
+	}
+	
 	private void renderNoDucks() {
 		Graphics2D g = (Graphics2D)canvas.getGraphics();
 		g.drawImage(background, 0, 0, canvas.getWidth(), canvas.getHeight(), null);
@@ -136,6 +142,8 @@ public class DuckScreen extends JPanel implements MouseListener {
 	public synchronized void render() {
 		if(ducks.size() > 0) {
 			renderSpriteSheet(ducks.get(focus).currentSprite(), ducks.get(focus).getX(), ducks.get(focus).getY());
+			if(ducks.get(focus).hasGoal())
+				renderLine(ducks.get(focus).getX(),ducks.get(focus).getY(),ducks.get(focus).getGoalX(), ducks.get(focus).getGoalY(), Color.RED);
 			this.repaint();
 		} else {
 			renderNoDucks();

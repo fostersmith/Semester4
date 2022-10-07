@@ -77,6 +77,14 @@ public class Duck extends Encryption {
 		this.y = y;
 	}
 	
+	public int getGoalX() {
+		return this.goalX;
+	}
+	
+	public int getGoalY() {
+		return this.goalY;
+	}
+	
 	public void goTo(int gX, int gY, int speed) {
 		this.goalX = gX;
 		this.goalY = gY;
@@ -224,7 +232,7 @@ public class Duck extends Encryption {
 			if(hasGoal) {
 				if((goalX-speed-1 < x && goalX+speed+1 > x) && (goalY-speed-1 < y && goalY+speed+1 > y) ) {
 					hasGoal = false;
-					state = chooseState();
+					state = STANDING;
 				}
 			}
 		}
