@@ -214,24 +214,17 @@ public class Duck extends Encryption {
 				// v[0] = sqrt(-v[1]^2 + speed^2)
 				// v[1] = sqrt(-v[0]^2 + speed^2)
 				double temp = velocity[0];
-				double a = Math.pow(speed, 2)-Math.pow(velocity[1], 2);
-				if(a < 0)
-					velocity[0] = Math.sqrt(Math.abs(a))*-1;
-				else
-					velocity[0] = Math.sqrt(a);
-				double b = Math.pow(speed, 2)-Math.pow(temp, 2);
-				if(b < 0)
-					velocity[1] = Math.sqrt(Math.abs(b))*-1;
-				else
-					velocity[1] = Math.sqrt(b);
-				System.out.println("("+x+","+y+") ->" +"("+goalX+","+goalY+")"+" = ("+velocity[0]+","+velocity[1]+")");
+				velocity[0] /= Math.sqrt(Math.pow(velocity[0],2)+Math.pow(velocity[1],2));
+				velocity[1] /= Math.sqrt(Math.pow(temp,2)+Math.pow(velocity[1],2));
+				velocity[0] *= speed;
+				velocity[1] *= speed;
 			}
 			x += velocity[0];
 			y += velocity[1];
 			if(hasGoal) {
 				if((goalX-speed-1 < x && goalX+speed+1 > x) && (goalY-speed-1 < y && goalY+speed+1 > y) ) {
 					hasGoal = false;
-					System.out.println("reached goal");
+					state = chooseState();
 				}
 			}
 		}
