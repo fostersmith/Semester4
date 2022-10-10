@@ -142,8 +142,8 @@ public class DuckScreen extends JPanel implements MouseListener {
 	public synchronized void render() {
 		if(ducks.size() > 0) {
 			renderSpriteSheet(ducks.get(focus).currentSprite(), ducks.get(focus).getX(), ducks.get(focus).getY());
-			if(ducks.get(focus).hasGoal())
-				renderLine(ducks.get(focus).getX(),ducks.get(focus).getY(),ducks.get(focus).getGoalX(), ducks.get(focus).getGoalY(), Color.RED);
+			//if(ducks.get(focus).hasGoal())
+			//	renderLine(ducks.get(focus).getX(),ducks.get(focus).getY(),ducks.get(focus).getGoalX(), ducks.get(focus).getGoalY(), Color.RED);
 			this.repaint();
 		} else {
 			renderNoDucks();
