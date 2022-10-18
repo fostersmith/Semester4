@@ -9,7 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
-public class JDorm extends JFrame implements ItemListener {
+public class JDorm2 extends JFrame implements ItemListener {
 
 	private static final String[] OPTIONS = {"Private Room","Apartment-Style","Private Bath","Loft Bed","Double-As-Single","Bike Storage","Rec Room","Cable TV","All-You-Can-Eat Meal Plan","Music Practice Rooms","Library"};
 	
@@ -18,7 +18,7 @@ public class JDorm extends JFrame implements ItemListener {
 	JPanel optPanel;
 	JPanel fieldPanel;
 	
-	public JDorm() {
+	public JDorm2() {
 		
 		options = new JCheckBox[OPTIONS.length];
 		for(int i = 0; i < OPTIONS.length; ++i) {
@@ -42,21 +42,27 @@ public class JDorm extends JFrame implements ItemListener {
 		add(field);
 		field.setBounds(0, 200, 500, 200);
 		
+		itemStateChanged(null);
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(500,400);
+		setSize(500,500);
 		setResizable(true);
 		setVisible(true);
 	}
 	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		JCheckBox box = (JCheckBox)e.getSource();
-		field.append("\n"+(e.getStateChange()==1 ? "+ " : "- ")+box.getText());
-		System.out.println(getHeight() +","+ getWidth());
+		field.setText("");
+		for(JCheckBox b : options) {
+			if(b.isSelected())
+				field.append(b.getText()+": Yes\n");
+			else
+				field.append(b.getText()+": No\n");
+		}
 	}
 	
 	public static void main(String[] args) {
-		new JDorm();
+		new JDorm2();
 	}
 	
 }
