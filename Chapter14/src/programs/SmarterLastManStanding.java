@@ -14,7 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class LastManStanding extends JFrame implements ActionListener, ItemListener {
+public class SmarterLastManStanding extends JFrame implements ActionListener, ItemListener {
 
 	JCheckBox[] boxes;
 	JPanel boxPanel;
@@ -23,7 +23,7 @@ public class LastManStanding extends JFrame implements ActionListener, ItemListe
 	int ptr = 0; //index of the next to replace
 	ArrayList<JCheckBox> available;
 	
-	public LastManStanding() {
+	public SmarterLastManStanding() {
 		boxPanel = new JPanel(new GridLayout(2, 5));
 		
 		available = new ArrayList<>();
@@ -54,7 +54,24 @@ public class LastManStanding extends JFrame implements ActionListener, ItemListe
 	
 	
 	public void doBotTurn() {
-		int numToSelect = (int)(Math.random()*3)+1;
+		int r = available.size();
+		int numToSelect = 1;
+		// if r <= 3, select r to win immediately
+		if(r <= 3)
+			numToSelect = r;
+		// 'checkmate' is ending with 4 remaining
+		// if r = 4, you've already lost, just choose something
+		else if(r == 4)
+			numToSelect = (int)(Math.random()*3)+1;
+		// so if 5 <= r <= 7, select r-4
+		else if(r>=5 && r <= 7)
+			numToSelect = r-4;
+		// if you start the turn w/ 8, you are forced into choosing on [5,7], i.e. the danger zone
+		else if(r == 8)
+			numToSelect = (int)(Math.random()*3)+1;
+		// it's desirable to start turn w/ 5 <= r <= 7, so if 8 < r( <= 10), select r-8, forcing opponent to choose w/in interval
+		else if(r > 8)
+			numToSelect = r-8;
 		for(int i = 0; i < numToSelect && available.size() > 0; ++i) {
 			int selectedInd = (int) (Math.random()*available.size());
 			JCheckBox choice = available.get(selectedInd);
@@ -161,6 +178,6 @@ public class LastManStanding extends JFrame implements ActionListener, ItemListe
 	}
 	
 	public static void main(String[] args) {
-		new LastManStanding();
+		new SmarterLastManStanding();
 	}
 }
