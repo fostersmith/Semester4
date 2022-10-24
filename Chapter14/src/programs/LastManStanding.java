@@ -19,7 +19,7 @@ public class LastManStanding extends JFrame implements ActionListener, ItemListe
 	JPanel boxPanel;
 	JButton submitButton;
 	JCheckBox[] selected;
-	int ptr = -1;
+	int ptr = 0; //index of the next to replace
 	ArrayList<JCheckBox> available;
 	
 	public LastManStanding() {
@@ -31,6 +31,7 @@ public class LastManStanding extends JFrame implements ActionListener, ItemListe
 		boxes = new JCheckBox[10];
 		for(int i = 0; i < boxes.length;++i) {
 			boxes[i] = new JCheckBox();
+			boxes[i].setText(Integer.toString(i));
 			boxPanel.add(boxes[i]);
 			available.add(boxes[i]);
 			boxes[i].addItemListener(this);
@@ -47,25 +48,78 @@ public class LastManStanding extends JFrame implements ActionListener, ItemListe
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//setResizable(false);
-		setSize(500,220);
+		setSize(500,300);
 		setVisible(true);
 	}
 	
 	
 	public void doBotTurn() {
-		
+		int numToSelect = (int)(Math.random()*3)+1;
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		// if(e.getSource() == submitButton)
+		for(JCheckBox b : selected) {
+			if(b != null) {
+				available.remove(b);
+				b.setEnabled(false);
+			}
+		}
+		for(int i = 0; i < selected.length; ++i)
+			selected[i] = null;
+		ptr = 0;
 		
-		
+		doBotTurn();
 	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		// TODO Auto-generated method stub
-		
+		JCheckBox b = (JCheckBox) e.getSource();
+		if(e.getStateChange() == ItemEvent.SELECTED) {
+			if(selected[ptr] != null) {
+				selected[ptr].removeItemListener(this);
+				selected[ptr].setSelected(false);
+				selected[ptr].addItemListener(this);
+			}
+			selected[ptr] = b;
+			ptr += 1;
+			ptr %= selected.length;
+		} else if(e.getStateChange() == ItemEvent.DESELECTED) {
+			if(selected[ptr] != b) {
+				JCheckBox[] selectedCopy = selected.clone(); //this is bad
+				int i = (ptr+1)%selected.length;
+				int lastI = ptr;
+				boolean done = false;
+				while(!done) {
+					done = selected[i] == b;
+					selected[i] = selectedCopy[lastI];
+					lastI = i;
+					i = (i+1)%selected.length;
+				}
+			}
+			selected[ptr] = null;
+			
+		}
+		//printSelected();
+	}
+	
+	public void printSelected() {
+		for(JCheckBox b : selected) {
+			if(b != null) {
+				System.out.print(b.getText()+",");
+			} else {
+				System.out.print("X,");
+			}
+		}
+		System.out.println();
+		for(int i = 0; i < selected.length; ++i) {
+			if(ptr == i)
+				System.out.print("^ ");
+			else
+				System.out.print("  ");
+		}
+		System.out.println("\n");
 	}
 	
 	public static void main(String[] args) {
