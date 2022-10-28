@@ -1,8 +1,8 @@
 package extra;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.swing.JPanel;
 
@@ -16,6 +16,12 @@ public class TableauPile extends JPanel {
 		setLayout(null);
 		faceDown = new ArrayList<>();
 		faceUp = new ArrayList<>();
+	}
+	
+	public TableauPile(Card[] faceDown) {
+		this();
+		for(Card c : faceDown)
+			faceDownAdd(c);
 	}
 	
 	public void faceUpAdd(Card c) {
