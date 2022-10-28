@@ -19,14 +19,17 @@ public class TableauPile extends JPanel {
 	}
 	
 	public void faceUpAdd(Card c) {
+		c.setState(Card.FACEUP);
 		faceUp.add(c);
 		add(c);
 		c.setBounds(0,(faceDown.size()+faceUp.size())*PX_VISIBLE_SPACE,Card.PX_WIDTH,Card.PX_HEIGHT);
 	}
 	
-	@Override
-	public void paintComponent(Graphics g) {
-		
+	public void faceDownAdd(Card c) {
+		c.setState(Card.FACEDOWN);
+		faceDown.add(c);
+		add(c);
+		c.setBounds(0,faceDown.size()*PX_VISIBLE_SPACE,Card.PX_WIDTH,Card.PX_HEIGHT);
 	}
 	
 	@Override
