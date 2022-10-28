@@ -1,12 +1,13 @@
 package extra;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -14,7 +15,7 @@ import javax.swing.JOptionPane;
 
 public class Card extends JButton {
 	
-	public static final int PX_WIDTH = 80, PX_HEIGHT = 160;
+	public static final int PX_WIDTH = 80, PX_HEIGHT = 120;
 	
 	public static final int HEARTS = 14, DIAMONDS = 15, CLUBS = 16, SPADES = 17;
 	public static final int ACE = 1, JACK = 11, QUEEN = 12, KING = 13;
@@ -25,7 +26,7 @@ public class Card extends JButton {
 	
 	private final int suit, value;
 	private BufferedImage img;
-	private int state;
+	private int state = FACEUP;
 	
 	public Card(int suit, int value) {
 		if(!(suit == HEARTS || suit == DIAMONDS || suit == CLUBS || suit == SPADES))
@@ -48,19 +49,26 @@ public class Card extends JButton {
 	public void setState(int state) {
 		if(!(state==FACEDOWN || state ==FACEUP || state == HIGHLIGHTED))
 			throw new IllegalArgumentException("Invalid state");
+		if(this.state == FACEDOWN && state != FACEDOWN)
+			setEnabled(true);
+		else if(this.state != FACEDOWN && state == FACEDOWN)
+			setEnabled(false);
 		this.state = state;
 	}
 	
 	@Override
 	public void paintComponent(Graphics g) {
 		//TODO clear
+		Graphics2D g2d = (Graphics2D)g;
 		if(state == FACEDOWN) {
-			g.drawImage(facedown, 0, 0, PX_WIDTH, PX_HEIGHT, null);
+			g2d.drawImage(facedown, 0, 0, PX_WIDTH, PX_HEIGHT, null);
 		} else {
-			g.drawImage(img, 0, 0, PX_WIDTH, PX_HEIGHT, null);			
+			g2d.drawImage(img, 0, 0, PX_WIDTH, PX_HEIGHT, null);			
 		}
 		if(state == HIGHLIGHTED) {
-			//TODO highlighting			
+			g2d.setStroke(new BasicStroke(4));
+			g2d.setPaint(Color.CYAN);
+			g2d.drawRect(0, 0, PX_WIDTH, PX_HEIGHT);
 		}
 	}
 	
@@ -71,7 +79,7 @@ public class Card extends JButton {
 	
 	@Override
 	public int hashCode() {
-		return (suit-HEARTS)*(SPADES-HEARTS)+(value-ACE);
+		return (suit-HEARTS)*(KING-ACE+1)+(value-ACE);
 	}
 	@Override
 	public boolean equals(Object obj) {
@@ -150,6 +158,7 @@ public class Card extends JButton {
 			throw new IllegalArgumentException("Invalid Suit");
 		if(value < ACE || value > KING)
 			throw new IllegalArgumentException("Invalid Value");
-		return cardImages[(suit-HEARTS)*(SPADES-HEARTS)+(value-ACE)];
+		return cardImages[(suit-HEARTS)*(KING-ACE+1)+(value-ACE)];
 	}
+	
 }

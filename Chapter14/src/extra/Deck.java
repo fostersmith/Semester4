@@ -1,10 +1,16 @@
 package extra;
 
+import java.awt.event.ActionListener;
+
 public class Deck {
-	private Card[] cards;
 	
-	public Deck() {
+	private Card[] cards;
+	int next = 0;
+	
+	public Deck(ActionListener listener) {
 		cards = genCards();
+		for(Card c : cards)
+			c.addActionListener(listener);
 	}
 	
 	public void shuffle() {
@@ -14,12 +20,19 @@ public class Deck {
 			cards[i] = cards[randInd];
 			cards[randInd] = temp;
 		}
+		next = 0;
 	}
 	
 	public Card cardAt(int i) {
 		if(i < 0 || i >= cards.length)
 			throw new IllegalArgumentException("Card Index out of Bounds");
 		return cards[i];
+	}
+	
+	public Card getNext() {
+		Card r = cards[next];
+		++next;
+		return r;
 	}
 	
 	private static Card[] genCards() {
@@ -33,4 +46,6 @@ public class Deck {
 		}
 		return cards;
 	}
+	
+	
 }
