@@ -70,18 +70,23 @@ public class TableauPile extends JPanel {
 	}
 	
 	public void removeCards(int overallIndex) {
-		for(int i = faceUp.size()+faceDown.size()-1; i >= overallIndex; i -- ) {
-			cardMap[getCard(i).hashCode()] = -1;
-			this.remove(getCard(i));
-			if(faceUp.size() > 0)
-				faceUp.remove(faceUp.size()-1);
-			else
-				faceDown.remove(faceDown.size()-1);
+		for(;overallIndex < faceUp.size() + faceDown.size();) {
+			Card removed = getCard(overallIndex);
+			if(overallIndex >= faceDown.size()) { // in face up
+				faceUp.remove(overallIndex-faceDown.size());
+			} else { // in face down
+				faceDown.remove(overallIndex);
+			}
+			this.remove(removed);
 		}
-		if(faceUp.size() == 0 && faceDown.size() != 0)
-			faceDown.get(faceDown.size()-1).setState(Card.FACEUP);
-		if(faceDown.size() + faceUp.size() > 0)
-			getCard(faceDown.size()+faceUp.size()-1).setBounds(fullCard(faceDown.size()+faceUp.size()-1));
+		if(faceUp.size() == 0 && faceDown.size() != 0) {
+			Card flipped = faceDown.get(faceDown.size()-1);
+			faceDown.remove(faceDown.size()-1);
+			flipped.setState(Card.FACEUP);
+			faceUp.add(flipped);
+		}
+		if(faceUp.size() + faceDown.size() != 0)
+			getCard(faceDown.size() + faceUp.size() - 1).setBounds(fullCard(faceDown.size() + faceUp.size() - 1));
 		revalidate();
 		repaint();
 	}

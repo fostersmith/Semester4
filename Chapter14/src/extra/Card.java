@@ -93,6 +93,14 @@ public class Card extends JButton {
 		return state == other.state && suit == other.suit;
 	}
 	
+	public static void canStack(Card top, Card bottom) {
+		if(top.getSuit() == HEARTS || top.getSuit() == DIAMONDS) {
+			if(bottom.getSuit() == SPADES || bottom.getSuit() == CLUBS)
+		} else {
+			
+		}
+	}
+	
 	public static BufferedImage[] createImageMap() {
 		try {
 			BufferedImage[] images = new BufferedImage[52];

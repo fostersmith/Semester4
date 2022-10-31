@@ -15,6 +15,7 @@ public class JSolitaire extends JFrame implements ActionListener {
 	Deck d;
 	int[] cardLocations = new int[52]; // maps card -> location
 	int curhighlighted = -1;
+	int highlightedIndex = 0;
 	// 0-6 - Tableau
 	// 7-10 - Foundation
 	// 11 - Stock
@@ -64,10 +65,17 @@ public class JSolitaire extends JFrame implements ActionListener {
 			int loc = cardLocations[c.hashCode()];
 			if(loc<=6) {
 				System.out.println("In tableau "+(loc+1));
-				piles[loc].highlightCards(piles[loc].indexOf(c));
-				if(curhighlighted > -1)
-					piles[curhighlighted].unhighlight();
-				curhighlighted = loc;
+				
+				if(curhighlighted < 0) { // nothing highlighted
+					highlightedIndex = piles[loc].indexOf(c);
+					piles[loc].highlightCards(highlightedIndex);
+					if(curhighlighted > -1)
+						piles[curhighlighted].unhighlight();
+					curhighlighted = loc;
+				} else { //something highlighted
+					piles[curhighlighted].removeCards(highlightedIndex);
+					curhighlighted = -1;
+				}
 				revalidate();
 				repaint();
 			} else if(loc <= 10) {
