@@ -3,10 +3,12 @@ package extra;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JFrame;
 
-public class JSolitaire extends JFrame implements ActionListener {
+public class JSolitaire extends JFrame implements ActionListener, MouseListener {
 	
 	TableauPile[] piles = new TableauPile[7];
 	FoundationPile[] foundation = new FoundationPile[4];
@@ -47,8 +49,9 @@ public class JSolitaire extends JFrame implements ActionListener {
 		for(int p = 0; p < piles.length; ++p) {
 			add(piles[p]);
 			Dimension size = piles[p].getPreferredSize();
-			piles[p].setBounds(p*Card.PX_WIDTH, 0, (int)size.getWidth(), (int)size.getHeight());
+			piles[p].setBounds(p*(Card.PX_WIDTH+5), 0, (int)size.getWidth(), (int)size.getHeight());
 		}
+		addMouseListener(this);
 		
 		//setSize(piles.length*Card.PX_WIDTH,piles[piles.length-1].getPreferredSize().height);
 		setSize(Card.PX_WIDTH*piles.length, TableauPile.PX_VISIBLE_SPACE*(piles.length-1)+Card.PX_HEIGHT);
@@ -73,7 +76,15 @@ public class JSolitaire extends JFrame implements ActionListener {
 						piles[curhighlighted].unhighlight();
 					curhighlighted = loc;
 				} else { //something highlighted
-					piles[curhighlighted].removeCards(highlightedIndex);
+					//if(Card.canStack(piles[loc].getTopCard(),piles[curhighlighted].getCard(highlightedIndex))) {
+						System.out.println("Tableau "+curhighlighted);
+						Card[] removed = piles[curhighlighted].removeCards(highlightedIndex);
+						System.out.println("Tableau "+loc);
+						piles[loc].addAllCards(removed);
+						for(Card removedCard : removed)
+							cardLocations[removedCard.hashCode()] = loc;
+					//}
+					piles[curhighlighted].unhighlight();
 					curhighlighted = -1;
 				}
 				revalidate();
@@ -90,6 +101,56 @@ public class JSolitaire extends JFrame implements ActionListener {
 	
 	public static void main(String[] args) {
 		new JSolitaire();
+	}
+	
+	public boolean onEmptyPile(int x, int y) {
+		return y <= Card.PX_HEIGHT;
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		//if(e.getSource() == this)
+		if(onEmptyPile(e.getX(), e.getY())) {
+			int pile = e.getX()/(Card.PX_WIDTH+5);
+			if(curhighlighted > -1) {
+				if(piles[curhighlighted].getCard(highlightedIndex).getValue()==Card.KING) {
+					Card[] removed = piles[curhighlighted].removeCards(highlightedIndex);
+					piles[pile].addAllCards(removed);
+					for(Card c : removed)
+						cardLocations[c.hashCode()] = pile;
+				}
+			}
+		}
+		else {
+			if(curhighlighted > -1)
+				piles[curhighlighted].unhighlight();
+			curhighlighted = -1;
+		}
+		repaint();
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -1,6 +1,9 @@
 package extra;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
@@ -69,9 +72,13 @@ public class TableauPile extends JPanel {
 			return faceDown.get(overallIndex);
 	}
 	
-	public void removeCards(int overallIndex) {
+	public Card[] removeCards(int overallIndex) {
+		Card[] removedCards = new Card[faceUp.size()+faceDown.size()-overallIndex];
+		int removedI = 0;
 		for(;overallIndex < faceUp.size() + faceDown.size();) {
 			Card removed = getCard(overallIndex);
+			removedCards[removedI] = removed;
+			removedI++;
 			if(overallIndex >= faceDown.size()) { // in face up
 				faceUp.remove(overallIndex-faceDown.size());
 			} else { // in face down
@@ -89,6 +96,14 @@ public class TableauPile extends JPanel {
 			getCard(faceDown.size() + faceUp.size() - 1).setBounds(fullCard(faceDown.size() + faceUp.size() - 1));
 		revalidate();
 		repaint();
+		print();
+		return removedCards;
+	}
+	
+	public void addAllCards(Card[] cards) {
+		for(Card c : cards)
+			faceUpAdd(c);
+		print();
 	}
 	
 	public void highlightCards(int overallIndex) {
@@ -119,9 +134,39 @@ public class TableauPile extends JPanel {
 		return arr;
 	}
 	
+	public Card getTopCard() {
+		return getCard(faceUp.size()+faceDown.size()-1);
+	}
+	
+	public void print() {
+		System.out.print("Hidden: ");
+		for(Card c : faceDown)
+			System.out.print(c+", ");
+		System.out.println();
+		System.out.print("Shown: ");
+		for(Card c : faceUp)
+			System.out.print(c+", ");
+		System.out.println();
+		System.out.print("Map: ");
+		for(int i : cardMap)
+			System.out.print(i+", ");
+		System.out.print("");
+	}
+	
+	@Override
+	public void paintComponent(Graphics g) {
+		if(faceUp.size() + faceDown.size() > 0)
+			super.paintComponent(g);
+		else {
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.setPaint(Color.GRAY);
+			g2d.fillRect(0,0,Card.PX_WIDTH,Card.PX_HEIGHT);
+		}
+	}
+	
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension(Card.PX_WIDTH, (faceDown.size()+faceUp.size())*PX_VISIBLE_SPACE+Card.PX_HEIGHT);
+		return new Dimension(Card.PX_WIDTH, (6+Card.KING-Card.ACE)*PX_VISIBLE_SPACE+Card.PX_HEIGHT);
 	}
 	
 }
