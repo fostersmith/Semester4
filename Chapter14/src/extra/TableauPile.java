@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-public class TableauPile extends JPanel {
+public class TableauPile extends JPanel implements CardCollection {
 	
 	public static final int PX_VISIBLE_SPACE = 20; //vertical distance between cards
 	ArrayList<Card> faceDown, faceUp;
@@ -72,7 +72,8 @@ public class TableauPile extends JPanel {
 			return faceDown.get(overallIndex);
 	}
 	
-	public Card[] removeCards(int overallIndex) {
+	@Override
+	public Card[] pop(int overallIndex) {
 		Card[] removedCards = new Card[faceUp.size()+faceDown.size()-overallIndex];
 		int removedI = 0;
 		for(;overallIndex < faceUp.size() + faceDown.size();) {
@@ -100,7 +101,8 @@ public class TableauPile extends JPanel {
 		return removedCards;
 	}
 	
-	public void addAllCards(Card[] cards) {
+	@Override
+	public void addAll(Card[] cards) {
 		for(Card c : cards)
 			faceUpAdd(c);
 		print();

@@ -14,9 +14,8 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 	FoundationPile[] foundation = new FoundationPile[4];
 	StockPile stock;
 	WastePile waste;
-	Deck d;
 	int[] cardLocations = new int[52]; // maps card -> location
-	int curhighlighted = -1;
+	CardCollection highlighted;
 	int highlightedIndex = 0;
 	// 0-6 - Tableau
 	// 7-10 - Foundation
@@ -25,10 +24,12 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 	
 	public JSolitaire() {
 		
+		
+		
 		for(int i = 0; i < cardLocations.length; ++i)
 			cardLocations[i] = 11; //All are in stock
 		
-		d = new Deck(this);
+		Deck d = new Deck(this);
 		d.shuffle();
 		
 		for(int p = 0; p < piles.length; ++p) {
@@ -44,14 +45,25 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 			
 		}
 		
+		
+		stock = new StockPile(d);
+		waste = new  WastePile();		
+		
 		setLayout(null);
+		add(stock);
+		stock.setBounds(0, 0, Card.PX_WIDTH, Card.PX_HEIGHT);
+		add(waste);
+		waste.setBounds(Card.PX_WIDTH+5, 0, Card.PX_WIDTH, Card.PX_HEIGHT);
 		
 		for(int p = 0; p < piles.length; ++p) {
 			add(piles[p]);
 			Dimension size = piles[p].getPreferredSize();
-			piles[p].setBounds(p*(Card.PX_WIDTH+5), 0, (int)size.getWidth(), (int)size.getHeight());
+			piles[p].setBounds(p*(Card.PX_WIDTH+5), Card.PX_HEIGHT+5, (int)size.getWidth(), (int)size.getHeight());
 		}
 		addMouseListener(this);
+		
+		revalidate();
+		repaint();
 		
 		//setSize(piles.length*Card.PX_WIDTH,piles[piles.length-1].getPreferredSize().height);
 		setSize(Card.PX_WIDTH*piles.length, TableauPile.PX_VISIBLE_SPACE*(piles.length-1)+Card.PX_HEIGHT);
@@ -69,33 +81,36 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 			if(loc<=6) {
 				System.out.println("In tableau "+(loc+1));
 				
-				if(curhighlighted < 0) { // nothing highlighted
+				if(highlighted == null) { // nothing highlighted
 					highlightedIndex = piles[loc].indexOf(c);
 					piles[loc].highlightCards(highlightedIndex);
-					if(curhighlighted > -1)
-						piles[curhighlighted].unhighlight();
-					curhighlighted = loc;
+					highlighted = piles[loc];
 				} else { //something highlighted
-					//if(Card.canStack(piles[loc].getTopCard(),piles[curhighlighted].getCard(highlightedIndex))) {
-						System.out.println("Tableau "+curhighlighted);
-						Card[] removed = piles[curhighlighted].removeCards(highlightedIndex);
-						System.out.println("Tableau "+loc);
-						piles[loc].addAllCards(removed);
+					if(Card.canStack(piles[loc].getTopCard(), highlighted.getCard(highlightedIndex))) {
+						Card[] removed = highlighted.pop(highlightedIndex);
+						piles[loc].addAll(removed);
 						for(Card removedCard : removed)
 							cardLocations[removedCard.hashCode()] = loc;
-					//}
-					piles[curhighlighted].unhighlight();
-					curhighlighted = -1;
+					}
+					highlighted.unhighlight();
+					highlighted = null;
 				}
-				revalidate();
-				repaint();
 			} else if(loc <= 10) {
 				System.out.println("In foundation "+(loc-6));
 			} else if(loc == 11) {
 				System.out.println("In Stock");
+				stock.pop();
+				waste.addAll(new Card[] {c});
+				cardLocations[c.hashCode()] = 12;
 			} else {
 				System.out.println("In Waste");
+				if(highlighted != null)
+					highlighted.unhighlight();
+				highlighted = waste;
+				waste.highlightCards(-1);
 			}
+			revalidate();
+			repaint();
 		}
 	}
 	
@@ -112,19 +127,19 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 		//if(e.getSource() == this)
 		if(onEmptyPile(e.getX(), e.getY())) {
 			int pile = e.getX()/(Card.PX_WIDTH+5);
-			if(curhighlighted > -1) {
-				if(piles[curhighlighted].getCard(highlightedIndex).getValue()==Card.KING) {
-					Card[] removed = piles[curhighlighted].removeCards(highlightedIndex);
-					piles[pile].addAllCards(removed);
+			if(highlighted != null) {
+				if(highlighted.getCard(highlightedIndex).getValue()==Card.KING) {
+					Card[] removed = highlighted.pop(highlightedIndex);
+					piles[pile].addAll(removed);
 					for(Card c : removed)
 						cardLocations[c.hashCode()] = pile;
 				}
 			}
 		}
 		else {
-			if(curhighlighted > -1)
-				piles[curhighlighted].unhighlight();
-			curhighlighted = -1;
+			if(highlighted != null)
+				highlighted.unhighlight();
+			highlighted = null;
 		}
 		repaint();
 	}
