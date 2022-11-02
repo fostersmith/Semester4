@@ -45,6 +45,12 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 			
 		}
 		
+		for(int s = 0; s < 4; ++s) {
+			foundation[s] = new FoundationPile(s+Card.HEARTS);
+			add(foundation[s]);
+			foundation[s].setBounds((Card.PX_WIDTH+5)*(3+s),0,Card.PX_WIDTH,Card.PX_HEIGHT);
+		}
+		
 		
 		stock = new StockPile(d);
 		waste = new  WastePile();		
@@ -102,6 +108,9 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 				stock.pop();
 				waste.addAll(new Card[] {c});
 				cardLocations[c.hashCode()] = 12;
+				if(highlighted != null)
+					highlighted.unhighlight();
+				highlighted = null;
 			} else {
 				System.out.println("In Waste");
 				if(highlighted != null)
@@ -119,7 +128,11 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 	}
 	
 	public boolean onEmptyPile(int x, int y) {
-		return y <= Card.PX_HEIGHT;
+		return y <= Card.PX_HEIGHT*2+5 && y >= Card.PX_HEIGHT+5 && x < (Card.PX_WIDTH+5*7);
+	}
+	
+	public boolean onFoundation(int x, int y) {
+		return y <= Card.PX_HEIGHT && x > (Card.PX_WIDTH+5)*3 && x < (Card.PX_WIDTH+5)*6;
 	}
 
 	@Override
@@ -127,20 +140,31 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 		//if(e.getSource() == this)
 		if(onEmptyPile(e.getX(), e.getY())) {
 			int pile = e.getX()/(Card.PX_WIDTH+5);
-			if(highlighted != null) {
-				if(highlighted.getCard(highlightedIndex).getValue()==Card.KING) {
-					Card[] removed = highlighted.pop(highlightedIndex);
-					piles[pile].addAll(removed);
-					for(Card c : removed)
-						cardLocations[c.hashCode()] = pile;
+			if(piles[pile].numCards() == 0) {
+				if(highlighted != null) {
+					if(highlighted.getCard(highlightedIndex).getValue()==Card.KING) {
+						Card[] removed = highlighted.pop(highlightedIndex);
+						piles[pile].addAll(removed);
+						for(Card c : removed)
+							cardLocations[c.hashCode()] = pile;
+					}
 				}
 			}
+		} else if(onFoundation(e.getX(), e.getY())) {
+			int found = (e.getX()-(Card.PX_WIDTH+5)*3)/(Card.PX_WIDTH*5);
+			System.out.println("In foundation "+found);
+			System.out.println("Suit is "+foundation[found].suit);
+			if(highlighted != null) {
+				if(highlighted.getCards(highlightedIndex).length == 1)
+					if(foundation[found].canStack(highlighted.getCard(highlightedIndex))) {
+						Card[] c = highlighted.pop(highlightedIndex);
+						foundation[found].addAll(c);
+					}
+			}
 		}
-		else {
-			if(highlighted != null)
-				highlighted.unhighlight();
-			highlighted = null;
-		}
+		if(highlighted != null)
+			highlighted.unhighlight();
+		highlighted = null;
 		repaint();
 	}
 

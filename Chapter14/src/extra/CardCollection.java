@@ -6,4 +6,5 @@ public interface CardCollection {
 	public void highlightCards(int index);
 	public void unhighlight();
 	public Card getCard(int index);
+	public Card[] getCards(int index);
 }

@@ -155,6 +155,11 @@ public class TableauPile extends JPanel implements CardCollection {
 		System.out.print("");
 	}
 	
+	
+	public int numCards() {
+		return faceUp.size() + faceDown.size();
+	}
+	
 	@Override
 	public void paintComponent(Graphics g) {
 		if(faceUp.size() + faceDown.size() > 0)
@@ -169,6 +174,15 @@ public class TableauPile extends JPanel implements CardCollection {
 	@Override
 	public Dimension getPreferredSize() {
 		return new Dimension(Card.PX_WIDTH, (6+Card.KING-Card.ACE)*PX_VISIBLE_SPACE+Card.PX_HEIGHT);
+	}
+
+	@Override
+	public Card[] getCards(int index) {
+		Card[] ret = new Card[numCards()-index];
+		for(int i = index; i < numCards(); ++i) {
+			ret[i-index] = getCard(i);
+		}
+		return ret;
 	}
 	
 }

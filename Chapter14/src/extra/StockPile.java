@@ -2,6 +2,7 @@ package extra;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -13,6 +14,7 @@ public class StockPile extends JPanel {
 	private Card next;
 	
 	public StockPile(Deck d) {
+		setLayout(new FlowLayout());
 		this.d = d;
 		next = d.getNext();
 		next.setState(Card.FACEDOWN);
