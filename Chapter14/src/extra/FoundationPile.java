@@ -24,10 +24,10 @@ public class FoundationPile extends JPanel implements CardCollection  {
 
 	@Override
 	public void addAll(Card[] cardList) {
-		for(Card c : cards) {
+		for(Card c : cardList) {
 			cards.add(c);
 			c.setState(Card.FACEUP);
-			c.setEnabled(false);
+			//c.setEnabled(false);
 		}
 		if(top != null)
 			remove(top);
@@ -54,8 +54,11 @@ public class FoundationPile extends JPanel implements CardCollection  {
 	
 	public boolean canStack(Card c) {
 		boolean ret = c.getSuit() == suit;
-		if(cards.size() > 0)
+		System.out.println("Cards : "+cards.size());
+		if(cards.size() > 0) {
 			ret = ret & c.getValue() == top.getValue() + 1;
+			System.out.println(top+" "+c+" = "+ret);
+		}
 		else
 			ret = ret & c.getValue() == 1;
 		return ret;

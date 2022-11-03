@@ -30,7 +30,7 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 			cardLocations[i] = 11; //All are in stock
 		
 		Deck d = new Deck(this);
-		d.shuffle();
+		//d.shuffle();
 		
 		for(int p = 0; p < piles.length; ++p) {
 			Card[] faceDown = new Card[p];
@@ -102,7 +102,22 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 					highlighted = null;
 				}
 			} else if(loc <= 10) {
-				System.out.println("In foundation "+(loc-6));
+				System.out.println("In foundation "+(loc-7));
+				if(highlighted != null) {
+					if(highlighted.getCards(highlightedIndex).length == 1) {
+						Card grabbed = highlighted.getCard(highlightedIndex);
+						System.out.println("Grabbing "+grabbed);
+						if(foundation[loc-7].canStack(grabbed)) {
+							System.out.println("Stacking");
+							Card[] grabbedCards = highlighted.pop(highlightedIndex);
+							foundation[loc-7].addAll(grabbedCards);
+							for(Card card : grabbedCards)
+								cardLocations[card.hashCode()] = loc;
+							highlighted.unhighlight();
+							highlighted = null;
+						}
+					}
+				}
 			} else if(loc == 11) {
 				System.out.println("In Stock");
 				stock.pop();
@@ -128,11 +143,11 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 	}
 	
 	public boolean onEmptyPile(int x, int y) {
-		return y <= Card.PX_HEIGHT*2+5 && y >= Card.PX_HEIGHT+5 && x < (Card.PX_WIDTH+5*7);
+		return y <= Card.PX_HEIGHT*2+5 && y >= Card.PX_HEIGHT+5 && x < (Card.PX_WIDTH+5)*7;
 	}
 	
 	public boolean onFoundation(int x, int y) {
-		return y <= Card.PX_HEIGHT && x > (Card.PX_WIDTH+5)*3 && x < (Card.PX_WIDTH+5)*6;
+		return y <= Card.PX_HEIGHT && x > (Card.PX_WIDTH+5)*3 && x < (Card.PX_WIDTH+5)*7;
 	}
 
 	@Override
@@ -140,6 +155,7 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 		//if(e.getSource() == this)
 		if(onEmptyPile(e.getX(), e.getY())) {
 			int pile = e.getX()/(Card.PX_WIDTH+5);
+			System.out.println("In pile" + pile);
 			if(piles[pile].numCards() == 0) {
 				if(highlighted != null) {
 					if(highlighted.getCard(highlightedIndex).getValue()==Card.KING) {
@@ -151,15 +167,21 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 				}
 			}
 		} else if(onFoundation(e.getX(), e.getY())) {
-			int found = (e.getX()-(Card.PX_WIDTH+5)*3)/(Card.PX_WIDTH*5);
+			int found = (e.getX()-(Card.PX_WIDTH+5)*3)/(Card.PX_WIDTH+5);
 			System.out.println("In foundation "+found);
 			System.out.println("Suit is "+foundation[found].suit);
 			if(highlighted != null) {
-				if(highlighted.getCards(highlightedIndex).length == 1)
+				if(highlighted.getCards(highlightedIndex).length == 1) {
+					System.out.println("Length is 1");
+					System.out.println("Card is "+highlighted.getCard(highlightedIndex));
 					if(foundation[found].canStack(highlighted.getCard(highlightedIndex))) {
+						System.out.println("Stacking");
 						Card[] c = highlighted.pop(highlightedIndex);
 						foundation[found].addAll(c);
+						for(Card card : c)
+							cardLocations[card.hashCode()] = found+7;
 					}
+				}
 			}
 		}
 		if(highlighted != null)
