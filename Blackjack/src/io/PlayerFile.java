@@ -12,6 +12,11 @@ public class PlayerFile {
 		this.money = m;
 	}
 	
+	public PlayerFile(int m) {
+		this.path = null;
+		this.money = m;
+	}
+	
 	public static PlayerFile load(Path p) {
 		return null;
 	}

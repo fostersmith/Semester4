@@ -37,4 +37,8 @@ public class Card {
 		return suit.ordinal()*13 + rank - 1;
 	}
 	
+	@Override
+	public String toString() {
+		return rank+" of "+suit.name();
+	}
 }
