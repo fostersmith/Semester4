@@ -3,10 +3,13 @@ package extra;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JFrame;
 
-public class JSolitaire extends JFrame implements ActionListener {
+public class JSolitaire extends JFrame implements ActionListener, MouseListener {
 	
 	TableauPile[] piles = new TableauPile[7];
 	FoundationPile[] foundation = new FoundationPile[4];
@@ -15,6 +18,7 @@ public class JSolitaire extends JFrame implements ActionListener {
 	Deck d;
 	int[] cardLocations = new int[52]; // maps card -> location
 	int curhighlighted = -1;
+	int highlightIndex;
 	// 0-6 - Tableau
 	// 7-10 - Foundation
 	// 11 - Stock
@@ -37,11 +41,12 @@ public class JSolitaire extends JFrame implements ActionListener {
 			piles[p] = new TableauPile(faceDown);
 			Card f = d.getNext();
 			cardLocations[f.hashCode()] = p;
-			piles[p].faceUpAdd(f);
-			
+			piles[p].faceUpAdd(f);			
 		}
 		
 		setLayout(null);
+		
+		addMouseListener(this);
 		
 		for(int p = 0; p < piles.length; ++p) {
 			add(piles[p]);
@@ -63,13 +68,24 @@ public class JSolitaire extends JFrame implements ActionListener {
 			Card c = (Card)e.getSource();
 			int loc = cardLocations[c.hashCode()];
 			if(loc<=6) {
+				
 				System.out.println("In tableau "+(loc+1));
-				piles[loc].highlightCards(piles[loc].indexOf(c));
-				if(curhighlighted > -1)
+				if(curhighlighted < 0) {
+					highlightIndex = piles[loc].indexOf(c);
+					piles[loc].highlightCards(highlightIndex);
+					curhighlighted = loc;
+					repaint();
+				} else if(curhighlighted != loc ){
 					piles[curhighlighted].unhighlight();
-				curhighlighted = loc;
-				revalidate();
-				repaint();
+					Card[] removed = piles[curhighlighted].removeCards(highlightIndex);
+					curhighlighted = -1;
+					for(Card card : removed) {
+						piles[loc].faceUpAdd(card);
+						cardLocations[card.hashCode()] = loc;
+					}
+					repaint();
+				}
+				
 			} else if(loc <= 10) {
 				System.out.println("In foundation "+(loc-6));
 			} else if(loc == 11) {
@@ -82,6 +98,39 @@ public class JSolitaire extends JFrame implements ActionListener {
 	
 	public static void main(String[] args) {
 		new JSolitaire();
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		System.out.print("clicked");
+		if(curhighlighted > -1)
+			piles[curhighlighted].unhighlight();
+		repaint();
+		curhighlighted = -1;
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

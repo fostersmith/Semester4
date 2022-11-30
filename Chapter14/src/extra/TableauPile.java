@@ -69,21 +69,16 @@ public class TableauPile extends JPanel {
 			return faceDown.get(overallIndex);
 	}
 	
-	public void removeCards(int overallIndex) {
-		for(int i = faceUp.size()+faceDown.size()-1; i >= overallIndex; i -- ) {
-			cardMap[getCard(i).hashCode()] = -1;
-			this.remove(getCard(i));
-			if(faceUp.size() > 0)
-				faceUp.remove(faceUp.size()-1);
-			else
-				faceDown.remove(faceDown.size()-1);
+	public Card[] removeCards(int overallIndex) {
+		Card[] removed = new Card[faceUp.size()+faceDown.size()-overallIndex];
+		for(;overallIndex < faceUp.size()+faceDown.size();) {
+			Card c = getCard(overallIndex);
+			cardMap[c.hashCode()] = -1;
+			removed[faceUp.size()-(overallIndex-faceDown.size())-1] = c;
+			faceUp.remove(overallIndex-faceDown.size());
+			this.remove(c);
 		}
-		if(faceUp.size() == 0 && faceDown.size() != 0)
-			faceDown.get(faceDown.size()-1).setState(Card.FACEUP);
-		if(faceDown.size() + faceUp.size() > 0)
-			getCard(faceDown.size()+faceUp.size()-1).setBounds(fullCard(faceDown.size()+faceUp.size()-1));
-		revalidate();
-		repaint();
+		return removed;
 	}
 	
 	public void highlightCards(int overallIndex) {
