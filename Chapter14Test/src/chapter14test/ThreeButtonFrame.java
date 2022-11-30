@@ -1,17 +1,20 @@
 package chapter14test;
 
 import java.awt.Color;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
+// Used for any frame which uses three buttons (CSFrame and ViewFrame)
 public abstract class ThreeButtonFrame extends JFrame implements ActionListener {
 
-	JButton a, b, c;
+	private JButton a, b, c;
 	
-	public ThreeButtonFrame(String a, String b, String c) {
+	public ThreeButtonFrame(String title, String a, String b, String c) {
+		super(title);
 		this.a = new JButton(a);
 		this.b = new JButton(b);
 		this.c = new JButton(c);
@@ -20,14 +23,14 @@ public abstract class ThreeButtonFrame extends JFrame implements ActionListener 
 		this.b.addActionListener(this);
 		this.c.addActionListener(this);
 		
-		setLayout(null);
+		GridLayout l = new GridLayout(3,1);
+		l.setVgap(15);
+		setLayout(l);
 		add(this.a);
 		add(this.b);
 		add(this.c);
-		this.a.setBounds(0, 0, 500, 50);
-		this.b.setBounds(0, 75, 500, 50);
-		this.c.setBounds(0, 140, 500, 50);
-		setBackground(Color.PINK); //FIXME
+		setSize(500,225);
+		getContentPane().setBackground(Color.MAGENTA);
 
 	}
 	

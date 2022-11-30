@@ -11,23 +11,24 @@ import javax.swing.JTextField;
 
 public class EquipmentFrame extends ThreeFieldAddFrame {
 	
-	public EquipmentFrame(CSFrame mainMenu) {
-		super("Add Equipment", "Add Equipment", "Item", "Description",  "Cost", mainMenu);
+	public EquipmentFrame() {
+		super("Add Equipment", "Add Equipment", "Item", "Description",  "Cost");
 	}
 
 	@Override
-	void onAddButton(String a, String b, String c) {
-		if(a.equals("")) {
+	void onAddButton(String item, String description, String costStr) {
+		if(item.equals("")) {
 			JOptionPane.showMessageDialog(null, "Enter an Item");
-		} else if(b.equals("")) {
-			JOptionPane.showMessageDialog(null, "Enter an Item");
-		}
-		try {
-			double cost = Double.parseDouble(c);
-			CSFrame.addEquipment(new Equipment(a, b, cost));
-			JOptionPane.showMessageDialog(null, "Success");
-		} catch(Exception e) {
-			JOptionPane.showMessageDialog(null, "Enter a cost");
+		} else if(description.equals("")) {
+			JOptionPane.showMessageDialog(null, "Enter a Description");
+		} else {
+			try {
+				double cost = Double.parseDouble(costStr);
+				CSFrame.addEquipment(new Equipment(item, description, cost));
+				JOptionPane.showMessageDialog(null, "Successfully Added Equipment");
+			} catch(Exception e) {
+				JOptionPane.showMessageDialog(null, "Enter a cost");
+			}
 		}
 	}
 

@@ -1,5 +1,6 @@
 package chapter14test;
 
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,15 +10,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+// Any frame that collects three fields (EquipmentFrame and StudentFrame)
 public abstract class ThreeFieldAddFrame extends JFrame implements ActionListener {
-	JButton addButton, mainMenuButton;
-	JTextField aField,  bField, cField;
-	JLabel aLabel, bLabel, cLabel;
-	CSFrame mainMenu;
+	private JButton addButton, mainMenuButton;
+	private JTextField aField,  bField, cField;
+	private JLabel aLabel, bLabel, cLabel;
 	
-	public ThreeFieldAddFrame(String title, String addButtonLabel, String a, String b, String c, CSFrame mainMenu){
+	public ThreeFieldAddFrame(String title, String addButtonLabel, String a, String b, String c){
 		setTitle(title);
-		this.mainMenu = mainMenu;
 		addButton = new JButton(addButtonLabel);
 		mainMenuButton = new JButton("Main Menu");
 		addButton.addActionListener(this);
@@ -29,16 +29,19 @@ public abstract class ThreeFieldAddFrame extends JFrame implements ActionListene
 		bLabel = new JLabel(b);
 		cLabel = new JLabel(c);
 		
-		setLayout(new GridLayout(4,2));
+		GridLayout l = new GridLayout(4,2);
+		l.setVgap(10);
+		setLayout(l);
 		add(addButton);
 		add(mainMenuButton);
-		add(aField);
 		add(aLabel);
-		add(bField);
+		add(aField);
 		add(bLabel);
-		add(cField);
+		add(bField);
 		add(cLabel);
-		setSize(500,125);
+		add(cField);
+		setSize(500,200);
+		getContentPane().setBackground(Color.MAGENTA);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(false);
@@ -54,7 +57,7 @@ public abstract class ThreeFieldAddFrame extends JFrame implements ActionListene
 			cField.setText("");
 		} else if(src == mainMenuButton) {
 			setVisible(false);
-			mainMenu.setVisible(true);
+			CSFrame.f1.setVisible(true);
 		}
 	}
 	
