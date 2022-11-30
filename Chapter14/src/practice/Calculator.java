@@ -75,8 +75,56 @@ public class Calculator extends JFrame implements ActionListener {
 		add(keys[16], BorderLayout.SOUTH);
 	}
 
-	private void keyAction(int keynum) {
-		
+	private void keyAction(int keyNum) {
+		switch(keyNum) {
+			//number and decimal point buttons
+		case 0: case 1: case 2: case 3: case 4: 
+		case 5: case 6: case 7: case 8: case 9:
+		case 15:
+			if(clearText) {
+				lcd.setText("");
+				clearText = false;
+			}
+			lcd.setText(lcd.getText() + keys[keyNum].getText());
+			break;
+		case 10: case 11: case 12: case 13: case 14: 
+			if(lcd.getText().length() != 0) {	//to stop from pressing operators w/o numbers
+				clearText = true;
+				if(first) { //first operand
+					op1 = Double.parseDouble(lcd.getText());
+					first = false;
+					lastOp = keyNum;
+				}
+				else { //second
+					op2 = Double.parseDouble(lcd.getText());
+					switch(lastOp) {
+					case 10: //divide
+						op1 /= op2;
+						break;
+					case 11: //multiply
+						op1 *= op2;
+						break;
+					case 12: //subtract
+						op1 -= op2;
+						break;
+					case 13: //addition
+						op1 += op2;
+						break;
+					}
+				}
+				lcd.setText(calcPattern.format(op1));
+				if(keyNum == 14) { // =
+					first = true;
+				} else {
+					lastOp = keyNum;
+				}
+			} 
+			break;
+		case 16:
+			lcd.setText("");
+			first = true;
+			break;
+		}
 	}
 	
 	@Override

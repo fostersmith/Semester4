@@ -22,7 +22,7 @@ public class Card extends JButton {
 	public static final int FACEDOWN = 0, FACEUP = 1, HIGHLIGHTED = 2;
 	
 	private static final BufferedImage[] cardImages = createImageMap();
-	private static final BufferedImage facedown = getFaceDown();
+	public static final BufferedImage facedown = getFaceDown();
 	
 	private final int suit, value;
 	private BufferedImage img;
@@ -93,6 +93,11 @@ public class Card extends JButton {
 		return state == other.state && suit == other.suit;
 	}
 	
+	public static boolean canStack(Card top, Card bottom) {
+		boolean suitsWork = (top.suit==DIAMONDS||top.suit==HEARTS)&&(bottom.suit==SPADES||bottom.suit==CLUBS) || (bottom.suit==DIAMONDS||bottom.suit==HEARTS)&&(top.suit==SPADES||top.suit==CLUBS);
+		return suitsWork && bottom.value==top.value-1;
+	}
+	
 	public static BufferedImage[] createImageMap() {
 		try {
 			BufferedImage[] images = new BufferedImage[52];
@@ -143,7 +148,7 @@ public class Card extends JButton {
 		}
 	}
 	
-	public static BufferedImage getFaceDown() {
+	private static BufferedImage getFaceDown() {
 		try {
 			return ImageIO.read(new File("cards\\facedown.png"));
 		} catch(IOException e) {
@@ -153,7 +158,7 @@ public class Card extends JButton {
 		}
 	}
 	
-	public static BufferedImage getImage(int suit, int value) {
+	private static BufferedImage getImage(int suit, int value) {
 		if(!(suit == HEARTS || suit == DIAMONDS || suit == CLUBS || suit == SPADES))
 			throw new IllegalArgumentException("Invalid Suit");
 		if(value < ACE || value > KING)
@@ -161,4 +166,8 @@ public class Card extends JButton {
 		return cardImages[(suit-HEARTS)*(KING-ACE+1)+(value-ACE)];
 	}
 	
+	@Override
+	public String toString() {
+		return value+" of "+suit;
+	}
 }
