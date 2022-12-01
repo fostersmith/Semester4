@@ -41,6 +41,10 @@ public class Deck {
 			return null;
 	}
 	
+	public Card peek(int i) {
+		return(cards[i]);
+	}
+	
 	/**
 	 * Return the next card and increment cardpointer
 	 * Returns null if deck is empty
