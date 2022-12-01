@@ -15,6 +15,7 @@ public class BlackjackManager {
 	
 	private PlayerFile pf;
 	private int playerInsurance = 0;
+	private int initialBet = 0;
 	
 	private List<BlackjackHand> playerHand;
 	
@@ -48,6 +49,7 @@ public class BlackjackManager {
 			deck.shuffle();
 		playerHand.clear();
 		playerHand.add(new BlackjackHand());
+		playerHand.get(0).bet = initialBet;
 		dealerUpcards.clear();
 		playerHand.get(0).add(deck.pop());
 		playerHand.get(0).add(deck.pop());
@@ -61,12 +63,12 @@ public class BlackjackManager {
 		if(stage == Stage.BETTING) {
 			try {
 				pf.takeMoney(bet);
-				playerHand.get(0).bet = bet;
+				initialBet = bet;
 				deal();
 				stage = Stage.INSURING;
 				return true;
-			} catch(Exception e) {
-				throw new Exception("Bet more money than the player has");
+			} catch(InsufficientFundsException e) {
+				throw new InsufficientFundsException("Bet more money than the player has");
 			}
 		} else
 			return false;
@@ -76,10 +78,10 @@ public class BlackjackManager {
 		if(insurance < 0)
 			throw new IllegalArgumentException("Cannot buy negative insurance");
 		if(stage == Stage.INSURING) {
-			if(insurance > playerBet/2)
+			if(insurance > playerHand.get(0).bet/2d)
 				throw new Exception("Excessive Insurance");
 			this.playerInsurance = insurance;
-			this.playerBet -= insurance;
+			playerHand.get(0).bet -= insurance;
 			stage = Stage.PLAYING;
 			return true;
 		} else
@@ -103,10 +105,11 @@ public class BlackjackManager {
 			return false;		
 	}
 	
-	public boolean split(int handNum) {
+	public boolean split(int handNum) throws InsufficientFundsException {
 		if(stage == Stage.PLAYING) {
 			// Check that cards match
 			BlackjackHand hand = playerHand.get(handNum);
+			pf.takeMoney(hand.bet);
 			if(hand.size() != 2)
 				return false;
 			if(hand.get(0).getRank() != hand.get(1).getRank())
@@ -115,6 +118,8 @@ public class BlackjackManager {
 			BlackjackHand handB = new BlackjackHand();
 			handA.add(hand.get(0));
 			handB.add(hand.get(1));
+			handA.bet = hand.bet;
+			handB.bet = hand.bet;
 			playerHand.remove(handNum);
 			playerHand.add(handNum, handA);
 			playerHand.add(handNum+1, handB);
@@ -132,9 +137,11 @@ public class BlackjackManager {
 			stage = Stage.DONE;
 	}
 	
-	public boolean doubleDown(int handNum) {
+	public boolean doubleDown(int handNum) throws InsufficientFundsException {
 		if(stage == Stage.PLAYING) {
-			//TODO
+			pf.takeMoney(playerHand.get(handNum).bet);
+			playerHand.get(handNum).add(deck.pop());
+			playerHand.get(handNum).bet *= 2;
 			return true;
 		} else
 			return false;
@@ -144,7 +151,7 @@ public class BlackjackManager {
 		return Move.HIT; //TODO
 	}
 	
-	public static int getHandValue(List<Card> hand) {
+	public static int getHandValue(BlackjackHand hand) {
 		int sum = 0;
 		int numAces = 0;
 		for(Card c : hand) {
@@ -203,7 +210,7 @@ public class BlackjackManager {
 			for(int i = 0; i < manager.playerHand().size(); ++i) {
 				if(!manager.handDone(i)) {
 				
-					System.out.println("Your bet: $"+manager.getBet());
+					System.out.println("Your bet: $"+manager.getBet(i));
 					if(manager.getInsurance() != 0)
 						System.out.println("Your insurance: $"+manager.getInsurance());
 					List<Card> hand = manager.playerHand().get(i);
@@ -214,7 +221,7 @@ public class BlackjackManager {
 					switch(input) {
 						case "h":
 						case "hit":
-							System.out.println("Your bet: $"+manager.getBet());
+							System.out.println("Your bet: $"+manager.getBet(i));
 							if(manager.getInsurance() != 0)
 								System.out.println("Your insurance: $"+manager.getInsurance());
 							System.out.println("Hitting");
@@ -223,7 +230,7 @@ public class BlackjackManager {
 							break;
 						case "st":
 						case "stand":
-							System.out.println("Your bet: $"+manager.getBet());
+							System.out.println("Your bet: $"+manager.getBet(i));
 							if(manager.getInsurance() != 0)
 								System.out.println("Your insurance: $"+manager.getInsurance());
 							System.out.println("Standing");
@@ -232,25 +239,35 @@ public class BlackjackManager {
 							break;
 						case "sp":
 						case "split":
-							System.out.println("Your bet: $"+manager.getBet());
+							System.out.println("Your bet: $"+manager.getBet(i));
 							if(manager.getInsurance() != 0)
 								System.out.println("Your insurance: $"+manager.getInsurance());
 							System.out.println("Splitting");
-							if(manager.split(i)) {
-								for(List<Card> h : manager.playerHand())
-									printPlayerHand(h);
-							} else {
+							try {
+								if(manager.split(i)) {
+									for(List<Card> h : manager.playerHand())
+										printPlayerHand(h);
+								} else {
+									--i;
+									System.out.println("Split unsucessful. Please try another move");
+								}
+							} catch(InsufficientFundsException e) {
 								--i;
-								System.out.println("Split unsucessful. Please try another move");
+								System.out.println("You don't have enough money");
 							}
 							break;
 						case "d":
 						case "double":
-							System.out.println("Your bet: $"+manager.getBet());
+							System.out.println("Your bet: $"+manager.getBet(i));
 							if(manager.getInsurance() != 0)
 								System.out.println("Your insurance: $"+manager.getInsurance());
 							System.out.println("Doubling down");
-							manager.doubleDown(i);
+							try {
+								manager.doubleDown(i);
+							} catch (InsufficientFundsException e) {
+								--i;
+								System.out.println("Insufficient funds");
+							}
 							printPlayerHand(hand);
 							break;
 						default:

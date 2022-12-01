@@ -2,6 +2,8 @@ package io;
 
 import java.nio.file.Path;
 
+import util.InsufficientFundsException;
+
 public class PlayerFile {
 	
 	private Path path;
@@ -29,11 +31,11 @@ public class PlayerFile {
 		money += amount;
 	}
 	
-	public void takeMoney(int amount) throws Exception {
+	public void takeMoney(int amount) throws InsufficientFundsException {
 		if(money >= amount)
 			money -= amount;
 		else
-			throw new Exception();
+			throw new InsufficientFundsException();
 	}
 	
 	public int getMoney() {

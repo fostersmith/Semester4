@@ -30,7 +30,7 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 			cardLocations[i] = 11; //All are in stock
 		
 		Deck d = new Deck(this);
-		//d.shuffle();
+		d.shuffle();
 		
 		for(int p = 0; p < piles.length; ++p) {
 			Card[] faceDown = new Card[p];
@@ -72,7 +72,8 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 		repaint();
 		
 		//setSize(piles.length*Card.PX_WIDTH,piles[piles.length-1].getPreferredSize().height);
-		setSize(Card.PX_WIDTH*piles.length, TableauPile.PX_VISIBLE_SPACE*(piles.length-1)+Card.PX_HEIGHT);
+		//setSize(Card.PX_WIDTH*piles.length, TableauPile.PX_VISIBLE_SPACE*(piles.length-1)+Card.PX_HEIGHT);
+		setSize(625, 420);
 		setTitle("Bad Solitaire");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//setResizable(false);
@@ -136,6 +137,8 @@ public class JSolitaire extends JFrame implements ActionListener, MouseListener 
 			revalidate();
 			repaint();
 		}
+		
+		System.out.println(getWidth()+" "+getHeight());
 	}
 	
 	public static void main(String[] args) {
