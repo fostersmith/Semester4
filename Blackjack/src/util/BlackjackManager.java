@@ -12,6 +12,7 @@ public class BlackjackManager {
 	public enum Move { HIT, STAND, SPLIT, DOUBLE_DOWN };
 	public enum Stage { BETTING, INSURING, PLAYING, DONE };
 	public enum DealerTurnOutcome { HIT, STAND, BUST };
+	public enum PlayerTurnOutcome { SUCCESS, BUST };
 	
 	private Deck deck;
 	
@@ -258,7 +259,7 @@ public class BlackjackManager {
 					List<Card> hand = manager.playerHand().get(i);
 					printPlayerHand(hand);
 					System.out.print("Make a move (hit, stand, split, double) >> ");
-					String input = in.nextLine().strip().toLowerCase();
+					String input = in.nextLine().trim().toLowerCase();
 					
 					switch(input) {
 						case "h":
