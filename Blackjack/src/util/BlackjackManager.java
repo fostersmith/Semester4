@@ -3,6 +3,7 @@ package util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 import io.PlayerFile;
 
@@ -10,10 +11,11 @@ public class BlackjackManager {
 	
 	public enum Move { HIT, STAND, SPLIT, DOUBLE_DOWN };
 	public enum Stage { BETTING, INSURING, PLAYING, DONE };
+	public enum DealerTurnOutcome { HIT, STAND, BUST };
 	
 	private Deck deck;
 	
-	private PlayerFile pf;
+	public PlayerFile pf;
 	private int playerInsurance = 0;
 	private int initialBet = 0;
 	
@@ -24,8 +26,20 @@ public class BlackjackManager {
 	
 	private Stage stage; //TODO
 	
-	public BlackjackManager(PlayerFile pf) {
+	private Consumer<Integer> onBust;
+	//private Consumer<Object> onDealerBust;//, onBlackjack, onDealerBlackjack;
+	
+	private void checkForBust(int index) {
+		if(getHandValue(playerHand.get(index)) < 0) {
+			onBust.accept(index);
+			playerHand.remove(index);
+			checkMoveToDone();
+		}
+	}
+	
+	public BlackjackManager(PlayerFile pf, Consumer<Integer> onBust) {//, Consumer<Object> onDealerBust,Consumer<Object> onBlackjack, Consumer<Object> onDealerBlackjack) {
 		this.pf = pf;
+		this.onBust = onBust;
 		stage = Stage.BETTING;
 		deck = new Deck();
 		playerHand = new ArrayList<>();
@@ -39,21 +53,30 @@ public class BlackjackManager {
 	
 	public Stage getStage() {return stage;}
 	public List<BlackjackHand> playerHand() {return playerHand;}
-	public List<Card> dealerHand() {return dealerUpcards;}
+	public List<Card> dealerUpcards() {return dealerUpcards;}
+	public List<Card> dealerHand() {
+		List<Card> hand = new ArrayList<Card>();
+		hand.add(dealerDownCard);
+		for(Card c : dealerUpcards)
+			hand.add(c);
+		return hand;
+	}
 	public int getBet(int i) {return playerHand.get(i).bet;}
 	public int getInsurance() {return playerInsurance;}
 	public boolean handDone(int i) {return playerHand.get(i).done;}
+	public Card dealerDownCard() {return dealerDownCard;}
 	
 	public void deal() {
-		while(deck.peek(0).getRank() != deck.peek(1).getRank())
-			deck.shuffle();
+		/*while(deck.peek(0).getRank() != deck.peek(1).getRank())
+			deck.shuffle();*/
+		deck.shuffle();
 		playerHand.clear();
 		playerHand.add(new BlackjackHand());
 		playerHand.get(0).bet = initialBet;
 		dealerUpcards.clear();
 		playerHand.get(0).add(deck.pop());
-		playerHand.get(0).add(deck.pop());
 		dealerUpcards.add(deck.pop());
+		playerHand.get(0).add(deck.pop());
 		dealerDownCard = deck.pop();
 	}
 	
@@ -74,6 +97,17 @@ public class BlackjackManager {
 			return false;
 	}
 	
+	public DealerTurnOutcome doDealerNextMove() {
+		int total = getHandValue(dealerHand());
+		if(total < 17) {
+			dealerUpcards.add(deck.pop());
+			if(getHandValue(dealerHand()) < 0)
+				return DealerTurnOutcome.BUST;
+			return DealerTurnOutcome.HIT;
+		} else
+			return DealerTurnOutcome.STAND;
+	}
+	
 	public boolean buyInsurance(int insurance) throws Exception {
 		if(insurance < 0)
 			throw new IllegalArgumentException("Cannot buy negative insurance");
@@ -91,6 +125,7 @@ public class BlackjackManager {
 	public boolean hit(int handNum) {
 		if(stage == Stage.PLAYING) {
 			playerHand.get(handNum).add(deck.pop());
+			checkForBust(handNum);
 			return true;
 		} else
 			return false;
@@ -142,6 +177,7 @@ public class BlackjackManager {
 			pf.takeMoney(playerHand.get(handNum).bet);
 			playerHand.get(handNum).add(deck.pop());
 			playerHand.get(handNum).bet *= 2;
+			checkForBust(handNum);
 			return true;
 		} else
 			return false;
@@ -151,7 +187,7 @@ public class BlackjackManager {
 		return Move.HIT; //TODO
 	}
 	
-	public static int getHandValue(BlackjackHand hand) {
+	public static int getHandValue(List<Card> hand) {
 		int sum = 0;
 		int numAces = 0;
 		for(Card c : hand) {
@@ -178,7 +214,13 @@ public class BlackjackManager {
 	}
 	
 	public static void main(String[] args) {
-		BlackjackManager manager = new BlackjackManager(new PlayerFile(100));
+		Consumer<Integer> onBust = new Consumer<Integer> () {
+			@Override
+			public void accept(Integer index) {
+				System.out.println("Busted!");
+			}
+		};
+		BlackjackManager manager = new BlackjackManager(new PlayerFile(100), onBust);
 		Scanner in = new Scanner(System.in);
 		while(manager.getStage() == Stage.BETTING) {
 			System.out.print("Make a bet >> $");
@@ -191,7 +233,7 @@ public class BlackjackManager {
 			}
 		}		
 		
-		printDealerHand(manager.dealerHand());
+		printDealerHand(manager.dealerUpcards());
 		printPlayerHand(manager.playerHand().get(0));
 		while(manager.getStage() == Stage.INSURING) {
 			System.out.print("How much insurance >> $");
@@ -206,7 +248,7 @@ public class BlackjackManager {
 		System.out.println();
 		
 		while(manager.getStage() == Stage.PLAYING) {
-			printDealerHand(manager.dealerHand());
+			printDealerHand(manager.dealerUpcards());
 			for(int i = 0; i < manager.playerHand().size(); ++i) {
 				if(!manager.handDone(i)) {
 				
@@ -280,12 +322,31 @@ public class BlackjackManager {
 				}
 			}
 		}
+		
+		DealerTurnOutcome outcome = manager.doDealerNextMove();
+		while(outcome != DealerTurnOutcome.BUST && outcome != DealerTurnOutcome.STAND) {
+			printDealerHand(manager.dealerDownCard(),manager.dealerUpcards());
+			outcome = manager.doDealerNextMove();
+		}
+		
+		for(BlackjackHand h : manager.playerHand()) {
+			printPlayerHand(h);
+			printDealerHand(manager.dealerDownCard(), manager.dealerUpcards());
+			List<Card> dealerHand = manager.dealerHand();
+			if(getHandValue(h) > getHandValue(dealerHand)) {
+				System.out.println("You win!!");
+				manager.pf.addMoney(h.bet*2);
+			} else {
+				System.out.println("You lose");
+			}
+		}
 	}
 	
 	public static void printPlayerHand(List<Card> hand) {
 		System.out.print("Your hand: "+hand.get(0));
 		for(int i = 1; i < hand.size(); ++i)
 			System.out.print(", "+hand.get(i));
+		System.out.print(" = "+getHandValue(hand));
 		System.out.println();
 	
 	
@@ -293,6 +354,13 @@ public class BlackjackManager {
 	
 	public static void printDealerHand(List<Card> up) {
 		System.out.print("Dealer: 1 downcard");
+		for(int i = 0; i < up.size(); ++i)
+			System.out.print(", "+up.get(i));
+		System.out.println();
+	}
+	
+	public static void printDealerHand(Card down, List<Card> up) {
+		System.out.print("Dealer: "+down);
 		for(int i = 0; i < up.size(); ++i)
 			System.out.print(", "+up.get(i));
 		System.out.println();
