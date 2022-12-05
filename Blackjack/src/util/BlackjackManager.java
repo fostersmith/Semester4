@@ -341,6 +341,8 @@ public class BlackjackManager {
 				System.out.println("You lose");
 			}
 		}
+		
+		System.out.println("Balance: "+manager.pf.getMoney());
 	}
 	
 	public static void printPlayerHand(List<Card> hand) {
@@ -366,7 +368,7 @@ public class BlackjackManager {
 			System.out.print(", "+up.get(i));
 		System.out.println();
 	}
-	
+		
 	/*public static void main(String[] args) {
 		Deck d = new Deck();
 		d.shuffle();
