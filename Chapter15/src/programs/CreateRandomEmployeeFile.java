@@ -6,11 +6,15 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,16 +24,16 @@ import javax.swing.JTextField;
 
 public class CreateRandomEmployeeFile extends JFrame implements ActionListener {
 
-	private static final String FILEPATH = "employees.txt";
-	private static final int MAX_ID = 99;
+	public static final String FILEPATH = "employees.txt";
+	public static final int MAX_ID = 99;
 	
-	private static final int FNAMELEN = 10;
-	private static final int LNAMELEN = 10;
-	private static final float MAXPAY = 100.0f;
+	public static final int FNAMELEN = 10;
+	public static final int LNAMELEN = 10;
+	public static final float MAXPAY = 100.0f;
 	
-	private static final String DELIM = ",";
+	public static final String DELIM = ",";
 	
-	private static final String DEFAULT_REC = "00,         ,          ,000.00\n";
+	public static final String DEFAULT_REC = "00,         ,          ,000.00\n";
 	
 	JTextField idF = new JTextField();
 	JTextField firstNameF = new JTextField();
@@ -46,11 +50,18 @@ public class CreateRandomEmployeeFile extends JFrame implements ActionListener {
 	FileChannel fc;
 	Path file;
 	
+	DecimalFormat payFormat = new DecimalFormat("000.00");
+	
 	public CreateRandomEmployeeFile() {
 		super("Create Employee File");
 		file = Paths.get(FILEPATH);
 		try {
-			fc = (FileChannel) Files.newByteChannel(file, WRITE, CREATE);
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(file, CREATE)));
+			for(int i = 0; i < 99; ++i) {
+				writer.write(DEFAULT_REC, 0, DEFAULT_REC.length());
+			}
+			writer.flush();
+			fc = (FileChannel) Files.newByteChannel(file, WRITE);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "An IO Exception Occurred. Stopping excution");
 			System.exit(1);
@@ -82,29 +93,27 @@ public class CreateRandomEmployeeFile extends JFrame implements ActionListener {
 		payF.setText("");
 	}
 	
-	public void writeRecord(int id, String fName, String lName, float pay) {
+	public void writeRecord(int id, String fName, String lName, float pay) throws IOException {
 		if(id < 0 || id > MAX_ID)
 			throw new IllegalArgumentException("ID out of range");
 		if(pay < 0 || pay > MAXPAY)
 			throw new IllegalArgumentException("Pay out of range");
 		if(fName.contains(DELIM) || lName.contains(DELIM))
 			throw new IllegalArgumentException("Can't use delimiter in name");
-		if(fName.length() > FNAMELEN)
-			fName = fName.substring(0,FNAMELEN-1);
-		else if(fName.length() < FNAMELEN) {
-			int padding = fName.length() - FNAMELEN;
-			for(int i = 0; i < padding; ++i)
-				fName += " ";
-		}
-		if(lName.length() > LNAMELEN)
-			lName = lName.substring(0,LNAMELEN-1);
-		else if(lName.length() < LNAMELEN) {
-			int padding = lName.length() - LNAMELEN;
-			for(int i = 0; i < padding; ++i)
-				lName += " ";
-		}
 		
-		String rec = String.format("", id)+DELIM+fName+DELIM+lName+DELIM+String.format("", pay)+"\n";
+		fName = String.format("%"+(FNAMELEN-1)+"s", fName);
+		if(fName.length() > FNAMELEN)
+			fName = fName.substring(0, FNAMELEN-1);
+		
+		lName = String.format("%"+(LNAMELEN)+"s", lName);
+		if(lName.length() > LNAMELEN)
+			lName = lName.substring(0, LNAMELEN-1);
+
+		String rec = String.format("%02d", id)+DELIM+fName+DELIM+lName+DELIM+payFormat.format(pay)+"\n";
+		fc.position(id*DEFAULT_REC.length());
+		ByteBuffer buff = ByteBuffer.wrap(rec.getBytes());
+		fc.write(buff);
+		
 	}
 	
 	@Override
@@ -129,9 +138,6 @@ public class CreateRandomEmployeeFile extends JFrame implements ActionListener {
 	public static void main(String[] args) {
 		JFrame f = new CreateRandomEmployeeFile();
 		f.setVisible(true);
-		
-		
-		System.out.println(String.format("%10s","017890"));
 	}
 	
 }
