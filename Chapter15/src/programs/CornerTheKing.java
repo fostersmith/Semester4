@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class CornerTheKing extends JFrame implements ActionListener {
 
@@ -57,11 +58,13 @@ public class CornerTheKing extends JFrame implements ActionListener {
 	}
 	
 	public void playerWin() {
-		
+		JOptionPane.showMessageDialog(null, "You win!");
+		System.exit(0);
 	}
 	
 	public void computerWin() {
-		
+		JOptionPane.showMessageDialog(null, "Better luck next time");
+		System.exit(0);
 	}
 	
 	@Override
@@ -86,14 +89,34 @@ public class CornerTheKing extends JFrame implements ActionListener {
 	public void doComputerTurn() {
 		if(!isPlayerTurn) {
 			board[compR][compC].setText("");
-			int movementAmount = (int)(Math.random()*2)+1;
-			boolean playerIsUp = compR - 2 == playerR;
-			if(Math.random() < 0.5d) { // go up
-				compR = Math.max(0, compR - 2);
-			} else {
-				compC = Math.max(0, compC - 2);
+			boolean movingUp = Math.random() < 0.5 || compC == 0;
+			if(compR == 0)
+				movingUp = false;
+			int movementAmount = (int) (Math.random()*2)+1;
+			
+			if(compC==playerC && movingUp) {
+				if(compR - 1 == playerR)
+					movementAmount = 2;
+				else if(compR - 2 == playerR)
+					movementAmount = 1;
+			} else if(compR == playerR && !movingUp) {
+				if(compC - 1 == playerC)
+					movementAmount = 2;
+				else if(compC -2 == playerC)
+					movementAmount = 1;
 			}
-			isPlayerTurn = true;
+			
+			if(movingUp)
+				compR = Math.max(0,compR-movementAmount);
+			else
+				compC = Math.max(0,compC-movementAmount);
+
+			board[compR][compC].setText("C");
+			
+			if(compR == 0 && compC == 0)
+				computerWin();
+			else
+				isPlayerTurn = true;
 		}
 	}
 
