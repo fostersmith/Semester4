@@ -48,6 +48,13 @@ public class BasicGear extends Gear {
 			g.drawLine(x + (int)(Math.sin(theta)*d1), y - (int)(Math.cos(theta)*d1), 
 					   x + (int)(Math.sin(theta)*d2), y - (int)(Math.cos(theta)*d2));
 		}
+		int d1 = diameter/2 ,d2 = diameter/2+TOOTHHEIGHT;
+		int deltaY = (int) (diameter/2 - Math.sqrt(Math.pow(TOOTHWIDTH/2d, 2) + Math.pow(diameter/2, 2)));
+		int[][] basePoints = new int[][] {{-TOOTHWIDTH/2, d1-deltaY}, {TOOTHWIDTH/2, d1-deltaY},
+			{-TOOTHWIDTH/2, d2-deltaY}, {TOOTHWIDTH/2, d2-deltaY}};
+		int[] basePointX = new int[] {x-TOOTHWIDTH/2, x+TOOTHWIDTH/2, x+TOOTHWIDTH/2, x-TOOTHWIDTH/2};
+		int[] basePointY = new int[] {y+d1-deltaY, y+d1-deltaY, y+d2-deltaY, y+d2-deltaY};
+		g.drawPolygon(basePointX, basePointY, 4);
 	}
 	
 }

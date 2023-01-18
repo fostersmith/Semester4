@@ -2,6 +2,7 @@ package programs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -65,6 +66,21 @@ public class LightsOut extends JFrame implements MouseListener {
 	
 	public void togglePanel(JPanel panel) {
 		panel.setBackground(panel.getBackground() == light ? dark : light);
+	}
+	
+	public void checkWin() {
+		boolean win = true;
+		for(int i = 0; i < panelOfPanels.getComponentCount(); ++i) {
+			if(panelOfPanels.getComponent(i).getBackground() != dark) {
+				win = false;
+				i = panelOfPanels.getComponentCount();
+			}
+		}
+		if(win) {
+			for(Component c : panelOfPanels.getComponents())
+				c.removeMouseListener(this);
+			messageLabel.setText("a congratulatory message");
+		}
 	}
 
 
