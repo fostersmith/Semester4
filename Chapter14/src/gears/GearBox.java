@@ -40,6 +40,11 @@ public class GearBox {
 	}
 	
 	public void applyMovementToGear(Gear g, double dist) {
-		
+		if(!gears.contains(g))
+			throw new IllegalArgumentException();
+		int gEvenOdd = evenOdd.get(g);
+		for(Gear ge : gears) {
+			ge.applyTravel(dist * evenOdd.get(ge) * gEvenOdd);
+		}
 	}
 }
