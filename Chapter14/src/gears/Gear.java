@@ -7,6 +7,7 @@ import java.util.List;
 public abstract class Gear {
 	public static final int TOOTHWIDTH = 10;
 	public static final int TOOTHHEIGHT = 5;
+	protected boolean highlighted = false;
 	
 	private List<Gear> directConnections = new ArrayList<>();
 	protected int x, y;
@@ -39,6 +40,9 @@ public abstract class Gear {
 	public void setY(int y) {
 		this.y = y;
 	}
+
+	public void highlight() {highlighted = true;};
+	public void unhighlight() {highlighted = false;};
 
 	abstract void applyTravel(double dist);
 	abstract void drawGear(Graphics g);

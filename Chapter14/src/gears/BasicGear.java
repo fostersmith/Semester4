@@ -7,6 +7,8 @@ public class BasicGear extends Gear {
 
 	private int teeth;
 	private double rotation; // [0.0,1.0)
+	private Color highlightColor = Color.GREEN;
+	private Color unhighlightColor = Color.RED;
 	
 	public BasicGear(int x, int y, int teeth) {
 		this.x = x;
@@ -38,7 +40,7 @@ public class BasicGear extends Gear {
 		
 		g.fillOval(x - diameter/2, y - diameter/2, diameter, diameter);
 		//TODO add teeth
-		g.setColor(Color.red);
+		g.setColor(highlighted ? highlightColor : unhighlightColor);
 		g.drawLine(x-5, y, x+5, y);
 		g.drawLine(x, y-5, x, y+5);
 		for(int i = 0; i < teeth; ++i) {
