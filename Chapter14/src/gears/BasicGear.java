@@ -33,7 +33,7 @@ public class BasicGear extends Gear {
 
 	@Override
 	void drawGear(Graphics g) {
-		g.setColor(Color.GRAY);
+		g.setColor(color);
 		double circumference = teeth*(double)TOOTHWIDTH*2;
 		int diameter = (int)(circumference/Math.PI);
 		
@@ -56,6 +56,18 @@ public class BasicGear extends Gear {
 		int[] basePointX = new int[] {x-TOOTHWIDTH/2, x+TOOTHWIDTH/2, x+TOOTHWIDTH/2, x-TOOTHWIDTH/2};
 		int[] basePointY = new int[] {y-d1+deltaY, y-d1+deltaY, y-d2+deltaY, y-d2+deltaY};
 		g.drawPolygon(basePointX, basePointY, 4);
+	}
+	
+	@Override
+	boolean isConnected(Gear g) {
+		if(g instanceof BasicGear) {
+			BasicGear bg = (BasicGear)g;
+			double radius = teeth*(double)(TOOTHWIDTH*2) / (2*Math.PI);
+			double gRadius = bg.teeth*(double)(TOOTHWIDTH*2) / (2*Math.PI);
+			double dist = Math.sqrt(Math.pow(x - g.x, 2) + Math.pow(y - g.y, 2));
+			return dist <= radius + gRadius + TOOTHHEIGHT;
+		} else
+			return false;
 	}
 	
 }
