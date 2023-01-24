@@ -65,7 +65,7 @@ public class BasicGear extends Gear {
 			double radius = teeth*(double)(TOOTHWIDTH*2) / (2*Math.PI);
 			double gRadius = bg.teeth*(double)(TOOTHWIDTH*2) / (2*Math.PI);
 			double dist = Math.sqrt(Math.pow(x - g.x, 2) + Math.pow(y - g.y, 2));
-			return dist <= radius + gRadius + TOOTHHEIGHT;
+			return dist <= radius + gRadius + 2*TOOTHHEIGHT;
 		} else
 			return false;
 	}

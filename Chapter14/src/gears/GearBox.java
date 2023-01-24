@@ -17,35 +17,21 @@ public class GearBox {
 		}
 		rotateGear = gears.get(0);
 		rotateGear.setRenderMode(Gear.CLOCKWISE_MODE);
-		compile();
+		compile(1);
 	}
 	
 	public GearBox(Gear g) {
 		gears.add(g);
 		rotateGear = g;
 		rotateGear.setRenderMode(Gear.CLOCKWISE_MODE);
-		compile();
+		compile(1);
 	}
 	
-	public void compile() {
+	public void compile(int gEvenOdd) {
 		evenOdd = new HashMap<>();
 		Gear root = rotateGear;
-		evenOdd.put(root, 1);
+		evenOdd.put(root, gEvenOdd);
 		setChildrenEvenOdd(root);
-	}
-	
-	public void setRotateGear(Gear g) {
-		if(!gears.contains(g)) {
-			throw new IllegalArgumentException("Received an argument for {g} which was not part of the GearBox");
-		}
-		for(Gear gear : gears) {
-			gear.setRenderMode(Gear.NORMAL_MODE);
-		}
-		rotateGear = g;
-		g.setRenderMode(Gear.CLOCKWISE_MODE);
-		if(evenOdd.get(g) != 1) {
-			compile();
-		}
 	}
 	
 	private void setChildrenEvenOdd(Gear g) {
@@ -57,6 +43,25 @@ public class GearBox {
 			}
 		}
 	}
+
+	public int getEvenOdd(Gear g) {
+		return evenOdd.get(g);
+	}
+	
+	public void setRotateGear(Gear g, int gEvenOdd) {
+		if(!gears.contains(g)) {
+			throw new IllegalArgumentException("Received an argument for {g} which was not part of the GearBox");
+		}
+		for(Gear gear : gears) {
+			gear.setRenderMode(Gear.NORMAL_MODE);
+		}
+		rotateGear = g;
+		g.setRenderMode(gEvenOdd == 1 ? Gear.CLOCKWISE_MODE : Gear.COUNTERCLOCKWISE_MODE);
+		if(evenOdd.get(g) != gEvenOdd) {
+			compile(gEvenOdd);
+		}
+	}
+	
 	
 	public List<Gear> getGears(){
 		return gears;
@@ -65,7 +70,7 @@ public class GearBox {
 	public void addGear(Gear g) {
 		gears.add(g);
 		g.setRenderMode(Gear.NORMAL_MODE);
-		compile();
+		compile(1);
 	}
 	
 	public void applyMovementToGear(Gear g, double dist) {
@@ -73,7 +78,7 @@ public class GearBox {
 			throw new IllegalArgumentException();
 		int gEvenOdd = evenOdd.get(g);
 		for(Gear ge : gears) {
-			ge.applyTravel(dist * evenOdd.get(ge) * gEvenOdd);
+			ge.applyTravel(dist * evenOdd.get(ge));
 		}
 	}
 }
