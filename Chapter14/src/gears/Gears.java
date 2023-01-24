@@ -32,9 +32,9 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 	List<GearBox> boxes = new ArrayList<>();
 	List<Gear> gears = new ArrayList<>();
 	
-	Thread autoRotate, moveGear;
+	Thread autoRotate, moveGear, highlighter;
 	
-	int mode = SPAWN_MODE;
+	int mode = MOVE_MODE;
 	
 	JMenuBar mainBar = new JMenuBar();
 	JMenu toolMenu = new JMenu("Tools");
@@ -46,6 +46,7 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			
 	
 	public Gears() {
+		super("Gears (Move Mode)");
 		
 		setJMenuBar(mainBar);
 		mainBar.add(toolMenu);
@@ -121,6 +122,33 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 		};
 		moveGear.setUncaughtExceptionHandler(moveGearHandler);
 		moveGear.start();
+		
+		highlighter = new Thread() {
+			Gear lastHighlighted;
+			
+			@Override
+			public void run() {
+				while(true) {
+					if(mode == DELETE_MODE || mode == ELECT_ROTATOR_MODE) {
+						Point mousePoint = MouseInfo.getPointerInfo().getLocation();
+						Point onScreen =  picturePanel.getLocationOnScreen();
+						int mouseX = mousePoint.x - onScreen.x;
+						int mouseY = mousePoint.y - onScreen.y;
+						Gear closest = findClosestGear(mouseX, mouseY);
+						if(lastHighlighted != null)	
+							lastHighlighted.unhighlight();
+						closest.highlight();
+						lastHighlighted = closest;
+					}
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		highlighter.start();
 
 		picturePanel = new JPanel() {
 			@Override
@@ -229,6 +257,8 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			gears.add(spawnGear);
 			updateConnections();
 			updateBoxes();
+			mode = MOVE_MODE;
+			this.setTitle("Gears (Move Mode)");
 		}
 	}
 
@@ -272,10 +302,13 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 		Object src = e.getSource();
 		if(src == moveTool) {
 			mode = MOVE_MODE;
+			this.setTitle("Gears (Move Mode)");
 		} else if(src == setRotatorTool) {
 			mode = ELECT_ROTATOR_MODE;
+			this.setTitle("Gears (Set Rotator Mode)");
 		} else if(src == reverseRotatorTool) {
 			mode = FLIP_DIRECTION_MODE;
+			this.setTitle("Gears (Flip Direction Mode)");
 		} else if(src == spawnTool) {
 			int toothCount = 0;
 			do {
@@ -287,8 +320,13 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			} while(toothCount <= 0);
 			spawnGear = new BasicGear(0,0,toothCount);
 			mode = SPAWN_MODE;
+			this.setTitle("Gears (Spawn Mode)");
 		} else if(src == deleteTool) {
 			mode = DELETE_MODE;
+			this.setTitle("Gears (Delete Mode)");
 		}
+		
+		for(Gear g : gears)
+			g.unhighlight();
 	}
 }

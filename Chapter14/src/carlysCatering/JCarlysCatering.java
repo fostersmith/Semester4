@@ -27,8 +27,8 @@ public class JCarlysCatering extends JFrame implements ItemListener, ActionListe
 	int sidesSelected;
 	int guests = -1;
 	
-	ButtonGroup entreesGroup;
-	ButtonGroup dessertsGroup;
+	ButtonGroup entreesGroup = new ButtonGroup();
+	ButtonGroup dessertsGroup = new ButtonGroup();
 	
 	JPanel sideDishPanel;
 	JPanel entreePanel;
@@ -126,6 +126,20 @@ public class JCarlysCatering extends JFrame implements ItemListener, ActionListe
 		guests = -1;
 		entreesGroup.setSelected(entrees[0].getModel(), true);
 		dessertsGroup.setSelected(desserts[0].getModel(), true);
+	}
+	
+	public static void main(String[] args) {
+		JFrame f1 = new JCarlysCatering(new Consumer<Event>() {
+
+			@Override
+			public void accept(Event arg0) {
+				// TODO Auto-generated method stub
+				
+			}});
+		
+		f1.setVisible(true);
+		f1.setSize(500, 500);
+		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 
 }
