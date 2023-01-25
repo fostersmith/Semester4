@@ -9,8 +9,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JFrame;
@@ -24,6 +26,8 @@ import javax.swing.KeyStroke;
 public class Gears extends JFrame implements MouseListener, ActionListener {
 	
 	public static final int MOVE_MODE = 0, ELECT_ROTATOR_MODE = 1, SPAWN_MODE = 2, FLIP_DIRECTION_MODE = 3, DELETE_MODE = 4;
+	
+	Map<Gear, Integer> preferredDirection = new HashMap<>();
 	
 	JPanel picturePanel;
 	Gear heldGear = null;
@@ -195,8 +199,16 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 				GearBox box = new GearBox(g);
 				discovered.add(g);
 				updateBox(g, box, discovered);
+				for(Gear gear : box.getGears()) {
+					if(preferredDirection.containsKey(gear))
+						box.setRotateGear(gear, preferredDirection.get(gear));
+				}
 				boxes.add(box);
 			}
+		}
+		preferredDirection.clear();
+		for(GearBox box : boxes) {
+			preferredDirection.put(box.rotateGear, box.getEvenOdd(box.rotateGear));
 		}
 	}
 	
