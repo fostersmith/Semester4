@@ -248,14 +248,17 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			// find the gear closest to the click
 			Gear closest = findClosestGear(e.getX(), e.getY());
 			GearBox box = findGearBox(closest);
+			preferredDirection.remove(box.rotateGear);
 			
 			box.setRotateGear(closest, 1);
+			preferredDirection.put(box.rotateGear, box.getEvenOdd(box.rotateGear));
 		} else if(mode == FLIP_DIRECTION_MODE) {
 			Gear closest = findClosestGear(e.getX(), e.getY());
 			GearBox box = findGearBox(closest);
 			
 			if(box.rotateGear == closest) {
 				box.setRotateGear(closest, box.getEvenOdd(closest)*-1);
+				preferredDirection.put(closest, box.getEvenOdd(closest));
 				System.out.println("even odd on click: "+box.getEvenOdd(closest));
 			}
 		} else if(mode == DELETE_MODE) {
