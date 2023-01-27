@@ -1,5 +1,6 @@
 package gears;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -74,16 +75,21 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 		
 		Gear[] someGears = new Gear[10];
 		for(int i = 0; i < someGears.length; ++i) {
-			someGears[i] = new BasicGear((i+1)*40, 50, 6);
+			someGears[i] = new BasicGear((i+1)*40, 50, 5);
+			((BasicGear)someGears[i]).setRotation(0);
 			gears.add(someGears[i]);
 		}
+		someGears[0].y += 1;
+		BasicGear.adjustGearRotation((BasicGear)someGears[0], (BasicGear)someGears[1]);
 		
 		autoRotate = new Thread() {
 			@Override
 			public void run() {
 				while(true) {
-					for(int i = 0; i < boxes.size(); ++i)
-						boxes.get(i).applyMovementToGear(boxes.get(i).rotateGear, 1/100d);
+					for(int i = 0; i < boxes.size(); ++i) {
+						boxes.get(i).rotateGear(boxes.get(i).rotateGear, (Math.PI/2)/100d);
+					}
+						//boxes.get(i).applyMovementToGear(boxes.get(i).rotateGear, 1/100d);
 					try {
 						Thread.sleep(10);
 					} catch (InterruptedException e) {
@@ -101,6 +107,7 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				System.out.println("Uncaught exception: "+e);
+				t.start();
 			}
 		};
 		moveGear = new Thread() {
@@ -163,6 +170,7 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 				}
 			}
 		};
+		picturePanel.setBackground(Color.black);
 		picturePanel.addMouseListener(this);
 		
 		add(picturePanel);
@@ -259,7 +267,6 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			if(box.rotateGear == closest) {
 				box.setRotateGear(closest, box.getEvenOdd(closest)*-1);
 				preferredDirection.put(closest, box.getEvenOdd(closest));
-				System.out.println("even odd on click: "+box.getEvenOdd(closest));
 			}
 		} else if(mode == DELETE_MODE) {
 			Gear closest = findClosestGear(e.getX(), e.getY());

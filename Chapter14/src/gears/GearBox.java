@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GearBox {
 	private List<Gear> gears = new ArrayList<>();
@@ -30,8 +31,14 @@ public class GearBox {
 	public void compile(int gEvenOdd) {
 		evenOdd = new HashMap<>();
 		Gear root = rotateGear;
+		((BasicGear)root).setRotation(0);
 		evenOdd.put(root, gEvenOdd);
 		setChildrenEvenOdd(root);
+		
+		//BasicGear.adjustGearRotation((BasicGear)root, (BasicGear)root.getDirectConnections().get(0));
+		List<Gear> throwaway = new ArrayList<>();
+		throwaway.add(root);
+		adjustChildrenRotation(root, throwaway);
 	}
 	
 	private void setChildrenEvenOdd(Gear g) {
@@ -42,6 +49,24 @@ public class GearBox {
 				setChildrenEvenOdd(child);
 			}
 		}
+	}
+	
+	private void adjustChildrenRotation(Gear g, List<Gear> rotated) {
+		for(Gear child : g.getDirectConnections()) {
+			if(!rotated.contains(child)) {
+				double[] rotations = BasicGear.adjustGearRotation((BasicGear)g, (BasicGear)child);
+				//((BasicGear) g).rotate(rotations[0]);
+				((BasicGear)child).rotate(rotations[1]);
+				double dist = ((BasicGear)g).getTravelForRotation(rotations[0]);
+				//g.applyTravel(dist);
+				int gEvenOdd = evenOdd.get(g);
+				for(Gear rotate : rotated) {
+					rotate.applyTravel(dist* evenOdd.get(rotate) * gEvenOdd);
+				}
+				rotated.add(child);
+				adjustChildrenRotation(child, rotated);
+			}
+		}		
 	}
 
 	public int getEvenOdd(Gear g) {
@@ -80,5 +105,10 @@ public class GearBox {
 		for(Gear ge : gears) {
 			ge.applyTravel(dist * evenOdd.get(ge));
 		}
+	}
+	
+	public void rotateGear(Gear g, double theta) {
+		double dist = ((BasicGear)g).getTravelForRotation(theta);
+		applyMovementToGear(g, dist);
 	}
 }

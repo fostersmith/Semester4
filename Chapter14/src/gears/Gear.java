@@ -12,7 +12,7 @@ public abstract class Gear {
 	private static final Color[] MODE_COLORS = new Color[] {Color.GRAY, Color.PINK, Color.RED};
 	
 	public static final int TOOTHWIDTH = 10;
-	public static final int TOOTHHEIGHT = 5;
+	public static final int TOOTHHEIGHT = 9;
 	protected boolean highlighted = false;
 	
 	protected Color color;
