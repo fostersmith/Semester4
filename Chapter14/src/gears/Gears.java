@@ -26,9 +26,12 @@ import javax.swing.KeyStroke;
 
 public class Gears extends JFrame implements MouseListener, ActionListener {
 	
-	public static final int MOVE_MODE = 0, ELECT_ROTATOR_MODE = 1, SPAWN_MODE = 2, FLIP_DIRECTION_MODE = 3, DELETE_MODE = 4;
+	public static final int MOVE_MODE = 0, ELECT_ROTATOR_MODE = 1, SPAWN_MODE = 2, FLIP_DIRECTION_MODE = 3, DELETE_MODE = 4, SET_SPEED_MODE = 5;
+	
+	private static final double DEFAULT_SPEED = Math.PI/2d;
 	
 	Map<Gear, Integer> preferredDirection = new HashMap<>();
+	Map<Gear, Double> preferredSpeed = new HashMap<>();
 	
 	JPanel picturePanel;
 	Gear heldGear = null;
@@ -41,13 +44,15 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 	
 	int mode = MOVE_MODE;
 	
+	
 	JMenuBar mainBar = new JMenuBar();
 	JMenu toolMenu = new JMenu("Tools");
 	JMenuItem moveTool = new JMenuItem("Move"),
 			setRotatorTool = new JMenuItem("Set Rotator Gear"),
 			reverseRotatorTool = new JMenuItem("Switch Rotator Direction"),
 			spawnTool = new JMenuItem("Spawn Gear"),
-			deleteTool = new JMenuItem("Delete Gear");
+			deleteTool = new JMenuItem("Delete Gear"),
+			setSpeedTool = new JMenuItem("Set Speed");
 			
 	
 	public Gears() {
@@ -60,24 +65,28 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 		toolMenu.add(reverseRotatorTool);
 		toolMenu.add(spawnTool);
 		toolMenu.add(deleteTool);
+		toolMenu.add(setSpeedTool);
 		
 		moveTool.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionEvent.ALT_MASK));
 		setRotatorTool.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK));
 		reverseRotatorTool.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
 		spawnTool.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.ALT_MASK));
 		deleteTool.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.ALT_MASK));
+		setSpeedTool.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, ActionEvent.ALT_MASK));
 		
 		moveTool.addActionListener(this);
 		setRotatorTool.addActionListener(this);
 		reverseRotatorTool.addActionListener(this);
 		spawnTool.addActionListener(this);
 		deleteTool.addActionListener(this);
+		setSpeedTool.addActionListener(this);
 		
 		Gear[] someGears = new Gear[10];
 		for(int i = 0; i < someGears.length; ++i) {
 			someGears[i] = new BasicGear((i+1)*40, 50, 5);
 			((BasicGear)someGears[i]).setRotation(0);
 			gears.add(someGears[i]);
+			preferredSpeed.put(someGears[i], DEFAULT_SPEED);
 		}
 		someGears[0].y += 1;
 		BasicGear.adjustGearRotation((BasicGear)someGears[0], (BasicGear)someGears[1]);
@@ -87,7 +96,7 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			public void run() {
 				while(true) {
 					for(int i = 0; i < boxes.size(); ++i) {
-						boxes.get(i).rotateGear(boxes.get(i).rotateGear, (Math.PI/2)/100d);
+						boxes.get(i).rotateGear(boxes.get(i).rotateGear, preferredSpeed.get(boxes.get(i).rotateGear)/100d);
 					}
 						//boxes.get(i).applyMovementToGear(boxes.get(i).rotateGear, 1/100d);
 					try {
@@ -102,14 +111,14 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 		};
 		autoRotate.start();
 		
-		Thread.UncaughtExceptionHandler moveGearHandler = new Thread.UncaughtExceptionHandler() {
+		/*Thread.UncaughtExceptionHandler moveGearHandler = new Thread.UncaughtExceptionHandler() {
 			
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				System.out.println("Uncaught exception: "+e);
 				t.start();
 			}
-		};
+		};*/
 		moveGear = new Thread() {
 			@Override
 			public void run() {
@@ -119,8 +128,12 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 						Point onScreen =  picturePanel.getLocationOnScreen();
 						int mouseX = mousePoint.x - onScreen.x;
 						int mouseY = mousePoint.y - onScreen.y;
-						heldGear.setX(heldGearMouseOffsetX+mouseX);
-						heldGear.setY(heldGearMouseOffsetY+mouseY);
+						try {
+							heldGear.setX(heldGearMouseOffsetX+mouseX);
+							heldGear.setY(heldGearMouseOffsetY+mouseY);
+						} catch(NullPointerException e) {
+							System.out.println("Caught a nullpointer exception in moveGear");
+						}
 					}
 					try {
 						Thread.sleep(10);
@@ -131,7 +144,6 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 				}
 			}
 		};
-		moveGear.setUncaughtExceptionHandler(moveGearHandler);
 		moveGear.start();
 		
 		highlighter = new Thread() {
@@ -140,7 +152,7 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			@Override
 			public void run() {
 				while(true) {
-					if(mode == DELETE_MODE || mode == ELECT_ROTATOR_MODE) {
+					if((mode == DELETE_MODE || mode == ELECT_ROTATOR_MODE || mode == SET_SPEED_MODE) && gears.size() != 0) {
 						Point mousePoint = MouseInfo.getPointerInfo().getLocation();
 						Point onScreen =  picturePanel.getLocationOnScreen();
 						int mouseX = mousePoint.x - onScreen.x;
@@ -252,7 +264,7 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if(mode == ELECT_ROTATOR_MODE) {
+		if(mode == ELECT_ROTATOR_MODE && gears.size() != 0) {
 			// find the gear closest to the click
 			Gear closest = findClosestGear(e.getX(), e.getY());
 			GearBox box = findGearBox(closest);
@@ -260,7 +272,7 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			
 			box.setRotateGear(closest, 1);
 			preferredDirection.put(box.rotateGear, box.getEvenOdd(box.rotateGear));
-		} else if(mode == FLIP_DIRECTION_MODE) {
+		} else if(mode == FLIP_DIRECTION_MODE && gears.size() != 0) {
 			Gear closest = findClosestGear(e.getX(), e.getY());
 			GearBox box = findGearBox(closest);
 			
@@ -268,6 +280,16 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 				box.setRotateGear(closest, box.getEvenOdd(closest)*-1);
 				preferredDirection.put(closest, box.getEvenOdd(closest));
 			}
+		} else if(mode == SET_SPEED_MODE && gears.size() != 0) {
+			Gear closest = findClosestGear(e.getX(), e.getY());
+			try {
+				double rotateSpeed = Double.parseDouble(JOptionPane.showInputDialog(null, "Input new speed").trim());
+				
+				preferredSpeed.put(closest, rotateSpeed);
+			} catch(Exception ex) {
+				JOptionPane.showMessageDialog(null, "Invalid Input");
+			}
+			
 		} else if(mode == DELETE_MODE) {
 			Gear closest = findClosestGear(e.getX(), e.getY());
 			gears.remove(closest);
@@ -277,6 +299,7 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 			spawnGear.setX(e.getX());
 			spawnGear.setY(e.getY());
 			gears.add(spawnGear);
+			preferredSpeed.put(spawnGear, DEFAULT_SPEED);
 			updateConnections();
 			updateBoxes();
 			mode = MOVE_MODE;
@@ -346,6 +369,9 @@ public class Gears extends JFrame implements MouseListener, ActionListener {
 		} else if(src == deleteTool) {
 			mode = DELETE_MODE;
 			this.setTitle("Gears (Delete Mode)");
+		} else if(src == setSpeedTool) {
+			mode = SET_SPEED_MODE;
+			this.setTitle("Gears (Set Speed Mode)");
 		}
 		
 		for(Gear g : gears)

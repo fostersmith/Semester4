@@ -70,12 +70,6 @@ public class BasicGear extends Gear {
 		double yMod = Math.sqrt(Math.pow(radius, 2) - Math.pow(TOOTHWIDTH, 2)/4d);
 		double[] baseX = {yMod-1, yMod-1, yMod + TOOTHHEIGHT -1, yMod + TOOTHHEIGHT -1};
 		
-		System.out.println("----------------");
-		for(int i = 0; i < 4; ++i) {
-			System.out.println("X: "+baseX[i]);
-			System.out.println("Y: "+baseY[i]);
-		}
-		
 		for(int i = 0; i < teeth; ++i) {
 			
 			double theta = Math.PI*2*i/teeth + rotation;
