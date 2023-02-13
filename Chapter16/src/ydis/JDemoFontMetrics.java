@@ -3,6 +3,7 @@ package ydis;
 import java.awt.Font;
 import java.awt.Graphics;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class JDemoFontMetrics extends JPanel {
@@ -33,5 +34,22 @@ public class JDemoFontMetrics extends JPanel {
 		height = g.getFontMetrics().getHeight();
 		
 		g.drawString(movieQuote, x, y += height);
+		g.drawString("Leading is " + leading,
+				x, y += height);
+				g.drawString("Ascent is " + ascent,
+				x, y += height);
+				g.drawString("Descent is " + descent,
+				x, y += height);
+				g.drawString("Height is " + height,
+				x, y += height);
+				y += height * 2;
+	}
+	
+	public static void main(String[] args) {
+		JFrame frame = new JFrame();
+		frame.add(new JDemoFontMetrics());
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(300,460);
+		frame.setVisible(true);
 	}
 }
