@@ -26,6 +26,7 @@ public class J2DLine extends JPanel {
 	
 	public static void main(String[] args)
 	{
+		System.out.println("hello");
 		JFrame frame = new JFrame();
 		frame.add(new J2DLine());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
