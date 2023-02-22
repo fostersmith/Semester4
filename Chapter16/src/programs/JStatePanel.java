@@ -7,20 +7,55 @@ import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.GeneralPath;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class JStatePanel extends JPanel {
 
+	double boatx = 1300, boaty = 100;
+	double boatVx = 5, boatVy = 2;
+	
+	boolean boatMoving = true;
+	
 	public JStatePanel() {
 		setBackground(Color.cyan);
+		Thread boatThread = new Thread() {
+			@Override
+			public void run() {
+				while(boatMoving) {
+					if(boatx > 1450) {
+						boatVx = Math.abs(boatVx)*-1;
+					} if(boatx < 1100) {
+						boatVx = Math.abs(boatVx);
+					} if(boaty > 300) {
+						boatVx = Math.abs(boatVx)*-1;						
+					} if(boaty < 1) {
+						boatVx = Math.abs(boatVx);
+					}
+					
+					boatx += boatVx;
+					boaty += boatVy;
+					repaint();
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		
+		boatThread.start();
 	}
 	
 	@Override
@@ -71,7 +106,43 @@ public class JStatePanel extends JPanel {
 		//g2d.setColor(new Color(128, 0, 255));
 		g2d.setFont(new Font("Old English Text MT", Font.BOLD, 70));
 		g2d.drawString("Massachusetts", 400, 380);
+		
+		g2d.setColor(Color.BLACK);
+		GeneralPath heartPath = drawHeart(100, 960, 340);
+		g2d.fill(heartPath);
+		g2d.setFont(new Font("Engravers MT", Font.BOLD, 20));
+		g2d.drawString("MIT", 960, 340);
+		
+		try {
+			BufferedImage boat = ImageIO.read(new File("sailboat.png"));
+			g2d.drawImage(boat, (int)boatx, (int)boaty, 60, 50, null);
+		} catch(IOException e) {}
 	}
+	
+	public GeneralPath drawHeart(double adjustSize,double adjustX,double adjustY)
+	{
+		double y;
+		GeneralPath heartPath=new GeneralPath();for(double i=-2;i<=2;i+=.001)
+		{
+			y=-Math.sqrt(1-Math.pow((Math.abs(i)-1),2));
+			if(i==-2)
+			{
+				heartPath.moveTo(((i*adjustSize+250)*.1)+adjustX,((y*adjustSize+200)*.1)+adjustY);
+			}
+			heartPath.lineTo(((i*adjustSize+250)*.1)+adjustX,((y*adjustSize+200)*.1)+adjustY);
+		}for(double i=-2;i<=2;i+=.001)
+		{
+			y=3*(Math.sqrt(1-((Math.sqrt(Math.abs(i))/Math.sqrt(2)))));
+			if(i==-2)
+			{
+				heartPath.moveTo(((i*adjustSize+250)*.1)+adjustX,((y*adjustSize+200)*.1)+adjustY);
+			}
+			heartPath.lineTo(((i*adjustSize+250)*.1)+adjustX,((y*adjustSize+200)*.1)+adjustY);
+		}
+		return heartPath;
+	}
+	
+
 	
 	public double[][] getStatePoints(int i){
 		try {

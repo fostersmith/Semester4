@@ -15,6 +15,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.TexturePaint;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -162,6 +163,41 @@ public class DuckiePicture extends JPanel {
 			}
 			
 		} catch(IOException ex) { ex.printStackTrace(); }
+		
+		//draws the text
+		gr2D.setPaint(new GradientPaint(10, 10, Color.YELLOW, 740, 406, Color.MAGENTA, false));
+		gr2D.setFont(new Font("HoboSTD", Font.BOLD, 100));
+		gr2D.drawString("CRAZY DUCK LADY", 30, 488);
+		
+		drawStar(2, 35, 50);
+		drawStar(1, 100, 0);
+		drawStar(1, 700, 250);
+		drawStar(1, 775, 110);
+		drawStar(1, 525, 30);
+	}
+	
+	public void drawStar(int scaleFactor, int xMove, int yMove) {
+		int[] xStarPoints = {(xMove+74)*scaleFactor,(xMove+84)*scaleFactor,(xMove+124)*scaleFactor,(xMove+90)*scaleFactor,(xMove+104)*scaleFactor,(xMove+74)*scaleFactor,(xMove+43)*scaleFactor,(xMove+58)*scaleFactor,(xMove+25)*scaleFactor,(xMove+64)*scaleFactor};
+		int[] yStarPoints = {(yMove+24)*scaleFactor,(yMove+64)*scaleFactor,(yMove+64)*scaleFactor,(yMove+85)*scaleFactor,(yMove+124)*scaleFactor,(yMove+99)*scaleFactor,(yMove+125)*scaleFactor,(yMove+84)*scaleFactor,(yMove+64)*scaleFactor,(yMove+65)*scaleFactor};
+		
+		Graphics g = getGraphics();
+		Graphics2D gr2D = (Graphics2D)g;
+		
+		try {
+			rainbowImage = ImageIO.read(new FileInputStream("C:\\Users\\fsmith\\Semester4\\Chapter16\\rainbow.jpg"));
+			
+		} catch(IOException e) {}
+		
+		int randFill = (int)(Math.random()*2);
+		if(randFill == 0) {
+			gr2D.setPaint(new GradientPaint(447, 236, Color.RED, 482, 236, Color.YELLOW, true));
+			
+		} else {
+			Rectangle r = new Rectangle(0, 0, 50, 50);
+			gr2D.setPaint(new TexturePaint(rainbowImage, r));
+		}
+		
+		gr2D.fillPolygon(xStarPoints, yStarPoints, xStarPoints.length);
 	}
 
 
@@ -188,24 +224,24 @@ public class DuckiePicture extends JPanel {
 		return heartPath;
 	}
 
+	
 	public static void saveImage() {
-		bImage = new BufferedImage(frameWidth - 15, frameHeight - 37, BufferedImage.TYPE_INT_RGB);
+		bImage = new BufferedImage(frameWidth-15, frameHeight-37, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g2 = bImage.createGraphics();
 		duckiePanel.paint(g2);
-
+		
 		JFileChooser fileChooser = new JFileChooser();
-		FileNameExtensionFilter filter= new FileNameExtensionFilter("JPG Images", "jpg");
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG Images", "jpg");
 		fileChooser.setFileFilter(filter);
 		int result = fileChooser.showSaveDialog(duckiePanel);
 		if(result == JFileChooser.APPROVE_OPTION) {
-			File saveFile = fileChooser.getSelectedFile();
+			File saveFile = new File(fileChooser.getSelectedFile().getAbsolutePath()+".jpg");
 			try {
 				ImageIO.write(bImage, "jpg", saveFile);
-			} catch(IOException e) {
-				e.printStackTrace();
-			}
+			} catch(IOException e) {};
 		}
 	}
+
 
 	public static void main(String[] args) {
 		duckiePanel = new DuckiePicture();
@@ -228,7 +264,7 @@ public class DuckiePicture extends JPanel {
 		Image icon = tk.getImage("duck.png");
 		f1.setIconImage(icon);
 
-		//saveImage();
+		saveImage();
 	}
 
 }
