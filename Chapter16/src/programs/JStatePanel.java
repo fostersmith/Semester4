@@ -32,14 +32,14 @@ public class JStatePanel extends JPanel {
 			@Override
 			public void run() {
 				while(boatMoving) {
-					if(boatx > 1450) {
+					if(boatx > 1421) {
 						boatVx = Math.abs(boatVx)*-1;
-					} if(boatx < 1100) {
+					} if(boatx < 1200) {
 						boatVx = Math.abs(boatVx);
-					} if(boaty > 300) {
-						boatVx = Math.abs(boatVx)*-1;						
+					} if(boaty > 400) {
+						boatVy = Math.abs(boatVy)*-1;						
 					} if(boaty < 1) {
-						boatVx = Math.abs(boatVx);
+						boatVy = Math.abs(boatVy);
 					}
 					
 					boatx += boatVx;
