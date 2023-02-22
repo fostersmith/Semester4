@@ -23,6 +23,8 @@ public class JStatePanel extends JPanel {
 
 	double boatx = 1300, boaty = 100;
 	double boatVx = 5, boatVy = 2;
+	//double theta = Math.atan2(boatVy,boatVx);
+	double speed = Math.sqrt(boatVx*boatVx+boatVy*boatVy);
 	
 	boolean boatMoving = true;
 	
@@ -32,14 +34,31 @@ public class JStatePanel extends JPanel {
 			@Override
 			public void run() {
 				while(boatMoving) {
+					boolean hitWall = false;
 					if(boatx > 1421) {
 						boatVx = Math.abs(boatVx)*-1;
+						hitWall = true;
 					} if(boatx < 1200) {
 						boatVx = Math.abs(boatVx);
+						hitWall = true;
 					} if(boaty > 400) {
-						boatVy = Math.abs(boatVy)*-1;						
+						boatVy = Math.abs(boatVy)*-1;		
+						hitWall = true;
 					} if(boaty < 1) {
 						boatVy = Math.abs(boatVy);
+						hitWall = true;
+					}
+					
+					/*if(hitWall) {
+						theta = Math.atan2(boatVy,boatVx);
+					}*/
+					
+					if(!hitWall && Math.random()>0.9) {
+						//theta += Math.random()*0.2d-0.1d;
+						//theta %= Math.PI*2;
+						double newTheta = Math.random()*2*Math.PI;
+						boatVx = Math.cos(newTheta)*speed;
+						boatVy = Math.sin(newTheta)*speed;
 					}
 					
 					boatx += boatVx;
@@ -114,8 +133,8 @@ public class JStatePanel extends JPanel {
 		g2d.drawString("MIT", 960, 340);
 		
 		try {
-			BufferedImage boat = ImageIO.read(new File("sailboat.png"));
-			g2d.drawImage(boat, (int)boatx, (int)boaty, 60, 50, null);
+			BufferedImage boat = ImageIO.read(new File("floatduck.png"));
+			g2d.drawImage(boat, (int)boatx, (int)boaty, 60, 60, null);
 		} catch(IOException e) {}
 	}
 	
@@ -160,6 +179,8 @@ public class JStatePanel extends JPanel {
 				out[n][1] = Double.parseDouble(yStrings[n]);
 			}
 			
+			xIn.close();
+			yIn.close();
 			return out;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -170,7 +191,8 @@ public class JStatePanel extends JPanel {
 	}
 	
 	public static void main(String[] args) {
-		JFrame f1 = new JFrame();
+		JFrame f1 = new JFrame("The superior state panel program");
+		f1.setResizable(false);
 		f1.add(new JStatePanel());
 		f1.setSize(1500,900);
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
