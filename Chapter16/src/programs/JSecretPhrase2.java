@@ -14,9 +14,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class JSecretPhrase extends JPanel implements ActionListener {
+public class JSecretPhrase2 extends JPanel implements ActionListener {
 
-	String phrase = "BUDDY HOLLY BY WEEZER";
+	String phrase = "BUDDY HOLLY BY WEEZER!";
 	
 	JButton[] keys = new JButton[26];
 	
@@ -28,11 +28,16 @@ public class JSecretPhrase extends JPanel implements ActionListener {
 	JLabel responseLabel = new JLabel();
 	JLabel instructionLabel2 = new JLabel("                        Enter one letter");
 	
-	Set<Character> guesses = new HashSet<Character>();
+	HangmanPanel hangman = new HangmanPanel(100, 200);
 	
-	public JSecretPhrase() {
+	Set<Character> guesses = new HashSet<Character>();
+	int incorrectGuesses = 0;
+	
+	public JSecretPhrase2() {
 		
-		labelPanel.setPreferredSize(new Dimension(720, 300));
+		labelPanel.setPreferredSize(new Dimension(720, 150));
+		
+		add(hangman);
 		
 		title.setFont(new Font("Jokerman", Font.BOLD, 40));
 		instructionLabel.setFont(new Font("HoboSTD", Font.BOLD, 25));
@@ -97,6 +102,13 @@ public class JSecretPhrase extends JPanel implements ActionListener {
 			responseLabel.setText("Correct!");
 		} else {
 			responseLabel.setText("Incorrect :(");
+			++incorrectGuesses;
+		}
+		hangman.setWrongGuesses(incorrectGuesses);
+		if(incorrectGuesses >= 6) {
+			for(int i = 0; i < keys.length;  ++i)
+				keys[i].setEnabled(false);
+			JOptionPane.showMessageDialog(null, "Lose!");
 		}
 		keys[buttonIndex].setEnabled(false);;
 		setGuessLabel();
@@ -108,10 +120,10 @@ public class JSecretPhrase extends JPanel implements ActionListener {
 			JOptionPane.showMessageDialog(null, "Win!");
 		}
 	}
-
+	
 	public static void main(String[] args) {
 		JFrame f1 = new JFrame("Secret phrase");
-		f1.add(new JSecretPhrase());
+		f1.add(new JSecretPhrase2());
 		f1.setSize(720,500);
 		f1.setResizable(false);
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
