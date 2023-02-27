@@ -5,6 +5,10 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.GeneralPath;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -15,7 +19,8 @@ public class PathDesignerPanel extends JPanel implements MouseListener {
 	static final int APPEND = 0, MOVE = 1, DELETE = 2;
 	
 	GeneralPath path = new GeneralPath();
-	ArrayList<double[]> points = new ArrayList<>();
+	int selectedIndex = -1;
+	ArrayList<ArrayList<double[]>> points = new ArrayList<>();
 	double dX, dY;
 	int mode = APPEND;
 	
@@ -26,32 +31,73 @@ public class PathDesignerPanel extends JPanel implements MouseListener {
 		g2d.draw(path);
 	}
 	
+	public int getSelectedIndex() {
+		return selectedIndex;
+	}
+	
+	public void setSelectedIndex(int i) {
+		selectedIndex = i;
+	}
+	
+	public int getMode() {
+		return mode;
+	}
+	
+	public void setMode(int m) {
+		mode = m;
+	}
+	
 	public void updatePath() {
 		path.reset();
-		for(int i = 0; i < points.size(); ++i) {
-			double[] p = points.get(i);
-			if(i != 0) {
-				path.lineTo(p[0], p[1]);
-			} else {
-				path.moveTo(p[0],p[1]);
+		if(selectedIndex >= 0) {
+			for(int i = 0; i < points.size(); ++i) {
+				double[] p = points.get(selectedIndex).get(i);
+				if(i != 0) {
+					path.lineTo(p[0], p[1]);
+				} else {
+					path.moveTo(p[0],p[1]);
+				}
 			}
 		}
 		
 		repaint();
 	}
 	
+	public static ArrayList<double[]> loadPoints(File f){
+		//TODO
+		return new ArrayList<double[]>();
+	}
+	
+	public static boolean savePoints(File f, ArrayList<double[]> points) {
+		//TODO
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(f));
+			bw.write("placeholder");
+			bw.flush();
+			bw.close();
+			return true;
+		} catch(IOException ex) {
+			System.out.println(ex.getMessage());
+			return false;
+		}
+	}
+	
+	public void addPath(ArrayList<double[]> path) {
+		
+	}
+	
 	public void addPoint(double x, double y) {
-		points.add(new double[] {x,y});
+		points.get(selectedIndex).add(new double[] {x,y});
 		updatePath();
 	}
 	
 	public void removePoint(int i) {
-		points.remove(i);
+		points.get(selectedIndex).remove(i);
 		updatePath();
 	}
 	
 	public void replacePoint(int i, double x, double y) {
-		points.set(i, new double[] {x, y});
+		points.get(selectedIndex).set(i, new double[] {x, y});
 		updatePath();
 	}
 	

@@ -1,7 +1,10 @@
 package carlysCatering;
 
 public class Event {
+	private static final int PRICE_PER_GUEST = 35;
+	
 	private int entreeChoice, side1Choice, side2Choice, dessertChoice;
+	private int guests;
 	public static final String[] entrees = {"Duck","Steak","Fettucini Alfredo","Şɕæłŀöpʂ"}, 
 			sides = {"Chef's Salad","Bread Rolls","Soup"}, 
 			desserts = {"Tiramisu","Chocolate Cake","Vanilla Cake","Pudding"}; 
@@ -30,12 +33,16 @@ public class Event {
 	public void setDessertChoice(int dessertChoice) {
 		this.dessertChoice = dessertChoice;
 	}
-	public Event(int entreeChoice, int side1Choice, int side2Choice, int dessertChoice) {
+	public int getPrice() {
+		return PRICE_PER_GUEST * guests;
+	}
+	public Event(int entreeChoice, int side1Choice, int side2Choice, int dessertChoice, int guests) {
 		super();
 		this.entreeChoice = entreeChoice;
 		this.side1Choice = side1Choice;
 		this.side2Choice = side2Choice;
 		this.dessertChoice = dessertChoice;
+		this.guests = guests;
 	}
 
 }

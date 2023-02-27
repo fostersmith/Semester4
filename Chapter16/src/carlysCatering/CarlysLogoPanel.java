@@ -66,7 +66,7 @@ public class CarlysLogoPanel extends JPanel {
 		g2d.fillOval(3*width/4-breadHeight/4, sandwichStart, breadHeight/2, breadHeight);
 		g2d.fillRect(width/4, sandwichStart, width/2, breadHeight);
 		
-		Font logoFont = new Font("Broadway", Font.PLAIN, 100);
+		Font logoFont = new Font("Broadway", Font.PLAIN, 40);
 		g2d.setColor(Color.BLUE);
 		g2d.setFont(logoFont);
 				
@@ -80,14 +80,14 @@ public class CarlysLogoPanel extends JPanel {
 	}
 	
 	//temp
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		JFrame f1 = new JFrame();
 		f1.add(new CarlysLogoPanel(500,500));
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f1.pack();
 		f1.setResizable(false);
 		f1.setVisible(true);
-	}
+	}*/
 
 
 }

@@ -1,12 +1,11 @@
 package carlysCatering;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.TextField;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.function.Consumer;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -15,131 +14,138 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
-public class JCarlysCatering extends JFrame implements ItemListener, ActionListener {
+public class JCarlysCatering extends JFrame implements ActionListener {
+	
+	ButtonGroup entreeGroup = new ButtonGroup();
+	ButtonGroup side1Group = new ButtonGroup();
+	ButtonGroup side2Group = new ButtonGroup();
+	ButtonGroup dessertGroup = new ButtonGroup();
+	
+	JCheckBox[] entreeBoxes = new JCheckBox[Event.entrees.length];
+	JCheckBox[] side1Boxes = new JCheckBox[Event.sides.length];
+	JCheckBox[] side2Boxes = new JCheckBox[Event.sides.length];
+	JCheckBox[] dessertBoxes = new JCheckBox[Event.desserts.length];
+	
+	JButton submitButton = new JButton("Calculate Total");
+	
+	
+	JTextField guestField = new JTextField();
+	
+	JLabel entreeLabel = new JLabel("Entree", SwingConstants.CENTER);
+	JLabel side1Label = new JLabel("Side 1", SwingConstants.CENTER);
+	JLabel side2Label = new JLabel("Side 2", SwingConstants.CENTER);
+	JLabel dessertLabel = new JLabel("Dessert", SwingConstants.CENTER);
 
-	TextField guestsField;
+	JLabel guestLabel = new JLabel("Guest Number");
+	JLabel outputLabel = new JLabel();
 	
-	JCheckBox[] sideDishes;
-	JCheckBox[] entrees;
-	JCheckBox[] desserts;
+	JPanel menuPanel = new JPanel(new GridLayout(11,1));
+
+	JPanel entreePanel = new JPanel(new FlowLayout());
+	JPanel side1Panel = new JPanel(new FlowLayout());
+	JPanel side2Panel = new JPanel(new FlowLayout());
+	JPanel dessertPanel = new JPanel(new FlowLayout());
+	JPanel guestPanel = new JPanel(new GridLayout(1, 2));
+	JPanel outputPanel = new JPanel(new GridLayout(1,2));
 	
-	int sidesSelected;
-	int guests = -1;
 	
-	ButtonGroup entreesGroup = new ButtonGroup();
-	ButtonGroup dessertsGroup = new ButtonGroup();
-	
-	JPanel sideDishPanel;
-	JPanel entreePanel;
-	JPanel dessertPanel;
-	
-	JButton submitButton;
-	JButton resetButton;
-	JButton quitButton;
-	JButton guestsButton;
-	
-	JLabel sideLabel;
-	JLabel guestsLabel;
-	JLabel entreeLabel;
-	JLabel dessertLabel;
-	
-	Consumer<Event> doOnEntry;
-	
-	/**
-	 * Creates a new JFrame which takes arguments for an Event object
-	 * The JFrame will accept new Events until the "Quit" button is pressed, calling doOnEntry each time a new Event is entered
-	 * @param doOnEntry - method to be called when an Event is entered by the user
-	 */
-	public JCarlysCatering(Consumer<Event> doOnEntry) {
-		this.doOnEntry = doOnEntry;
+	public JCarlysCatering() {
+		super("JCarlysCatering");
 		
-		sideDishes = new JCheckBox[Event.sides.length];
-		entrees = new JCheckBox[Event.entrees.length];
-		desserts = new JCheckBox[Event.desserts.length];
+		submitButton.setBackground(Color.MAGENTA);
 		
-		sideDishPanel = new JPanel(new FlowLayout());
-		entreePanel = new JPanel(new FlowLayout());
-		dessertPanel = new JPanel(new FlowLayout());
-
-		for(int i = 0; i < sideDishes.length; ++i) {
-			sideDishes[i] = new JCheckBox(Event.sides[i]);
-			sideDishes[i].addItemListener(this);
-			sideDishPanel.add(sideDishes[i]);
+		for(int i = 0; i < entreeBoxes.length; ++i) {
+			entreeBoxes[i] = new JCheckBox(Event.entrees[i]);
+			entreeGroup.add(entreeBoxes[i]);
+			entreePanel.add(entreeBoxes[i]);
 		}
-		for(int i = 0; i < entrees.length; ++i) {
-			entrees[i] = new JCheckBox(Event.entrees[i]);
-			entreesGroup.add(entrees[i]);
-			entreePanel.add(entrees[i]);
+		entreeGroup.setSelected(entreeBoxes[0].getModel(), true);
+		for(int i = 0; i < side1Boxes.length; ++i) {
+			side1Boxes[i] = new JCheckBox(Event.sides[i]);
+			side2Boxes[i] = new JCheckBox(Event.sides[i]);
+			side1Group.add(side1Boxes[i]);
+			side2Group.add(side2Boxes[i]);
+			side1Panel.add(side1Boxes[i]);
+			side2Panel.add(side2Boxes[i]);
 		}
-		for(int i = 0; i < desserts.length; ++i) {
-			desserts[i] = new JCheckBox(Event.desserts[i]);
-			dessertsGroup.add(desserts[i]);
-			dessertPanel.add(desserts[i]);
+		side1Group.setSelected(side1Boxes[0].getModel(), true);
+		side2Group.setSelected(side2Boxes[0].getModel(), true);
+		for(int i = 0; i < dessertBoxes.length; ++i) {
+			dessertBoxes[i] = new JCheckBox(Event.desserts[i]);
+			dessertGroup.add(dessertBoxes[i]);
+			dessertPanel.add(dessertBoxes[i]);
 		}
-		entreesGroup.setSelected(entrees[0].getModel(), true);
-		dessertsGroup.setSelected(desserts[0].getModel(), true);
+		dessertGroup.setSelected(dessertBoxes[0].getModel(), true);
 		
-		sidesSelected = 0;
+		guestPanel.add(guestLabel);
+		guestPanel.add(guestField);
 		
-		sideLabel = new JLabel("Select up to 2 sides");
-		guestsLabel = new JLabel("Enter number of Guests");
-		entreeLabel = new JLabel("Select an Entree");
-		dessertLabel = new JLabel("Select a Dessert");
+		outputPanel.add(outputLabel);
+		outputPanel.add(submitButton);
 		
-		submitButton = new JButton("Submit Event");
-		resetButton = new JButton("Reset");
-		quitButton = new JButton("Quit");
-		guestsButton = new JButton("Enter Guests");
+		setLayout(new FlowLayout());
+		
+		menuPanel.setSize(new Dimension(400,600));
+		
+		menuPanel.add(entreeLabel);
+		menuPanel.add(entreePanel);
+		menuPanel.add(side1Label);
+		menuPanel.add(side1Panel);
+		menuPanel.add(side2Label);
+		menuPanel.add(side2Panel);
+		menuPanel.add(dessertLabel);
+		menuPanel.add(dessertPanel);
+		menuPanel.add(guestPanel);
+		menuPanel.add(outputPanel);
+		entreePanel.setBackground(Color.RED);
+		side1Panel.setBackground(Color.ORANGE);
+		side2Panel.setBackground(Color.YELLOW);
+		dessertPanel.setBackground(Color.GREEN);
+		guestPanel.setBackground(Color.BLUE);
+		outputPanel.setBackground(Color.MAGENTA);
+		
+		add(new CarlysLogoPanel(200,200));
+		add(menuPanel);
 
+
+		submitButton.addActionListener(this);
+		
 	}
 	
+	public static int getSelectionIndex(ButtonGroup b, JCheckBox[] boxes) {
+		for(int i = 0; i < boxes.length; ++i) {
+			if(b.isSelected(boxes[i].getModel()))
+				return i;
+		}
+		return -1;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		JButton source = (JButton) e.getSource();
-		if(source == submitButton) {
-			if(guests != -1) {
-				JCheckBox[] selectedSides = new JCheckBox[sidesSelected];
-			} else {
-				JOptionPane.showMessageDialog(null, "Please enter guest number");
-			}
-		} else if(source == resetButton) {
-			resetFields();
-		} else if(source == quitButton) {
-			System.exit(0);
+		int entree = getSelectionIndex(entreeGroup, entreeBoxes);
+		int side1 = getSelectionIndex(side1Group, side1Boxes);
+		int side2 = getSelectionIndex(side2Group, side2Boxes);
+		int dessert = getSelectionIndex(dessertGroup, dessertBoxes);
+		int guests;
+		try {
+			guests = Integer.parseInt(guestField.getText().trim());
+		} catch(Exception ex) {
+			JOptionPane.showMessageDialog(null, "You must enter a valid guest number");
+			return;
 		}
+		Event ev = new Event(entree, side1, side2, dessert, guests);
+		outputLabel.setText("Total Price: $"+ev.getPrice());
 	}
 
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		if(e.getStateChange() == ItemEvent.SELECTED /*&& entrees contains e.getSource()*/) {
-			++sidesSelected;
-		} else if(e.getStateChange() == ItemEvent.DESELECTED) {
-			--sidesSelected;
-		}
-	}
-	
-	public void resetFields() {
-		guestsField.setText("");
-		for(JCheckBox b : sideDishes)
-			b.setSelected(false);
-		guests = -1;
-		entreesGroup.setSelected(entrees[0].getModel(), true);
-		dessertsGroup.setSelected(desserts[0].getModel(), true);
-	}
-	
 	public static void main(String[] args) {
-		JFrame f1 = new JCarlysCatering(new Consumer<Event>() {
-
-			@Override
-			public void accept(Event arg0) {
-				// TODO Auto-generated method stub
-				
-			}});
-		
+		JFrame f1 = new JCarlysCatering();
 		f1.setVisible(true);
-		f1.setSize(500, 500);
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f1.setSize(400, 650);
+		//f1.pack();
 	}
-
+	
 }
