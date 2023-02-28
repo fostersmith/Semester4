@@ -7,8 +7,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.ButtonGroup;
+import javax.swing.ButtonModel;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -23,10 +26,10 @@ public class PathDesigner extends JFrame implements ActionListener, ItemListener
 	PathDesignerPanel designer = new PathDesignerPanel();
 	JMenuBar mainBar = new JMenuBar();
 
-	JMenu editingPathMenu = new JMenu("Editing Path:");
+	JMenu editingPathMenu = new JMenu("Editing Path");
 	ButtonGroup pathToEditGroup = new ButtonGroup();
 	
-	JMenu showPathsMenu = new JMenu("Show Paths:");
+	JMenu showPathsMenu = new JMenu("Show Paths");
 	
 	JMenu fileMenu = new JMenu("File");
 	JMenuItem save = new JMenuItem("Save");
@@ -34,19 +37,28 @@ public class PathDesigner extends JFrame implements ActionListener, ItemListener
 	JMenuItem deletePath = new JMenuItem("Delete Path");
 	
 	JMenu modeMenu = new JMenu("Mode");
-	JMenuItem append = new JRadioButtonMenuItem("Append");
-	JMenuItem delete = new JRadioButtonMenuItem("Delete");
-	JMenuItem move = new JRadioButtonMenuItem("Move");
+	JRadioButtonMenuItem append = new JRadioButtonMenuItem("Append");
+	JRadioButtonMenuItem delete = new JRadioButtonMenuItem("Delete");
+	JRadioButtonMenuItem move = new JRadioButtonMenuItem("Move");
 	ButtonGroup modeGroup = new ButtonGroup();
+	
+	Map<ButtonModel, Integer> modeMap = new HashMap<>();
+	Map<ButtonModel, File> editingPathButtons = new HashMap<>();
+	Map<ButtonModel, File> showPathButtons = new HashMap<>();
 	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		if(pathToEditGroup.getSelection() == e.getSource()) {};//TODO
 		
-		if(e.getSource() instanceof JRadioButtonMenuItem) {
-			
-		} else if (e.getSource() instanceof JCheckBoxMenuItem) {
-			
+		if(modeGroup.getSelection() != null)
+			designer.setMode(modeMap.get(modeGroup.getSelection()));
+		if(pathToEditGroup.getSelection() != null)
+			designer.setSelectedFile(editingPathButtons.get(pathToEditGroup.getSelection()));
+		
+		File show = showPathButtons.get(e.getSource());
+		if(show != null) {
+			JCheckBoxMenuItem check = (JCheckBoxMenuItem)e.getSource();
+			designer.setVisible(show, check.isSelected());
 		}
 	}
 	
@@ -57,13 +69,25 @@ public class PathDesigner extends JFrame implements ActionListener, ItemListener
 	}
 	
 	public PathDesigner() {
+
+		modeMap.put(append.getModel(), PathDesignerPanel.APPEND);
+		modeMap.put(delete.getModel(), PathDesignerPanel.DELETE);
+		modeMap.put(move.getModel(), PathDesignerPanel.MOVE);
+		
 		for(File f : DIR.listFiles()) {
-			designer.addPath(PathDesignerPanel.loadPoints(f));
+			designer.addPath(PathDesignerPanel.loadPoints(f), f);
 			JRadioButtonMenuItem radio = new JRadioButtonMenuItem(f.getName());
 			JCheckBoxMenuItem checkBox = new JCheckBoxMenuItem(f.getName());
+			editingPathButtons.put(radio.getModel(), f);
+			showPathButtons.put(checkBox.getModel(), f);
+			radio.addItemListener(this);
+			checkBox.addItemListener(this);
 			editingPathMenu.add(radio);
 			pathToEditGroup.add(radio);
-			showPathsMenu.add(checkBox);						
+			showPathsMenu.add(checkBox);				
+
+			radio.setSelected(true);
+			checkBox.setSelected(true);
 		}
 		
 		fileMenu.add(save);
@@ -75,6 +99,7 @@ public class PathDesigner extends JFrame implements ActionListener, ItemListener
 		modeGroup.add(move);
 		
 		append.addItemListener(this);
+		append.setSelected(true);
 		delete.addItemListener(this);
 		move.addItemListener(this);
 		
@@ -87,6 +112,8 @@ public class PathDesigner extends JFrame implements ActionListener, ItemListener
 		mainBar.add(fileMenu);
 		mainBar.add(modeMenu);
 		
+		add(designer);
+		
 		this.setJMenuBar(mainBar);
 		setLayout(new FlowLayout());
 	}
@@ -94,7 +121,7 @@ public class PathDesigner extends JFrame implements ActionListener, ItemListener
 	public static void main(String[] args) {
 		JFrame f1 = new PathDesigner();
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		f1.setSize(new Dimension(600, 100));
+		f1.setSize(new Dimension(600, 600));
 		f1.setResizable(true);
 		f1.setVisible(true);
 	}
