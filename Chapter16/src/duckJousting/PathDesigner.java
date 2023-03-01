@@ -48,7 +48,6 @@ public class PathDesigner extends JFrame implements ActionListener, ItemListener
 	
 	@Override
 	public void itemStateChanged(ItemEvent e) {
-		if(pathToEditGroup.getSelection() == e.getSource()) {};//TODO
 		
 		if(modeGroup.getSelection() != null)
 			designer.setMode(modeMap.get(modeGroup.getSelection()));
@@ -60,15 +59,21 @@ public class PathDesigner extends JFrame implements ActionListener, ItemListener
 			JCheckBoxMenuItem check = (JCheckBoxMenuItem)e.getSource();
 			designer.setVisible(show, check.isSelected());
 		}
+		
+		repaint();
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		
+		if(e.getSource() == save) {
+			designer.saveSelected();
+			System.out.println("saved");
+		}
 	}
 	
 	public PathDesigner() {
+		
+		designer.setPreferredSize(new Dimension(600,600));
 
 		modeMap.put(append.getModel(), PathDesignerPanel.APPEND);
 		modeMap.put(delete.getModel(), PathDesignerPanel.DELETE);
@@ -112,7 +117,10 @@ public class PathDesigner extends JFrame implements ActionListener, ItemListener
 		mainBar.add(fileMenu);
 		mainBar.add(modeMenu);
 		
+		save.addActionListener(this);
+		
 		add(designer);
+		addMouseListener(designer);
 		
 		this.setJMenuBar(mainBar);
 		setLayout(new FlowLayout());
