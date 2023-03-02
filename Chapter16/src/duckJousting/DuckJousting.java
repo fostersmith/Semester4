@@ -19,12 +19,15 @@ public class DuckJousting extends JPanel implements KeyListener {
 	final static Color P1_C = Color.GREEN, P2_C = Color.CYAN;
 	
 	final static int RIGHT_BOUND = 765;
-	final static double PLAYER_WIDTH = 40, PLAYER_HEIGHT = 20;
+	final static double FLOATY_WIDTH = 40, FLOATY_HEIGHT = 20;
 	
-	double p1_x = 50.0, p1_y = -500.0;
+	double p1_x = 50.0, p1_y = -200.0;
 	double p1_a_x = 0.0, p1_v_x = 0.0, p1_v_y = 0.0;
-	double p2_x = 800-50.0, p2_y = 0.0;
+	double p2_x = 800-50.0, p2_y = -200.0;
 	double p2_a_x = 0.0, p2_v_x = 0.0, p2_v_y = 0.0;
+	
+	double lanceLen = 50, lanceHeight = 20;
+	double duckHeight = 20, duckWidth = 20;
 	
 	//long targetFrameLen = 5000;
 	
@@ -95,6 +98,45 @@ public class DuckJousting extends JPanel implements KeyListener {
 			p2_a_x = 0;
 		}
 		
+		//check for collisions
+		double p1_lance_x = p1_v_x < 0 ? p1_x-lanceLen : p1_x+lanceLen,  p2_lance_x = p2_v_x>0 ? p2_x+lanceLen : p2_x-lanceLen;
+		//System.out.println("P1 X: "+p1_x);
+		//System.out.println("P1 Lance X: "+p1_lance_x);
+		double p1_lance_y = p1_y - lanceHeight, p2_lance_y = p2_y-lanceHeight;
+		//System.out.println("P1 Y: "+p1_y);
+		//System.out.println("P1 Lance Y: "+p1_lance_y);
+		
+		boolean p1_hit = false, p2_hit = false;
+		
+		if(p1_lance_x >= p2_x-duckWidth/2 && p1_lance_x <= p2_x+duckWidth/2 && p1_lance_y <= p2_y-FLOATY_HEIGHT/2 && p1_lance_y >= p2_y-FLOATY_HEIGHT/2-duckHeight) {
+			p1_hit = true;
+		}
+		if(p2_lance_x >= p1_x-duckWidth/2 && p2_lance_x <= p1_x+duckWidth/2 && p2_lance_y >= p1_y-FLOATY_HEIGHT/2 && p2_lance_y <= p1_y-FLOATY_HEIGHT/2-duckHeight) {
+			p2_hit = true;
+		}
+		
+		if(p1_hit && p2_hit) {
+			if(Math.abs(p1_v_x) > Math.abs(p2_v_x)) {
+				System.out.println("P1 Wins!");
+			} else if (Math.abs(p2_v_x) > Math.abs(p1_v_x)) {
+				System.out.println("P2 Wins!");
+			} else {
+				System.out.println("Draw!");
+			}
+			running = false;
+		} else if(p1_hit) {
+			System.out.println("P1 Wins!");			
+			running = false;
+		} else if(p2_hit) {
+			System.out.println("P2 Wins!");						
+			running = false;
+		}
+		
+		if(p1_hit) {
+			System.out.println("P1 Hit!");
+		}
+		
+	
 	}
 	
 	@Override
@@ -102,10 +144,25 @@ public class DuckJousting extends JPanel implements KeyListener {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D)g;
 		g2d.setColor(P1_C);
-		g2d.fillRect((int)(p1_x-PLAYER_WIDTH/2), (int)(200-PLAYER_HEIGHT/2+p1_y), (int)PLAYER_WIDTH, (int)PLAYER_HEIGHT);
+		g2d.fillRect((int)(p1_x-FLOATY_WIDTH/2), (int)(200-FLOATY_HEIGHT/2+p1_y), (int)FLOATY_WIDTH, (int)FLOATY_HEIGHT);
+		g2d.fillRect((int)(p1_x-duckWidth/2), (int)(200-FLOATY_HEIGHT/2-duckHeight+p1_y), (int)duckWidth, (int)duckHeight);
 		g2d.setColor(P2_C);
-		g2d.fillRect((int)(p2_x-PLAYER_WIDTH/2), (int)(200-PLAYER_HEIGHT/2+p2_y), (int)PLAYER_WIDTH, (int)PLAYER_HEIGHT);
-	}
+		g2d.fillRect((int)(p2_x-FLOATY_WIDTH/2), (int)(200-FLOATY_HEIGHT/2+p2_y), (int)FLOATY_WIDTH, (int)FLOATY_HEIGHT);
+		g2d.fillRect((int)(p2_x-duckWidth/2), (int)(200-FLOATY_HEIGHT/2-duckHeight+p2_y), (int)duckWidth, (int)duckHeight);
+		
+		g2d.setColor(Color.RED);
+		if(p1_v_x < 0) {
+			g2d.drawLine((int)p1_x, (int)(200+p1_y-20), (int)(p1_x-lanceLen), (int)(200+p1_y-20));
+		} else {
+			g2d.drawLine((int)p1_x, (int)(200+p1_y-20), (int)(p1_x+lanceLen), (int)(200+p1_y-20));
+		}
+
+		if(p2_v_x > 0) {
+			g2d.drawLine((int)p2_x, (int)(200+p2_y-20), (int)(p2_x+lanceLen), (int)(200+p2_y-20));
+		} else {
+			g2d.drawLine((int)p2_x, (int)(200+p2_y-20), (int)(p2_x-lanceLen), (int)(200+p2_y-20));
+		}
+}
 	
 	@Override
 	public void keyPressed(KeyEvent e) {
