@@ -6,7 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Date;
+import java.awt.geom.GeneralPath;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -14,32 +14,21 @@ import javax.swing.JPanel;
 public class DuckJousting extends JPanel implements KeyListener {
 
 	final static double ACCELERATION_CONSTANT = 500;
-	final static double JUMP_CONSTANT = 500;
-	final static double GRAVITY_ACCELERATION = 10;
+	final static double JUMP_CONSTANT = 600;
+	final static double GRAVITY_ACCELERATION = 2000;
 	final static Color P1_C = Color.GREEN, P2_C = Color.CYAN;
 	
 	final static int RIGHT_BOUND = 765;
 	final static double PLAYER_WIDTH = 40, PLAYER_HEIGHT = 20;
 	
-	double p1_x = 50.0, p1_y = 0.0;
+	double p1_x = 50.0, p1_y = -500.0;
 	double p1_a_x = 0.0, p1_v_x = 0.0, p1_v_y = 0.0;
 	double p2_x = 800-50.0, p2_y = 0.0;
 	double p2_a_x = 0.0, p2_v_x = 0.0, p2_v_y = 0.0;
 	
-	boolean running = true;
+	//long targetFrameLen = 5000;
 	
-	Thread updateThread = new Thread() {
-		@Override
-		public void run() {
-			long deltaTime = 0;
-			while(running) {
-				long start = new Date().getTime();
-				update(deltaTime);
-				repaint();
-				deltaTime = new Date().getTime() - start;
-			}
-		}
-	};
+	boolean running = true;
 	
 	public DuckJousting() {
 		super();
@@ -49,24 +38,43 @@ public class DuckJousting extends JPanel implements KeyListener {
 	public void run() {
 		long deltaTime = 0;
 		while(running) {
-			long start = new Date().getTime();
+			long start = System.nanoTime();
 			update(deltaTime);
 			repaint();
-			deltaTime = new Date().getTime() - start;
+			deltaTime = System.nanoTime()-start;
+			//System.out.println("Delta Time: "+deltaTime);
+			/*if(deltaTime < targetFrameLen) {
+				try {
+					Thread.sleep(targetFrameLen-deltaTime);
+					deltaTime = targetFrameLen;
+					System.out.println("Waited up to "+deltaTime);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}*/
 		}		
 	}
 	
-	public void update(long deltaTimeMs) {
-		double deltaTimeS = deltaTimeMs/1000d;
+	public void update(long deltaTimeNs) {
+		double deltaTimeS = deltaTimeNs/1E9;
 		p1_v_x += deltaTimeS*p1_a_x;
 		p2_v_x += deltaTimeS*p2_a_x;
 		p1_x += p1_v_x*deltaTimeS;
 		p2_x += p2_v_x*deltaTimeS;
 		
-		p1_v_y = Math.min(p1_v_y + deltaTimeS*GRAVITY_ACCELERATION, 0d);
-		p2_v_y = Math.min(p2_v_y + deltaTimeS*GRAVITY_ACCELERATION, 0d);
-		p1_y = Math.min(p1_y+deltaTimeS*p1_v_y, 0d);
-		p2_y = Math.min(p2_y+deltaTimeS*p2_v_y, 0d);
+		p1_v_y += deltaTimeS*GRAVITY_ACCELERATION;
+		p2_v_y += deltaTimeS*GRAVITY_ACCELERATION;
+		p1_y += deltaTimeS*p1_v_y;
+		p2_y += deltaTimeS*p2_v_y;
+		
+		if(p1_y >0) {
+			p1_y = 0;
+			p1_v_y = 0;
+		} 
+		if(p2_y > 0) {
+			p2_y = 0;
+			p2_v_y = 0;
+		}
 		
 		if(p1_x < 20) {
 			p1_x = 20;
@@ -86,6 +94,7 @@ public class DuckJousting extends JPanel implements KeyListener {
 			p2_v_x = 0;
 			p2_a_x = 0;
 		}
+		
 	}
 	
 	@Override
@@ -108,7 +117,8 @@ public class DuckJousting extends JPanel implements KeyListener {
 			p1_a_x = ACCELERATION_CONSTANT;
 			break;
 		case KeyEvent.VK_UP:
-			p1_v_y = -JUMP_CONSTANT;
+			if(p1_y == 0d)
+				p1_v_y = -JUMP_CONSTANT;
 			break;
 		case KeyEvent.VK_A:
 			p2_a_x = -ACCELERATION_CONSTANT;
@@ -117,7 +127,8 @@ public class DuckJousting extends JPanel implements KeyListener {
 			p2_a_x = ACCELERATION_CONSTANT;
 			break;
 		case KeyEvent.VK_W:
-			p2_v_y = -JUMP_CONSTANT;
+			if(p2_y == 0d)
+				p2_v_y = -JUMP_CONSTANT;
 			break;
 		}
 	}
