@@ -105,9 +105,7 @@ public class DuckJoustingServer {
 	};
 
 	public synchronized void quit(String msg) {
-	}
-	
-	
+	}	
 	
 	public DuckJoustingServer(int port) {
 		try {

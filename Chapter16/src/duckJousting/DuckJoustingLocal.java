@@ -21,9 +21,6 @@ import javax.swing.JPanel;
 public class DuckJoustingLocal extends JPanel implements KeyListener {
 
 	final static int GAMEPLAY = 0, P1_WIN = 1, P2_WIN = 2, DRAW = 3;
-	double p1_falling_x, p2_falling_x, p1_falling_y, p2_falling_y;
-	double p1_falling_v_x, p2_falling_v_x, p1_falling_v_y, p2_falling_v_y;
-	int state = GAMEPLAY;
 	
 	final static int REMATCH = 4, QUIT = 5;
 	
@@ -38,7 +35,7 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 	final static int FLOATY_WIDTH = 46*3, FLOATY_HEIGHT = 28*3;
 	final static int LANCE_LEN = 41*3, LANCE_HEIGHT = 7*3, LANCE_ELEVATION = 8*3;
 	final static int DUCK_HEIGHT = 20*3, DUCK_WIDTH = 19*3;
-	final static int floatyRelativeX = 2*3, floatyRelativeY = 3*3;
+	final static int FLOATY_RELATIVE_X = 2*3, FLOATY_RELATIVE_Y = 3*3;
 	
 	BufferedImage duckImg, floatyImg, lance1Img, lance2Img;
 	BufferedImage duckImgFlipped, floatyImgFlipped, lance1ImgFlipped, lance2ImgFlipped;
@@ -46,13 +43,16 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 	boolean wPressed, aPressed, dPressed, upPressed, leftPressed, rightPressed;
 	
 	// game state
+	int state = GAMEPLAY;
 	double p1_x , p1_y;
 	double p1_a_x, p1_v_x, p1_v_y;
 	double p2_x = RIGHT_BOUND, p2_y = -200.0;
 	double p2_a_x = 0.0, p2_v_x = 0.0, p2_v_y = 0.0;
 	Point[] rainbow1, rainbow2;
 	int rainbowCtr = 0;
-	
+	double p1_falling_x, p2_falling_x, p1_falling_y, p2_falling_y;
+	double p1_falling_v_x, p2_falling_v_x, p1_falling_v_y, p2_falling_v_y;
+
 	//long targetFrameLen = 5000;
 	
 	public void reset() {
@@ -355,7 +355,7 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 		Graphics2D g2d = (Graphics2D)g;
 		
 		g2d.setColor(Color.BLUE);
-		g2d.fillRect(0, 200+FLOATY_HEIGHT/2+floatyRelativeY, RIGHT_BOUND+35, 400);
+		g2d.fillRect(0, 200+FLOATY_HEIGHT/2+FLOATY_RELATIVE_Y, RIGHT_BOUND+35, 400);
 		
 		g2d.setStroke(new BasicStroke(6.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
@@ -367,20 +367,20 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 			
 			g2d.setColor(Color.red);
 			if(p1_v_x <0) {
-				g2d.drawImage(floatyImgFlipped,(int)p1_x-floatyRelativeX-FLOATY_WIDTH/2, (int)p1_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(floatyImgFlipped,(int)p1_x-FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p1_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
 				g2d.drawImage(duckImgFlipped,(int)p1_x-DUCK_WIDTH/2, (int)p1_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
 				g2d.drawImage(lance1ImgFlipped, (int)p1_x-LANCE_LEN, (int)p1_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
 			} else {
-				g2d.drawImage(floatyImg,(int)p1_x+floatyRelativeX-FLOATY_WIDTH/2, (int)p1_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(floatyImg,(int)p1_x+FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p1_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
 				g2d.drawImage(duckImg,(int)p1_x-DUCK_WIDTH/2, (int)p1_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
 				g2d.drawImage(lance1Img,(int)p1_x, (int)p1_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
 			}
 			if(p2_v_x > 0) {
-				g2d.drawImage(floatyImg,(int)p2_x+floatyRelativeX-FLOATY_WIDTH/2, (int)p2_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(floatyImg,(int)p2_x+FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p2_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
 				g2d.drawImage(duckImg,(int)p2_x-DUCK_WIDTH/2, (int)p2_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
 				g2d.drawImage(lance2Img,(int)p2_x, (int)p2_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
 			} else {
-				g2d.drawImage(floatyImgFlipped,(int)p2_x-floatyRelativeX-FLOATY_WIDTH/2, (int)p2_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(floatyImgFlipped,(int)p2_x-FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p2_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
 				g2d.drawImage(duckImgFlipped,(int)p2_x-DUCK_WIDTH/2, (int)p2_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
 				g2d.drawImage(lance2ImgFlipped, (int)p2_x-LANCE_LEN, (int)p2_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
 			}
@@ -391,23 +391,23 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 				drawRainbow(g2d, rainbow2);
 			
 			if(p1_v_x <0) {
-				g2d.drawImage(floatyImgFlipped,(int)p1_x-floatyRelativeX-FLOATY_WIDTH/2, (int)p1_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(floatyImgFlipped,(int)p1_x-FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p1_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
 				g2d.drawImage(duckImgFlipped,(int)p1_falling_x-DUCK_WIDTH/2, (int)p1_falling_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
 				if(state == P1_WIN)
 					g2d.drawImage(lance1ImgFlipped, (int)p1_x-LANCE_LEN, (int)p1_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
 			} else {
-				g2d.drawImage(floatyImg,(int)p1_x+floatyRelativeX-FLOATY_WIDTH/2, (int)p1_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(floatyImg,(int)p1_x+FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p1_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
 				g2d.drawImage(duckImg,(int)p1_falling_x-DUCK_WIDTH/2, (int)p1_falling_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
 				if(state == P1_WIN)
 					g2d.drawImage(lance1Img,(int)p1_x, (int)p1_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
 			}
 			if(p2_v_x >0) {
-				g2d.drawImage(floatyImg,(int)p2_x+floatyRelativeX-FLOATY_WIDTH/2, (int)p2_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(floatyImg,(int)p2_x+FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p2_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
 				g2d.drawImage(duckImg,(int)p2_falling_x-DUCK_WIDTH/2, (int)p2_falling_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
 				if(state == P2_WIN)
 					g2d.drawImage(lance2Img,(int)p2_x, (int)p2_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
 			} else {
-				g2d.drawImage(floatyImgFlipped,(int)p2_x-floatyRelativeX-FLOATY_WIDTH/2, (int)p2_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(floatyImgFlipped,(int)p2_x-FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p2_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
 				g2d.drawImage(duckImgFlipped,(int)p2_falling_x-DUCK_WIDTH/2, (int)p2_falling_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
 				if(state == P2_WIN)
 					g2d.drawImage(lance2ImgFlipped, (int)p2_x-LANCE_LEN, (int)p2_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
@@ -419,6 +419,7 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 
 
 	}
+
 	@Override
 	public void keyPressed(KeyEvent e) {
 		switch(e.getKeyCode()) {
@@ -442,7 +443,6 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 			break;
 		}
 	}
-
 
 	@Override
 	public void keyReleased(KeyEvent e) {
@@ -468,14 +468,14 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 		}
 	}
 	
-	public static double magnitude(double x,double y) {
-		return Math.sqrt(Math.pow(x,2)+Math.pow(y, 2));
-	}
-
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public static double magnitude(double x,double y) {
+		return Math.sqrt(Math.pow(x,2)+Math.pow(y, 2));
 	}
 
 	public static void main(String[] args) {

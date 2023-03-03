@@ -50,10 +50,6 @@ public class DuckJoustingFrontend extends JPanel {
 	Point[] rainbow1, rainbow2;
 	int rainbowCtr = 0;
 
-	public void getGameState() {
-		
-	}
-	
 	public static void drawRainbow(Graphics2D g2d, Point[] rainbow1) {
 		g2d.setColor(Color.RED);		
 		GeneralPath rainbow = new GeneralPath();
