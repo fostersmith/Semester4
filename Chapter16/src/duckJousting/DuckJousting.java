@@ -6,7 +6,11 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -26,15 +30,19 @@ public class DuckJousting extends JPanel implements KeyListener {
 	final static Color P1_C = Color.GREEN, P2_C = Color.CYAN;
 	
 	final static int RIGHT_BOUND = 765;
-	final static double FLOATY_WIDTH = 40, FLOATY_HEIGHT = 20;
 	
 	double p1_x = 50.0, p1_y = -200.0;
 	double p1_a_x = 0.0, p1_v_x = 0.0, p1_v_y = 0.0;
 	double p2_x = 800-50.0, p2_y = -200.0;
 	double p2_a_x = 0.0, p2_v_x = 0.0, p2_v_y = 0.0;
 	
-	double lanceLen = 50, lanceHeight = 20;
-	double duckHeight = 20, duckWidth = 20;
+	final static int FLOATY_WIDTH = 46*3, FLOATY_HEIGHT = 28*3;
+	int lanceLen = 41*3, lanceHeight = 7*3, lanceElevation = 8*3;
+	int duckHeight = 20*3, duckWidth = 19*3;
+	int floatyRelativeX = 2*3, floatyRelativeY = 3*3;
+	
+	BufferedImage duckImg, floatyImg, lanceImg;
+	BufferedImage duckImgFlipped, floatyImgFlipped, lanceImgFlipped;
 	
 	//long targetFrameLen = 5000;
 	
@@ -47,8 +55,27 @@ public class DuckJousting extends JPanel implements KeyListener {
 		state = GAMEPLAY;
 	}
 	
+	public static BufferedImage flipImage(BufferedImage bi) {
+		BufferedImage out = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		for(int x = 0; x < bi.getWidth(); ++x) {
+			for(int y = 0; y < bi.getHeight(); ++y) {
+				out.setRGB(bi.getWidth()-1-x, y, bi.getRGB(x, y));
+			}
+		}
+		return out;
+	}
+	
 	public DuckJousting() {
 		super();
+		try {
+			duckImg = ImageIO.read(new File("joust_duck.png"));
+			floatyImg = ImageIO.read(new File("joust_floaty.png"));
+			lanceImg = ImageIO.read(new File("joust_lance.png"));
+			
+			duckImgFlipped = flipImage(duckImg);
+			floatyImgFlipped = flipImage(floatyImg);
+			lanceImgFlipped = flipImage(lanceImg);
+		} catch(IOException e) { e.printStackTrace(); System.exit(1);}
 		this.setBackground(Color.BLACK);
 	}
 	
@@ -161,25 +188,25 @@ public class DuckJousting extends JPanel implements KeyListener {
 		double p1_lance_x = p1_v_x < 0 ? p1_x-lanceLen : p1_x+lanceLen,  p2_lance_x = p2_v_x>0 ? p2_x+lanceLen : p2_x-lanceLen;
 		//System.out.println("P1 X: "+p1_x);
 		//System.out.println("P1 Lance X: "+p1_lance_x);
-		double p1_lance_y = p1_y - lanceHeight, p2_lance_y = p2_y-lanceHeight;
+		double p1_lance_y = p1_y, p2_lance_y = p2_y;
 		//System.out.println("P1 Y: "+p1_y);
 		//System.out.println("P1 Lance Y: "+p1_lance_y);
 		
 		boolean p1_hit = false, p2_hit = false;
 		
-		if(p1_lance_x >= p2_x-duckWidth/2 && p1_lance_x <= p2_x+duckWidth/2 && p1_lance_y <= p2_y-FLOATY_HEIGHT/2 && p1_lance_y >= p2_y-FLOATY_HEIGHT/2-duckHeight) {
+		if(p1_lance_x >= p2_x-duckWidth/2 && p1_lance_x <= p2_x+duckWidth/2 && p1_lance_y <= p2_y+duckHeight/2 && p1_lance_y >= p2_y-duckHeight/2 && (p1_v_x != 0 || p1_v_y != 0)) {
 			p1_hit = true;
 		}
-		if(p2_lance_x >= p1_x-duckWidth/2 && p2_lance_x <= p1_x+duckWidth/2 && p2_lance_y <= p1_y-FLOATY_HEIGHT/2 && p2_lance_y >= p1_y-FLOATY_HEIGHT/2-duckHeight) {
+		if(p2_lance_x >= p1_x-duckWidth/2 && p2_lance_x <= p1_x+duckWidth/2 && p2_lance_y <= p1_y+duckHeight/2 && p2_lance_y >= p1_y-duckHeight/2 && (p2_v_x != 0 || p2_v_y != 0)) {
 			p2_hit = true;
 		}
 		
 		if(p1_hit && p2_hit) {
 			System.out.println(magnitude(p1_v_x, p1_v_y) - magnitude(p2_v_x, p2_v_y));
-			if(magnitude(p1_v_x, p1_v_y) - magnitude(p2_v_x, p2_v_y) >= 5) {
+			if(magnitude(p1_v_x, p1_v_y) - magnitude(p2_v_x, p2_v_y) >= 10) {
 				System.out.println("P1 Wins (almost tie)!");
 				state = P1_WIN;
-			} else if (magnitude(p1_v_x, p1_v_y) - magnitude(p2_v_x, p2_v_y) <= -5) {
+			} else if (magnitude(p1_v_x, p1_v_y) - magnitude(p2_v_x, p2_v_y) <= -10) {
 				System.out.println("P2 Wins (almost tie)!");
 				state = P2_WIN;
 			} else {
@@ -203,49 +230,49 @@ public class DuckJousting extends JPanel implements KeyListener {
 		Graphics2D g2d = (Graphics2D)g;
 		
 		if(state == GAMEPLAY) {
-			
-			g2d.setColor(P1_C);
-			g2d.fillRect((int)(p1_x-FLOATY_WIDTH/2), (int)(200-FLOATY_HEIGHT/2+p1_y), (int)FLOATY_WIDTH, (int)FLOATY_HEIGHT);
-			g2d.fillRect((int)(p1_x-duckWidth/2), (int)(200-FLOATY_HEIGHT/2-duckHeight+p1_y), (int)duckWidth, (int)duckHeight);
-			g2d.setColor(P2_C);
-			g2d.fillRect((int)(p2_x-FLOATY_WIDTH/2), (int)(200-FLOATY_HEIGHT/2+p2_y), (int)FLOATY_WIDTH, (int)FLOATY_HEIGHT);
-			g2d.fillRect((int)(p2_x-duckWidth/2), (int)(200-FLOATY_HEIGHT/2-duckHeight+p2_y), (int)duckWidth, (int)duckHeight);
-			
-			g2d.setColor(Color.RED);
-			if(p1_v_x < 0) {
-				g2d.drawLine((int)p1_x, (int)(200+p1_y-20), (int)(p1_x-lanceLen), (int)(200+p1_y-20));
+			g2d.setColor(Color.red);
+			if(p1_v_x <0) {
+				g2d.drawImage(floatyImgFlipped,(int)p1_x-floatyRelativeX-FLOATY_WIDTH/2, (int)p1_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImgFlipped,(int)p1_x-duckWidth/2, (int)p1_y-duckHeight/2 +200, duckWidth, duckHeight, null);
+				g2d.drawImage(lanceImgFlipped, (int)p1_x-lanceLen, (int)p1_y-lanceHeight/2+200, lanceLen, lanceHeight, null);
 			} else {
-				g2d.drawLine((int)p1_x, (int)(200+p1_y-20), (int)(p1_x+lanceLen), (int)(200+p1_y-20));
+				g2d.drawImage(floatyImg,(int)p1_x+floatyRelativeX-FLOATY_WIDTH/2, (int)p1_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImg,(int)p1_x-duckWidth/2, (int)p1_y-duckHeight/2 +200, duckWidth, duckHeight, null);
+				g2d.drawImage(lanceImg,(int)p1_x, (int)p1_y-lanceHeight/2+200, lanceLen, lanceHeight, null);
 			}
-	
 			if(p2_v_x > 0) {
-				g2d.drawLine((int)p2_x, (int)(200+p2_y-20), (int)(p2_x+lanceLen), (int)(200+p2_y-20));
+				g2d.drawImage(floatyImg,(int)p2_x+floatyRelativeX-FLOATY_WIDTH/2, (int)p2_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImg,(int)p2_x-duckWidth/2, (int)p2_y-duckHeight/2 +200, duckWidth, duckHeight, null);
+				g2d.drawImage(lanceImg,(int)p2_x, (int)p2_y-lanceHeight/2+200, lanceLen, lanceHeight, null);
 			} else {
-				g2d.drawLine((int)p2_x, (int)(200+p2_y-20), (int)(p2_x-lanceLen), (int)(200+p2_y-20));
+				g2d.drawImage(floatyImgFlipped,(int)p2_x-floatyRelativeX-FLOATY_WIDTH/2, (int)p2_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImgFlipped,(int)p2_x-duckWidth/2, (int)p2_y-duckHeight/2 +200, duckWidth, duckHeight, null);
+				g2d.drawImage(lanceImgFlipped, (int)p2_x-lanceLen, (int)p2_y-lanceHeight/2+200, lanceLen, lanceHeight, null);
 			}
 		} else {
-			g2d.setColor(P1_C);
-			g2d.fillRect((int)(p1_x-FLOATY_WIDTH/2), (int)(200-FLOATY_HEIGHT/2+p1_y), (int)FLOATY_WIDTH, (int)FLOATY_HEIGHT);
-			g2d.fillRect((int)(p1_falling_x-duckWidth/2), (int)(200-FLOATY_HEIGHT/2-duckHeight+p1_falling_y), (int)duckWidth, (int)duckHeight);
-			g2d.setColor(P2_C);
-			g2d.fillRect((int)(p2_x-FLOATY_WIDTH/2), (int)(200-FLOATY_HEIGHT/2+p2_y), (int)FLOATY_WIDTH, (int)FLOATY_HEIGHT);
-			g2d.fillRect((int)(p2_falling_x-duckWidth/2), (int)(200-FLOATY_HEIGHT/2-duckHeight+p2_falling_y), (int)duckWidth, (int)duckHeight);
+			if(p1_v_x <0) {
+				g2d.drawImage(floatyImgFlipped,(int)p1_x-floatyRelativeX-FLOATY_WIDTH/2, (int)p1_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImgFlipped,(int)p1_falling_x-duckWidth/2, (int)p1_falling_y-duckHeight/2 +200, duckWidth, duckHeight, null);
+				if(state == P1_WIN)
+					g2d.drawImage(lanceImgFlipped, (int)p1_x-lanceLen, (int)p1_y-lanceHeight/2+200, lanceLen, lanceHeight, null);
+			} else {
+				g2d.drawImage(floatyImg,(int)p1_x+floatyRelativeX-FLOATY_WIDTH/2, (int)p1_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImg,(int)p1_falling_x-duckWidth/2, (int)p1_falling_y-duckHeight/2 +200, duckWidth, duckHeight, null);
+				if(state == P1_WIN)
+					g2d.drawImage(lanceImg,(int)p1_x, (int)p1_y-lanceHeight/2+200, lanceLen, lanceHeight, null);
+			}
+			if(p2_v_x <0) {
+				g2d.drawImage(floatyImgFlipped,(int)p2_x-floatyRelativeX-FLOATY_WIDTH/2, (int)p2_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImgFlipped,(int)p2_falling_x-duckWidth/2, (int)p2_falling_y-duckHeight/2 +200, duckWidth, duckHeight, null);
+				if(state == P2_WIN)
+					g2d.drawImage(lanceImgFlipped, (int)p2_x-lanceLen, (int)p2_y-lanceHeight/2+200, lanceLen, lanceHeight, null);
+			} else {
+				g2d.drawImage(floatyImg,(int)p2_x+floatyRelativeX-FLOATY_WIDTH/2, (int)p2_y+floatyRelativeY-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImg,(int)p2_falling_x-duckWidth/2, (int)p2_falling_y-duckHeight/2 +200, duckWidth, duckHeight, null);
+				if(state == P2_WIN)
+					g2d.drawImage(lanceImg,(int)p2_x, (int)p2_y-lanceHeight/2+200, lanceLen, lanceHeight, null);
+			}
 			
-			g2d.setColor(Color.RED);
-			if(state == P1_WIN) {
-				if(p1_v_x < 0) {
-					g2d.drawLine((int)p1_falling_x, (int)(200+p1_falling_y-20), (int)(p1_falling_x-lanceLen), (int)(200+p1_falling_y-20));
-				} else {
-					g2d.drawLine((int)p1_falling_x, (int)(200+p1_falling_y-20), (int)(p1_falling_x+lanceLen), (int)(200+p1_falling_y-20));
-				}
-			}
-			if(state == P2_WIN) {
-				if(p2_v_x < 0) {
-					g2d.drawLine((int)p2_falling_x, (int)(200+p2_falling_y-20), (int)(p2_falling_x-lanceLen), (int)(200+p2_falling_y-20));
-				} else {
-					g2d.drawLine((int)p2_falling_x, (int)(200+p2_falling_y-20), (int)(p2_falling_x+lanceLen), (int)(200+p2_falling_y-20));
-				}
-			}
 		}
 }
 	
