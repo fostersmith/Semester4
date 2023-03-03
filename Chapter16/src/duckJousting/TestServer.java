@@ -10,6 +10,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import javax.swing.JOptionPane;
+
 public class TestServer {
 
 	private Socket socket;
@@ -223,7 +225,84 @@ public class TestServer {
 	
 	}
 
-	
+	public int run() throws IOException {
+		long deltaTime = 0;
+		long nextLog = System.nanoTime();
+		while(state == GAMEPLAY) {
+			System.out.println("Update!");
+			long start = System.nanoTime();
+			update(deltaTime);
+			if(start >= nextLog) {
+				rainbow1[rainbowCtr] = new Point();
+				rainbow1[rainbowCtr].x = (int) p1_x;
+				rainbow1[rainbowCtr].y = (int) p1_y;
+				
+				rainbow2[rainbowCtr] = new Point();
+				rainbow2[rainbowCtr].x = (int) p2_x;
+				rainbow2[rainbowCtr].y = (int) p2_y;
+				rainbowCtr = (rainbowCtr + 1) % RAINBOW_LEN;
+				//System.out.println();
+				nextLog = start + (long)1E9/30;
+			}
+			writeState();
+			deltaTime = System.nanoTime()-start;
+			//System.out.println("Delta Time: "+deltaTime);
+			/*if(deltaTime < targetFrameLen) {
+				try {
+					Thread.sleep(targetFrameLen-deltaTime);
+					deltaTime = targetFrameLen;
+					System.out.println("Waited up to "+deltaTime);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}*/
+		}
+		p1_falling_x = p1_x;
+		p1_falling_y = p1_y;
+		p2_falling_x = p2_x;
+		p2_falling_y = p2_y;
+		long timeCounter = 0;
+		deltaTime = 0;
+		if(state == P1_WIN || state == DRAW) {
+			p2_falling_v_x = p1_v_x;
+			p2_falling_v_y = p1_v_y - 500;
+		}
+		if(state == P2_WIN || state == DRAW) {
+			p1_falling_v_x = p2_v_x;
+			p1_falling_v_y = p2_v_y - 500;
+		}
+		while(timeCounter < 1E9) {
+			long start = System.nanoTime();
+			double deltaTimeS = deltaTime/1E9;
+			if(state == P1_WIN || state == DRAW) {
+				p2_falling_v_y += deltaTimeS*GRAVITY_ACCELERATION;
+				p2_falling_x += deltaTimeS*p2_falling_v_x;
+				p2_falling_y += deltaTimeS*p2_falling_v_y;
+			}
+			if(state == P2_WIN || state == DRAW) {
+				p1_falling_v_y += deltaTimeS*GRAVITY_ACCELERATION;
+				p1_falling_x += deltaTimeS*p1_falling_v_x;
+				p1_falling_y += deltaTimeS*p1_falling_v_y;
+			}
+			deltaTime = System.nanoTime() - start;
+			timeCounter += deltaTime;
+		}
+		
+		String msg;
+		if(state == P1_WIN) {
+			msg = "Player 1 wins! Play again?";
+		} else if(state == P2_WIN) {
+			msg = "Player 2 wins! Play again?";
+		} else {
+			msg = "It's a draw! Play again?";
+		}
+		int opt = JOptionPane.showConfirmDialog(null, msg, "Game Over", JOptionPane.YES_NO_OPTION);
+		if(opt == JOptionPane.YES_OPTION)
+			return REMATCH;
+		else
+			return QUIT;
+	}
+
 	public TestServer(int port) {
 		try {
 			server = new ServerSocket(port);
@@ -236,10 +315,28 @@ public class TestServer {
 			in1 = new DataInputStream(socket.getInputStream());
 			out1 = new ObjectOutputStream(socket.getOutputStream());
 			
+			/*reset();
+			while(true) {
+				update((long) (1E9/100));
+				System.out.println("Update");
+				writeState();
+				try {
+					Thread.sleep((long) (1E3/100));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}*/
 		} catch(IOException e) {e.printStackTrace();}
 	}
 	
 	public static void main(String[] args) {
-		new TestServer(5000);
+		TestServer server = new TestServer(5000);
+		server.reset();
+		try {
+			server.run();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

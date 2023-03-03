@@ -1,15 +1,24 @@
 package duckJousting;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 
-public class TestSocket {
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+public class TestSocket extends JPanel {
 	private Socket socket;
 	private ObjectInputStream input;
 	private DataOutputStream out;
@@ -58,38 +67,65 @@ public class TestSocket {
 		
 		p1_x = stateArray[0];
 		p1_y = stateArray[1];
-		p1_a_x = stateArray[1];
+		p1_a_x = stateArray[2];
 		p1_v_x = stateArray[3];
 		p1_v_y = stateArray[4];
 		
 		p2_x = stateArray[5];
 		p2_y = stateArray[6];
 		p2_a_x = stateArray[7];
-		p2_v_x = stateArray[0];
-		p2_v_y = stateArray[0];
+		p2_v_x = stateArray[8];
+		p2_v_y = stateArray[9];
 		
-		p1_falling_x = stateArray[0];
-		p1_falling_y = stateArray[0];
-		p1_falling_v_x = stateArray[0];
-		p1_falling_v_y = stateArray[0];
+		p1_falling_x = stateArray[10];
+		p1_falling_y = stateArray[11];
+		p1_falling_v_x = stateArray[12];
+		p1_falling_v_y = stateArray[13];
 
-		p2_falling_x = stateArray[0];
-		p2_falling_y = stateArray[0];
-		p2_falling_v_x = stateArray[0];
-		p2_falling_v_y = stateArray[0];
+		p2_falling_x = stateArray[14];
+		p2_falling_y = stateArray[15];
+		p2_falling_v_x = stateArray[16];
+		p2_falling_v_y = stateArray[17];
 		
-		state = (int)stateArray[0];
+		state = (int)stateArray[18];
 		
-		rainbowCtr = (int)stateArray[0];
+		rainbowCtr = (int)stateArray[19];
 		
 		for(int i = 0; i < RAINBOW_LEN; ++i) {
-			stateArray[19+i*4] = rainbow1[i].x;
-			stateArray[20+i*4] = rainbow1[i].y;
-			stateArray[21+i*4] = rainbow2[i].x;
-			stateArray[22+i*4] = rainbow2[i].y;
-		}	}
+			rainbow1[i] = new Point();
+			rainbow2[i] = new Point();
+			rainbow1[i].x = (int) stateArray[19+i*4];
+			rainbow1[i].y = (int) stateArray[20+i*4];
+			rainbow2[i].x = (int) stateArray[21+i*4];
+			rainbow2[i].y = (int) stateArray[22+i*4];
+		}
+	}
+	
+	public static BufferedImage flipImage(BufferedImage bi) {
+		BufferedImage out = new BufferedImage(bi.getWidth(), bi.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		for(int x = 0; x < bi.getWidth(); ++x) {
+			for(int y = 0; y < bi.getHeight(); ++y) {
+				out.setRGB(bi.getWidth()-1-x, y, bi.getRGB(x, y));
+			}
+		}
+		return out;
+	}
 	
 	public TestSocket(String address, int port) {
+		try {
+			duckImg = ImageIO.read(new File("joust_duck.png"));
+			floatyImg = ImageIO.read(new File("joust_floaty.png"));
+			lance1Img = ImageIO.read(new File("joust_lance_1.png"));
+			lance2Img = ImageIO.read(new File("joust_lance_2.png"));
+			
+			duckImgFlipped = flipImage(duckImg);
+			floatyImgFlipped = flipImage(floatyImg);
+			lance1ImgFlipped = flipImage(lance1Img);
+			lance2ImgFlipped = flipImage(lance2Img);
+		} catch(IOException e) { e.printStackTrace(); System.exit(1);}
+		this.setBackground(new Color(100, 200, 255));
+
+		
 		try {
 			socket = new Socket(address, port);
 			System.out.println("Connected");
@@ -97,18 +133,148 @@ public class TestSocket {
 			input = new ObjectInputStream(socket.getInputStream());
 			out = new DataOutputStream(socket.getOutputStream());
 			
-			double[] stateArray = (double[]) input.readObject();
-			setVars(stateArray);
-			
-		} catch(IOException e) {e.printStackTrace();} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch(IOException e) {e.printStackTrace();} 
 		
 	}
 	
+	public void run() throws ClassNotFoundException, IOException {
+		reset();
+		while(true) {
+			double[] stateArray = (double[]) input.readObject();
+			setVars(stateArray);
+			repaint();
+			System.out.println("update");
+		}		
+	}
+	
+	public static void drawRainbow(Graphics2D g2d, Point[] rainbow1, int rainbowCtr) {
+		Color[] colors = {Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.MAGENTA};
+		g2d.setStroke(new BasicStroke(6, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		for(int i = 0; i < colors.length; ++i) {
+			g2d.setColor(colors[i]);
+			int yMod = (i-(colors.length/2))*6+200;
+			GeneralPath rainbowPath = new GeneralPath();
+			rainbowPath.moveTo(rainbow1[rainbowCtr].x, rainbow1[rainbowCtr].y+yMod);
+			for(int n = 1; n < RAINBOW_LEN; ++n) {
+				int index = (n+rainbowCtr)%RAINBOW_LEN;
+				rainbowPath.lineTo(rainbow1[index].x, rainbow1[index].y+yMod);
+			}
+			g2d.draw(rainbowPath);
+		}
+	}	
+	@Override
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		Graphics2D g2d = (Graphics2D)g;
+		
+		g2d.setColor(Color.BLUE);
+		g2d.fillRect(0, 200+FLOATY_HEIGHT/2+FLOATY_RELATIVE_Y, RIGHT_BOUND+35, 400);
+		
+		g2d.setStroke(new BasicStroke(6.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+
+		
+		if(state == GAMEPLAY) {
+			drawRainbow(g2d, rainbow1, rainbowCtr);
+			drawRainbow(g2d, rainbow2, rainbowCtr);
+			
+			g2d.setColor(Color.red);
+			if(p1_v_x <0) {
+				g2d.drawImage(floatyImgFlipped,(int)p1_x-FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p1_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImgFlipped,(int)p1_x-DUCK_WIDTH/2, (int)p1_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
+				g2d.drawImage(lance1ImgFlipped, (int)p1_x-LANCE_LEN, (int)p1_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
+			} else {
+				g2d.drawImage(floatyImg,(int)p1_x+FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p1_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImg,(int)p1_x-DUCK_WIDTH/2, (int)p1_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
+				g2d.drawImage(lance1Img,(int)p1_x, (int)p1_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
+			}
+			if(p2_v_x > 0) {
+				g2d.drawImage(floatyImg,(int)p2_x+FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p2_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImg,(int)p2_x-DUCK_WIDTH/2, (int)p2_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
+				g2d.drawImage(lance2Img,(int)p2_x, (int)p2_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
+			} else {
+				g2d.drawImage(floatyImgFlipped,(int)p2_x-FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p2_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImgFlipped,(int)p2_x-DUCK_WIDTH/2, (int)p2_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
+				g2d.drawImage(lance2ImgFlipped, (int)p2_x-LANCE_LEN, (int)p2_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
+			}
+		} else {
+			if(state == P1_WIN)
+				drawRainbow(g2d, rainbow1, rainbowCtr);
+			if(state == P2_WIN)
+				drawRainbow(g2d, rainbow2, rainbowCtr);
+			
+			if(p1_v_x <0) {
+				g2d.drawImage(floatyImgFlipped,(int)p1_x-FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p1_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImgFlipped,(int)p1_falling_x-DUCK_WIDTH/2, (int)p1_falling_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
+				if(state == P1_WIN)
+					g2d.drawImage(lance1ImgFlipped, (int)p1_x-LANCE_LEN, (int)p1_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
+			} else {
+				g2d.drawImage(floatyImg,(int)p1_x+FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p1_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImg,(int)p1_falling_x-DUCK_WIDTH/2, (int)p1_falling_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
+				if(state == P1_WIN)
+					g2d.drawImage(lance1Img,(int)p1_x, (int)p1_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
+			}
+			if(p2_v_x >0) {
+				g2d.drawImage(floatyImg,(int)p2_x+FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p2_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImg,(int)p2_falling_x-DUCK_WIDTH/2, (int)p2_falling_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
+				if(state == P2_WIN)
+					g2d.drawImage(lance2Img,(int)p2_x, (int)p2_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
+			} else {
+				g2d.drawImage(floatyImgFlipped,(int)p2_x-FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p2_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
+				g2d.drawImage(duckImgFlipped,(int)p2_falling_x-DUCK_WIDTH/2, (int)p2_falling_y-DUCK_HEIGHT/2 +200, DUCK_WIDTH, DUCK_HEIGHT, null);
+				if(state == P2_WIN)
+					g2d.drawImage(lance2ImgFlipped, (int)p2_x-LANCE_LEN, (int)p2_y-LANCE_HEIGHT/2+200, LANCE_LEN, LANCE_HEIGHT, null);
+			}
+			
+		}
+		
+	}	
+	public void reset() {
+		p1_x = 75.0;
+		p1_y = -200.0;
+		p1_a_x = 0.0; p1_v_x = 0.0; p1_v_y = 0.0;
+		p2_x = RIGHT_BOUND-50.0; p2_y = -200.0;
+		p2_a_x = 0.0; p2_v_x = 0.0; p2_v_y = 0.0;
+		state = GAMEPLAY;
+		
+		wPressed = false;
+		aPressed = false;
+		dPressed = false;
+		upPressed = false;
+		leftPressed = false;
+		rightPressed = false;
+		
+		rainbow1 = new Point[10];
+		for(int i = 0; i < rainbow1.length; ++i) {
+			rainbow1[i] = new Point();
+			rainbow1[i].x = (int) p1_x;
+			rainbow1[i].y = (int) p1_y;
+		}
+
+		rainbow2 = new Point[10];
+		for(int i = 0; i < rainbow2.length; ++i) {
+			rainbow2[i] = new Point();
+			rainbow2[i].x = (int) p2_x;
+			rainbow2[i].y = (int) p2_y;
+		}
+	}
+	
 	public static void main(String[] args) {
-		new TestSocket("127.0.0.1", 5000);
+		JFrame f1 = new JFrame();
+		TestSocket panel = new TestSocket("127.0.0.1", 5000);
+		f1.add(panel);
+		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f1.setSize(new Dimension(RIGHT_BOUND+35, 400));
+		f1.setVisible(true);
+		try {
+			panel.run();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

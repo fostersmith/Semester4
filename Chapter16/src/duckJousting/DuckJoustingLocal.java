@@ -30,7 +30,7 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 	final static Color P1_C = Color.GREEN, P2_C = Color.CYAN;
 	
 	final static int RIGHT_BOUND = 1500;
-	
+	final static int RAINBOW_LEN = 10;
 	
 	final static int FLOATY_WIDTH = 46*3, FLOATY_HEIGHT = 28*3;
 	final static int LANCE_LEN = 41*3, LANCE_HEIGHT = 7*3, LANCE_ELEVATION = 8*3;
@@ -70,14 +70,14 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 		leftPressed = false;
 		rightPressed = false;
 		
-		rainbow1 = new Point[10];
+		rainbow1 = new Point[RAINBOW_LEN];
 		for(int i = 0; i < rainbow1.length; ++i) {
 			rainbow1[i] = new Point();
 			rainbow1[i].x = (int) p1_x;
 			rainbow1[i].y = (int) p1_y;
 		}
 
-		rainbow2 = new Point[10];
+		rainbow2 = new Point[RAINBOW_LEN];
 		for(int i = 0; i < rainbow2.length; ++i) {
 			rainbow2[i] = new Point();
 			rainbow2[i].x = (int) p2_x;
@@ -118,26 +118,14 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 			long start = System.nanoTime();
 			update(deltaTime);
 			if(start >= nextLog) {
-				Point temp = rainbow1[0];
-				for(int i = 1; i < rainbow1.length; ++i) {
-					Point temptemp = temp;
-					temp = rainbow1[i];
-					rainbow1[i] = temptemp;
-				}
-				rainbow1[0] = new Point();
-				rainbow1[0].x = (int) (p1_x + 0.005*p1_v_x);
-				rainbow1[0].y = (int) (p1_y + 0.005*p1_v_y);
+				rainbow1[rainbowCtr] = new Point();
+				rainbow1[rainbowCtr].x = (int) p1_x;
+				rainbow1[rainbowCtr].y = (int) p1_y;
 				
-				temp = rainbow2[0];
-				for(int i = 1; i < rainbow2.length; ++i) {
-					Point temptemp = temp;
-					temp = rainbow2[i];
-					rainbow2[i] = temptemp;
-				}
-				rainbow2[0] = new Point();
-				rainbow2[0].x = (int) (p2_x + 0.005*p2_v_x);
-				rainbow2[0].y = (int) (p2_y + 0.005*p2_v_y);
-
+				rainbow2[rainbowCtr] = new Point();
+				rainbow2[rainbowCtr].x = (int) p2_x;
+				rainbow2[rainbowCtr].y = (int) p2_y;
+				rainbowCtr = (rainbowCtr + 1) % RAINBOW_LEN;
 				//System.out.println();
 				nextLog = start + (long)1E9/30;
 			}
@@ -224,8 +212,8 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 			}
 
 		double deltaTimeS = deltaTimeNs/1E9;
-		p1_v_x += Math.signum(p1_a_x)==Math.signum(p1_v_x) ? deltaTimeS*p1_a_x : deltaTimeS*p1_a_x*2;
-		p2_v_x += Math.signum(p2_a_x)==Math.signum(p2_v_x) ? deltaTimeS*p2_a_x : deltaTimeS*p2_a_x*2;
+		p1_v_x += Math.signum(p1_a_x)==Math.signum(p1_v_x) ? deltaTimeS*p1_a_x : deltaTimeS*p1_a_x*4;
+		p2_v_x += Math.signum(p2_a_x)==Math.signum(p2_v_x) ? deltaTimeS*p2_a_x : deltaTimeS*p2_a_x*4;
 		p1_x += p1_v_x*deltaTimeS;
 		p2_x += p2_v_x*deltaTimeS;
 		
@@ -303,50 +291,20 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 	
 	}
 	
-	public static void drawRainbow(Graphics2D g2d, Point[] rainbow1) {
-		g2d.setColor(Color.RED);		
-		GeneralPath rainbow = new GeneralPath();
-		rainbow.moveTo(rainbow1[0].x, rainbow1[0].y+200-3*6);
-		for(int i = 1; i < rainbow1.length; ++i) {
-			rainbow.lineTo(rainbow1[i].x, rainbow1[i].y+200-3*6);
+	public static void drawRainbow(Graphics2D g2d, Point[] rainbow1, int rainbowCtr) {
+		Color[] colors = {Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.MAGENTA};
+		g2d.setStroke(new BasicStroke(6, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		for(int i = 0; i < colors.length; ++i) {
+			g2d.setColor(colors[i]);
+			int yMod = (i-(colors.length/2))*6+200;
+			GeneralPath rainbowPath = new GeneralPath();
+			rainbowPath.moveTo(rainbow1[rainbowCtr].x, rainbow1[rainbowCtr].y+yMod);
+			for(int n = 1; n < RAINBOW_LEN; ++n) {
+				int index = (n+rainbowCtr)%RAINBOW_LEN;
+				rainbowPath.lineTo(rainbow1[index].x, rainbow1[index].y+yMod);
+			}
+			g2d.draw(rainbowPath);
 		}
-		g2d.draw(rainbow);
-		g2d.setColor(Color.ORANGE);		
-		rainbow = new GeneralPath();
-		rainbow.moveTo(rainbow1[0].x, rainbow1[0].y+200-2*6);
-		for(int i = 1; i < rainbow1.length; ++i) {
-			rainbow.lineTo(rainbow1[i].x, rainbow1[i].y+200-2*6);
-		}
-		g2d.draw(rainbow);
-		g2d.setColor(Color.YELLOW);		
-		rainbow = new GeneralPath();
-		rainbow.moveTo(rainbow1[0].x, rainbow1[0].y+200-1*6);
-		for(int i = 1; i < rainbow1.length; ++i) {
-			rainbow.lineTo(rainbow1[i].x, rainbow1[i].y+200-1*6);
-		}
-		g2d.draw(rainbow);
-		g2d.setColor(Color.GREEN);		
-		rainbow = new GeneralPath();
-		rainbow.moveTo(rainbow1[0].x, rainbow1[0].y+200);
-		for(int i = 1; i < rainbow1.length; ++i) {
-			rainbow.lineTo(rainbow1[i].x, rainbow1[i].y+200);
-		}
-		g2d.draw(rainbow);
-		g2d.setColor(Color.BLUE);		
-		rainbow = new GeneralPath();
-		rainbow.moveTo(rainbow1[0].x, rainbow1[0].y+200+1*6);
-		for(int i = 1; i < rainbow1.length; ++i) {
-			rainbow.lineTo(rainbow1[i].x, rainbow1[i].y+200+1*6);
-		}
-		g2d.draw(rainbow);
-		g2d.setColor(Color.MAGENTA);		
-		rainbow = new GeneralPath();
-		rainbow.moveTo(rainbow1[0].x, rainbow1[0].y+200+2*6);
-		for(int i = 1; i < rainbow1.length; ++i) {
-			rainbow.lineTo(rainbow1[i].x, rainbow1[i].y+200+2*6);
-		}
-		g2d.draw(rainbow);
-
 	}
 	
 	@Override
@@ -362,8 +320,8 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 
 		
 		if(state == GAMEPLAY) {
-			drawRainbow(g2d, rainbow1);
-			drawRainbow(g2d, rainbow2);
+			drawRainbow(g2d, rainbow1, rainbowCtr);
+			drawRainbow(g2d, rainbow2, rainbowCtr);
 			
 			g2d.setColor(Color.red);
 			if(p1_v_x <0) {
@@ -386,9 +344,9 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 			}
 		} else {
 			if(state == P1_WIN)
-				drawRainbow(g2d, rainbow1);
+				drawRainbow(g2d, rainbow1, rainbowCtr);
 			if(state == P2_WIN)
-				drawRainbow(g2d, rainbow2);
+				drawRainbow(g2d, rainbow2, rainbowCtr);
 			
 			if(p1_v_x <0) {
 				g2d.drawImage(floatyImgFlipped,(int)p1_x-FLOATY_RELATIVE_X-FLOATY_WIDTH/2, (int)p1_y+FLOATY_RELATIVE_Y-FLOATY_HEIGHT/2+200, FLOATY_WIDTH, FLOATY_HEIGHT, null);
@@ -415,9 +373,6 @@ public class DuckJoustingLocal extends JPanel implements KeyListener {
 			
 		}
 		
-		
-
-
 	}
 
 	@Override
