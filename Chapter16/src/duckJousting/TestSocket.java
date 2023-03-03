@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.DataOutputStream;
@@ -16,14 +18,15 @@ import java.net.Socket;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class TestSocket extends JPanel {
+public class TestSocket extends JPanel implements KeyListener {
 	private Socket socket;
 	private ObjectInputStream input;
 	private DataOutputStream out;
 	
-	final static int GAMEPLAY = 0, P1_WIN = 1, P2_WIN = 2, DRAW = 3;
+	final static int GAMEPLAY = 0, P1_WIN = 1, P2_WIN = 2, DRAW = 3, REMATCH_ASK = 4, REMATCH_DECLINE = 5;
 	
 	final static int REMATCH = 4, QUIT = 5;
 	
@@ -43,8 +46,6 @@ public class TestSocket extends JPanel {
 	BufferedImage duckImg, floatyImg, lance1Img, lance2Img;
 	BufferedImage duckImgFlipped, floatyImgFlipped, lance1ImgFlipped, lance2ImgFlipped;
 	
-	boolean wPressed, aPressed, dPressed, upPressed, leftPressed, rightPressed;
-	
 	// game state
 	int state = GAMEPLAY;
 	double p1_x , p1_y;
@@ -56,7 +57,15 @@ public class TestSocket extends JPanel {
 	double p1_falling_x, p2_falling_x, p1_falling_y, p2_falling_y;
 	double p1_falling_v_x, p2_falling_v_x, p1_falling_v_y, p2_falling_v_y;
 	
-	public void setVars(double[] stateArray) {
+	public void writeKeyOn(char key) throws IOException {
+		out.writeUTF(key+"_on");
+	}
+	
+	public void writeKeyOff(char key) throws IOException {
+		out.writeUTF(key+"_off");
+	}
+	
+	public synchronized void setVars(double[] stateArray) {
 		// 5 - player 1 vars (x, y, a_x, v_x, v_y)
 		// 5 - player 2 vars (x, y, a_x, v_x, v_y)
 		// 4 - player 1 falling vars (x, y, v_x, v_y)
@@ -90,14 +99,16 @@ public class TestSocket extends JPanel {
 		state = (int)stateArray[18];
 		
 		rainbowCtr = (int)stateArray[19];
+		//System.out.println("reading rainbow: "+rainbowCtr);
 		
+		//System.out.println("Rainbow: "+rainbowCtr);
 		for(int i = 0; i < RAINBOW_LEN; ++i) {
 			rainbow1[i] = new Point();
 			rainbow2[i] = new Point();
-			rainbow1[i].x = (int) stateArray[19+i*4];
-			rainbow1[i].y = (int) stateArray[20+i*4];
-			rainbow2[i].x = (int) stateArray[21+i*4];
-			rainbow2[i].y = (int) stateArray[22+i*4];
+			rainbow1[i].x = (int) stateArray[20+i*4];
+			rainbow1[i].y = (int) stateArray[21+i*4];
+			rainbow2[i].x = (int) stateArray[22+i*4];
+			rainbow2[i].y = (int) stateArray[23+i*4];
 		}
 	}
 	
@@ -139,11 +150,24 @@ public class TestSocket extends JPanel {
 	
 	public void run() throws ClassNotFoundException, IOException {
 		reset();
-		while(true) {
+		while(state != REMATCH_DECLINE) {
 			double[] stateArray = (double[]) input.readObject();
+			/*for(int i = 0; i < stateArray.length; ++i) {
+				System.out.print(stateArray[i]+",\t");
+			}
+			System.out.println();*/
 			setVars(stateArray);
 			repaint();
-			System.out.println("update");
+			//System.out.println("update");
+			
+			if(state == REMATCH_ASK) {
+				int opt = JOptionPane.showConfirmDialog(null, "Game Over! Play again?", "Game Over", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+				if(opt == JOptionPane.YES_OPTION) {
+					out.writeUTF("accept");
+				} else {
+					out.writeUTF("decline");
+				}
+			}
 		}		
 	}
 	
@@ -163,7 +187,7 @@ public class TestSocket extends JPanel {
 		}
 	}	
 	@Override
-	public void paintComponent(Graphics g) {
+	public synchronized void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2d = (Graphics2D)g;
 		
@@ -237,13 +261,6 @@ public class TestSocket extends JPanel {
 		p2_a_x = 0.0; p2_v_x = 0.0; p2_v_y = 0.0;
 		state = GAMEPLAY;
 		
-		wPressed = false;
-		aPressed = false;
-		dPressed = false;
-		upPressed = false;
-		leftPressed = false;
-		rightPressed = false;
-		
 		rainbow1 = new Point[10];
 		for(int i = 0; i < rainbow1.length; ++i) {
 			rainbow1[i] = new Point();
@@ -259,9 +276,54 @@ public class TestSocket extends JPanel {
 		}
 	}
 	
+	@Override
+	public void keyPressed(KeyEvent e) {
+		try {
+			switch(e.getKeyCode()) {
+			case(KeyEvent.VK_A):
+			case(KeyEvent.VK_LEFT):
+				writeKeyOn('a');
+				break;
+			case(KeyEvent.VK_RIGHT):
+			case(KeyEvent.VK_D):
+				writeKeyOn('d');
+				break;
+			case(KeyEvent.VK_UP):
+			case(KeyEvent.VK_W):
+				writeKeyOn('w');
+				break;
+			}
+		} catch(IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		try {
+			switch(e.getKeyCode()) {
+			case(KeyEvent.VK_A):
+			case(KeyEvent.VK_LEFT):
+				writeKeyOff('a');
+				break;
+			case(KeyEvent.VK_RIGHT):
+			case(KeyEvent.VK_D):
+				writeKeyOff('d');
+				break;
+			case(KeyEvent.VK_UP):
+			case(KeyEvent.VK_W):
+				writeKeyOff('w');
+				break;
+			}
+		} catch(IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) {
 		JFrame f1 = new JFrame();
 		TestSocket panel = new TestSocket("127.0.0.1", 5000);
+		f1.addKeyListener(panel);
 		f1.add(panel);
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f1.setSize(new Dimension(RIGHT_BOUND+35, 400));
@@ -269,12 +331,17 @@ public class TestSocket extends JPanel {
 		try {
 			panel.run();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

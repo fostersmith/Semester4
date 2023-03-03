@@ -16,10 +16,10 @@ public class TestServer {
 
 	private Socket socket;
 	private ServerSocket server;
-	private DataInputStream in1;
-	private ObjectOutputStream out1;
+	private DataInputStream in1, in2;
+	private ObjectOutputStream out1, out2;
 
-	final static int GAMEPLAY = 0, P1_WIN = 1, P2_WIN = 2, DRAW = 3;
+	final static int GAMEPLAY = 0, P1_WIN = 1, P2_WIN = 2, DRAW = 3, REMATCH_ASK = 4, REMATCH_DECLINE = 5;
 	
 	final static int REMATCH = 4, QUIT = 5;
 	
@@ -52,6 +52,121 @@ public class TestServer {
 	int rainbowCtr = 0;
 	Point[] rainbow1, rainbow2;
 	
+	int p1Accepted = -1, p2Accepted = -1;
+	
+	// determines the buttons pressed by player 1 by accepting input from the client in the format "w_on" until the client sends "Over"
+	private Thread input1 = new Thread() {
+		@Override
+		public void run() {
+			try {
+				String line = "a_off";
+				while(!line.equals("Over")) {
+					if(state != REMATCH_ASK) {
+						System.out.println(line);
+						char key = line.charAt(0);
+						String type = line.split("_")[1];
+						if(type.equals("on")) {
+							switch(key){
+							case 'w':
+								System.out.println("enabling w");
+								wPressed = true;
+								break;
+							case 'a':
+								aPressed = true;
+								break;
+							case 'd':
+								dPressed = true;
+								break;
+							}
+						} else if(type.equals("off")) {
+							switch(key){
+							case 'w':
+								wPressed = false;
+								break;
+							case 'a':
+								aPressed = false;
+								break;
+							case 'd':
+								dPressed = false;
+								break;			
+							}
+						}
+					}
+					else {
+						if(line.equals("accept")) {
+							p1Accepted = 1;
+							System.out.println("accept");
+						} else if(line.equals("decline")) {
+							p1Accepted = 0;							
+						}
+					}
+					line = in1.readUTF();
+				}	
+			} catch(IOException e) {
+				quit("An IO Exception occurred for player 1");
+			}
+			quit("Player 1 quit");
+		}
+	};
+
+	private Thread input2 = new Thread() {
+		@Override
+		public void run() {
+			try {
+				String line = "a_off";
+				while(!line.equals("Over")) {
+					if(state != REMATCH_ASK) {
+						char key = line.charAt(0);
+						String type = line.split("_")[1];
+						if(type.equals("on")) {
+							switch(key){
+							case 'w':
+								upPressed = true;
+								break;
+							case 'a':
+								leftPressed = true;
+								break;
+							case 'd':
+								rightPressed = true;
+								break;
+							}
+						} else if(type.equals("off")) {
+							switch(key){
+							case 'w':
+								upPressed = false;
+								break;
+							case 'a':
+								leftPressed = false;
+								break;
+							case 'd':
+								rightPressed = false;
+								break;			
+							}
+						}
+					}
+					else {
+						if(line.equals("accept")) {
+							p2Accepted = 1;
+							System.out.println("accept");
+						} else if(line.equals("decline")) {
+							p2Accepted = 0;							
+						}
+					}
+					line = in1.readUTF();
+				}	
+			} catch(IOException e) {
+				quit("An IO Exception occurred for player 1");
+			}
+			quit("Player 1 quit");
+		}
+	};
+
+	public void quit(String msg) {
+		System.out.println(msg);
+		
+		System.exit(0);
+	}
+	
 	public void writeState() throws IOException {
 		// 5 - player 1 vars (x, y, a_x, v_x, v_y)
 		// 5 - player 2 vars (x, y, a_x, v_x, v_y)
@@ -83,22 +198,29 @@ public class TestServer {
 		stateArray[15] = p2_falling_y;
 		stateArray[16] = p2_falling_v_x;
 		stateArray[17] = p2_falling_v_y;
+		//System.out.println("Falling y: "+p2_falling_y);
 		
 		stateArray[18] = state;
 		
 		stateArray[19] = rainbowCtr;
+		//System.out.println("writing rainbow: "+stateArray[19]);
 		
 		for(int i = 0; i < RAINBOW_LEN; ++i) {
-			stateArray[19+i*4] = rainbow1[i].x;
-			stateArray[20+i*4] = rainbow1[i].y;
-			stateArray[21+i*4] = rainbow2[i].x;
-			stateArray[22+i*4] = rainbow2[i].y;
+			stateArray[20+i*4] = rainbow1[i].x;
+			stateArray[21+i*4] = rainbow1[i].y;
+			stateArray[22+i*4] = rainbow2[i].x;
+			stateArray[23+i*4] = rainbow2[i].y;
 		}
+		
+		/*for(int i = 0; i < stateArray.length; ++i) {
+			System.out.print(stateArray[i]+",\t");
+		}
+		System.out.println();*/
 		out1.writeObject(stateArray);
 	}
 	
 	public void reset() {
-		p1_x = 75.0;
+		p1_x = 76.0;
 		p1_y = -200.0;
 		p1_a_x = 0.0; p1_v_x = 0.0; p1_v_y = 0.0;
 		p2_x = RIGHT_BOUND-50.0; p2_y = -200.0;
@@ -118,6 +240,9 @@ public class TestServer {
 			rainbow2[i].x = (int) p2_x;
 			rainbow2[i].y = (int) p2_y;
 		}
+		
+		p1Accepted = -1;
+		p2Accepted = -1;
 	}
 	
 	public static double magnitude(double x,double y) {
@@ -229,7 +354,7 @@ public class TestServer {
 		long deltaTime = 0;
 		long nextLog = System.nanoTime();
 		while(state == GAMEPLAY) {
-			System.out.println("Update!");
+			//System.out.println("Update!");
 			long start = System.nanoTime();
 			update(deltaTime);
 			if(start >= nextLog) {
@@ -241,6 +366,7 @@ public class TestServer {
 				rainbow2[rainbowCtr].x = (int) p2_x;
 				rainbow2[rainbowCtr].y = (int) p2_y;
 				rainbowCtr = (rainbowCtr + 1) % RAINBOW_LEN;
+				//System.out.println("rainbow: "+rainbowCtr);
 				//System.out.println();
 				nextLog = start + (long)1E9/30;
 			}
@@ -284,23 +410,30 @@ public class TestServer {
 				p1_falling_x += deltaTimeS*p1_falling_v_x;
 				p1_falling_y += deltaTimeS*p1_falling_v_y;
 			}
+			writeState();
 			deltaTime = System.nanoTime() - start;
 			timeCounter += deltaTime;
+			//System.out.println("Falling");
+			
+		}
+		state = REMATCH_ASK;
+		System.out.println("doig the thing");
+		writeState();
+
+		while(p1Accepted == -1) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		
-		String msg;
-		if(state == P1_WIN) {
-			msg = "Player 1 wins! Play again?";
-		} else if(state == P2_WIN) {
-			msg = "Player 2 wins! Play again?";
-		} else {
-			msg = "It's a draw! Play again?";
-		}
-		int opt = JOptionPane.showConfirmDialog(null, msg, "Game Over", JOptionPane.YES_NO_OPTION);
-		if(opt == JOptionPane.YES_OPTION)
+		if(p1Accepted == 1)
 			return REMATCH;
 		else
 			return QUIT;
+		
+		
 	}
 
 	public TestServer(int port) {
@@ -315,6 +448,7 @@ public class TestServer {
 			in1 = new DataInputStream(socket.getInputStream());
 			out1 = new ObjectOutputStream(socket.getOutputStream());
 			
+			input1.start();
 			/*reset();
 			while(true) {
 				update((long) (1E9/100));
@@ -333,10 +467,16 @@ public class TestServer {
 		TestServer server = new TestServer(5000);
 		server.reset();
 		try {
-			server.run();
+			int opt = REMATCH;
+			while(opt != QUIT) {
+				server.reset();
+				opt = server.run();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		server.quit("Server terminated");
 	}
 }
