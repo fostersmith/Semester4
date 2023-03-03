@@ -1,4 +1,4 @@
-package duckJousting;
+package useless;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
