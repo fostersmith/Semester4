@@ -479,7 +479,7 @@ public class TestServer {
 			
 			in2 = new DataInputStream(socket2.getInputStream());
 			out2 = new ObjectOutputStream(socket2.getOutputStream());
-			out2.writeUTF("2");
+			out2.writeObject("2");
 			
 			in1.readUTF();
 			in2.readUTF();
