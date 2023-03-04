@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -59,10 +60,12 @@ public class TestSocket extends JPanel implements KeyListener {
 	
 	public void writeKeyOn(char key) throws IOException {
 		out.writeUTF(key+"_on");
+		out.flush();
 	}
 	
 	public void writeKeyOff(char key) throws IOException {
 		out.writeUTF(key+"_off");
+		out.flush();
 	}
 	
 	public synchronized void setVars(double[] stateArray) {
@@ -103,8 +106,8 @@ public class TestSocket extends JPanel implements KeyListener {
 		
 		//System.out.println("Rainbow: "+rainbowCtr);
 		for(int i = 0; i < RAINBOW_LEN; ++i) {
-			rainbow1[i] = new Point();
-			rainbow2[i] = new Point();
+			//rainbow1[i] = new Point();
+			//rainbow2[i] = new Point();
 			rainbow1[i].x = (int) stateArray[20+i*4];
 			rainbow1[i].y = (int) stateArray[21+i*4];
 			rainbow2[i].x = (int) stateArray[22+i*4];
@@ -150,25 +153,30 @@ public class TestSocket extends JPanel implements KeyListener {
 	
 	public void run() throws ClassNotFoundException, IOException {
 		reset();
+		double[] stateArray;
 		while(state != REMATCH_DECLINE) {
-			double[] stateArray = (double[]) input.readObject();
+			stateArray = (double[]) input.readObject();
 			/*for(int i = 0; i < stateArray.length; ++i) {
 				System.out.print(stateArray[i]+",\t");
 			}
 			System.out.println();*/
 			setVars(stateArray);
 			repaint();
+			System.out.println("read");
 			//System.out.println("update");
 			
 			if(state == REMATCH_ASK) {
 				int opt = JOptionPane.showConfirmDialog(null, "Game Over! Play again?", "Game Over", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-				if(opt == JOptionPane.YES_OPTION) {
-					out.writeUTF("accept");
-				} else {
-					out.writeUTF("decline");
-				}
+					if(opt == JOptionPane.YES_OPTION) {
+						System.out.println("accepted");
+						out.writeUTF("accept");
+					} else {
+						System.out.println("declined");
+						out.writeUTF("decline");
+					}
 			}
-		}		
+		}
+		
 	}
 	
 	public static void drawRainbow(Graphics2D g2d, Point[] rainbow1, int rainbowCtr) {
@@ -335,6 +343,9 @@ public class TestSocket extends JPanel implements KeyListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		f1.setVisible(false);
+		f1.dispose();
 	}
 
 	@Override

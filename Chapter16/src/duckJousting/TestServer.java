@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 
 public class TestServer {
 
-	private Socket socket;
+	private Socket socket1, socket2;
 	private ServerSocket server;
 	private DataInputStream in1, in2;
 	private ObjectOutputStream out1, out2;
@@ -62,13 +62,11 @@ public class TestServer {
 				String line = "a_off";
 				while(!line.equals("Over")) {
 					if(state != REMATCH_ASK) {
-						System.out.println(line);
 						char key = line.charAt(0);
 						String type = line.split("_")[1];
 						if(type.equals("on")) {
 							switch(key){
 							case 'w':
-								System.out.println("enabling w");
 								wPressed = true;
 								break;
 							case 'a':
@@ -152,12 +150,12 @@ public class TestServer {
 							p2Accepted = 0;							
 						}
 					}
-					line = in1.readUTF();
+					line = in2.readUTF();
 				}	
 			} catch(IOException e) {
 				quit("An IO Exception occurred for player 1");
 			}
-			quit("Player 1 quit");
+			quit("Player 2 quit");
 		}
 	};
 
@@ -167,7 +165,7 @@ public class TestServer {
 		System.exit(0);
 	}
 	
-	public void writeState() throws IOException {
+	public void writeState(double[] stateArray) throws IOException {
 		// 5 - player 1 vars (x, y, a_x, v_x, v_y)
 		// 5 - player 2 vars (x, y, a_x, v_x, v_y)
 		// 4 - player 1 falling vars (x, y, v_x, v_y)
@@ -175,8 +173,7 @@ public class TestServer {
 		// 1 - state
 		// 1 - rainbowCtr
 		// 4*rainbow1.length - rainbow points [(x,y)_1 ,(x,y)_2]
-		
-		double[] stateArray = new double[10 + 8 + 2 + 4*RAINBOW_LEN];
+		stateArray = new double[10 + 8 + 2 + 4*RAINBOW_LEN];
 		stateArray[0] = p1_x;
 		stateArray[1] = p1_y;
 		stateArray[2] = p1_a_x;
@@ -217,6 +214,10 @@ public class TestServer {
 		}
 		System.out.println();*/
 		out1.writeObject(stateArray);
+		out1.flush();
+		out2.writeObject(stateArray);
+		out2.flush();
+		System.gc();
 	}
 	
 	public void reset() {
@@ -351,6 +352,8 @@ public class TestServer {
 	}
 
 	public int run() throws IOException {
+		double[] stateArray = new double[10 + 8 + 2 + 4*RAINBOW_LEN];
+
 		long deltaTime = 0;
 		long nextLog = System.nanoTime();
 		while(state == GAMEPLAY) {
@@ -370,7 +373,7 @@ public class TestServer {
 				//System.out.println();
 				nextLog = start + (long)1E9/30;
 			}
-			writeState();
+			writeState(stateArray);
 			deltaTime = System.nanoTime()-start;
 			//System.out.println("Delta Time: "+deltaTime);
 			/*if(deltaTime < targetFrameLen) {
@@ -410,17 +413,16 @@ public class TestServer {
 				p1_falling_x += deltaTimeS*p1_falling_v_x;
 				p1_falling_y += deltaTimeS*p1_falling_v_y;
 			}
-			writeState();
+			writeState(stateArray);
 			deltaTime = System.nanoTime() - start;
 			timeCounter += deltaTime;
 			//System.out.println("Falling");
 			
 		}
 		state = REMATCH_ASK;
-		System.out.println("doig the thing");
-		writeState();
+		writeState(stateArray);
 
-		while(p1Accepted == -1) {
+		while(p1Accepted == -1 || p2Accepted == -1) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -428,10 +430,14 @@ public class TestServer {
 			}
 		}
 		
-		if(p1Accepted == 1)
+		if(p1Accepted == 1 && p2Accepted == 1) {
 			return REMATCH;
-		else
+		}
+		else {
+			state = REMATCH_DECLINE;
+			writeState(stateArray);
 			return QUIT;
+		}
 		
 		
 	}
@@ -442,13 +448,23 @@ public class TestServer {
 			System.out.println("Server started");
 			
 			System.out.println("Waiting for client 1...");
-			socket = server.accept();
+			socket1 = server.accept();
 			System.out.println("Client 1 connected!");
 			
-			in1 = new DataInputStream(socket.getInputStream());
-			out1 = new ObjectOutputStream(socket.getOutputStream());
+			in1 = new DataInputStream(socket1.getInputStream());
+			out1 = new ObjectOutputStream(socket1.getOutputStream());
 			
 			input1.start();
+
+			System.out.println("Waiting for client 2...");
+			socket2 = server.accept();
+			System.out.println("Client 2 connected!");
+			
+			in2 = new DataInputStream(socket2.getInputStream());
+			out2 = new ObjectOutputStream(socket2.getOutputStream());
+			
+			input2.start();
+
 			/*reset();
 			while(true) {
 				update((long) (1E9/100));
