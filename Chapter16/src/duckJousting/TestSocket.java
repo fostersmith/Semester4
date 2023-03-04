@@ -330,7 +330,7 @@ public class TestSocket extends JPanel implements KeyListener {
 	
 	public static void main(String[] args) {
 		JFrame f1 = new JFrame();
-		TestSocket panel = new TestSocket("127.0.0.1", 5000);
+		TestSocket panel = new TestSocket("192.168.86.21", 5000);
 		f1.addKeyListener(panel);
 		f1.add(panel);
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
