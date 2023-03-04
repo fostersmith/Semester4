@@ -27,7 +27,7 @@ public class TestSocket extends JPanel implements KeyListener {
 	private ObjectInputStream input;
 	private DataOutputStream out;
 	
-	final static int GAMEPLAY = 0, P1_WIN = 1, P2_WIN = 2, DRAW = 3, REMATCH_ASK = 4, REMATCH_DECLINE = 5;
+	final static int GAMEPLAY = 0, P1_WIN = 1, P2_WIN = 2, DRAW = 3, REMATCH_ASK = 4, GAME_OVER = 5;
 	
 	final static int REMATCH = 4, QUIT = 5;
 	
@@ -147,14 +147,22 @@ public class TestSocket extends JPanel implements KeyListener {
 			input = new ObjectInputStream(socket.getInputStream());
 			out = new DataOutputStream(socket.getOutputStream());
 			
-		} catch(IOException e) {e.printStackTrace();} 
+			String playerNum = (String) input.readObject();
+			System.out.println(playerNum);
+			JOptionPane.showMessageDialog(null, "Joined as Player "+playerNum);
+			out.writeUTF("ok");
+			
+		} catch(IOException e) {e.printStackTrace();} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 		
 	}
 	
 	public void run() throws ClassNotFoundException, IOException {
 		reset();
 		double[] stateArray;
-		while(state != REMATCH_DECLINE) {
+		while(state != GAME_OVER) {
 			stateArray = (double[]) input.readObject();
 			/*for(int i = 0; i < stateArray.length; ++i) {
 				System.out.print(stateArray[i]+",\t");

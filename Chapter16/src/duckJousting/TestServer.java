@@ -19,7 +19,7 @@ public class TestServer {
 	private DataInputStream in1, in2;
 	private ObjectOutputStream out1, out2;
 
-	final static int GAMEPLAY = 0, P1_WIN = 1, P2_WIN = 2, DRAW = 3, REMATCH_ASK = 4, REMATCH_DECLINE = 5;
+	final static int GAMEPLAY = 0, P1_WIN = 1, P2_WIN = 2, DRAW = 3, REMATCH_ASK = 4, GAME_OVER = 5;
 	
 	final static int REMATCH = 4, QUIT = 5;
 	
@@ -161,6 +161,16 @@ public class TestServer {
 
 	public void quit(String msg) {
 		System.out.println(msg);
+		try {
+			out1.close();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			out2.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		System.exit(0);
 	}
@@ -434,7 +444,7 @@ public class TestServer {
 			return REMATCH;
 		}
 		else {
-			state = REMATCH_DECLINE;
+			state = GAME_OVER;
 			writeState(stateArray);
 			return QUIT;
 		}
@@ -454,7 +464,14 @@ public class TestServer {
 			in1 = new DataInputStream(socket1.getInputStream());
 			out1 = new ObjectOutputStream(socket1.getOutputStream());
 			
-			input1.start();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			out1.writeObject("1");
+			System.out.println("wrote it");
 
 			System.out.println("Waiting for client 2...");
 			socket2 = server.accept();
@@ -462,7 +479,12 @@ public class TestServer {
 			
 			in2 = new DataInputStream(socket2.getInputStream());
 			out2 = new ObjectOutputStream(socket2.getOutputStream());
+			out2.writeUTF("2");
 			
+			in1.readUTF();
+			in2.readUTF();
+			
+			input1.start();
 			input2.start();
 
 			/*reset();
