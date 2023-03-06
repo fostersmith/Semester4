@@ -54,6 +54,8 @@ public class TestServer {
 	
 	int p1Accepted = -1, p2Accepted = -1;
 	
+	long time = 0;
+	
 	// determines the buttons pressed by player 1 by accepting input from the client in the format "w_on" until the client sends "Over"
 	private Thread input1 = new Thread() {
 		@Override
@@ -183,7 +185,7 @@ public class TestServer {
 		// 1 - state
 		// 1 - rainbowCtr
 		// 4*rainbow1.length - rainbow points [(x,y)_1 ,(x,y)_2]
-		stateArray = new double[10 + 8 + 2 + 4*RAINBOW_LEN];
+		stateArray = new double[10 + 8 + 2 + 1 + 4*RAINBOW_LEN];
 		stateArray[0] = p1_x;
 		stateArray[1] = p1_y;
 		stateArray[2] = p1_a_x;
@@ -212,11 +214,13 @@ public class TestServer {
 		stateArray[19] = rainbowCtr;
 		//System.out.println("writing rainbow: "+stateArray[19]);
 		
+		stateArray[20] = time;
+		
 		for(int i = 0; i < RAINBOW_LEN; ++i) {
-			stateArray[20+i*4] = rainbow1[i].x;
-			stateArray[21+i*4] = rainbow1[i].y;
-			stateArray[22+i*4] = rainbow2[i].x;
-			stateArray[23+i*4] = rainbow2[i].y;
+			stateArray[21+i*4] = rainbow1[i].x;
+			stateArray[22+i*4] = rainbow1[i].y;
+			stateArray[23+i*4] = rainbow2[i].x;
+			stateArray[24+i*4] = rainbow2[i].y;
 		}
 		
 		/*for(int i = 0; i < stateArray.length; ++i) {
@@ -254,6 +258,8 @@ public class TestServer {
 		
 		p1Accepted = -1;
 		p2Accepted = -1;
+		
+		time = System.currentTimeMillis();
 	}
 	
 	public static double magnitude(double x,double y) {
@@ -358,7 +364,7 @@ public class TestServer {
 			state = P2_WIN;
 		}
 				
-	
+		time = System.currentTimeMillis();
 	}
 
 	public int run() throws IOException {
@@ -423,6 +429,7 @@ public class TestServer {
 				p1_falling_x += deltaTimeS*p1_falling_v_x;
 				p1_falling_y += deltaTimeS*p1_falling_v_y;
 			}
+			time = System.currentTimeMillis();
 			writeState(stateArray);
 			deltaTime = System.nanoTime() - start;
 			timeCounter += deltaTime;
@@ -456,6 +463,13 @@ public class TestServer {
 		try {
 			server = new ServerSocket(port);
 			System.out.println("Server started");
+			
+			Thread clientThread = new Thread() {
+				public void run() {
+					TestSocket.startHost("127.0.0.1", 5000);
+				}
+			};
+			clientThread.start();
 			
 			System.out.println("Waiting for client 1...");
 			socket1 = server.accept();
@@ -503,14 +517,7 @@ public class TestServer {
 	
 	public static void main(String[] args) {		
 		TestServer server = new TestServer(5000);
-		
-		Thread clientThread = new Thread() {
-			public void run() {
-				TestSocket.main(null);
-			}
-		};
-		clientThread.start();
-		
+				
 		server.reset();
 		try {
 			int opt = REMATCH;

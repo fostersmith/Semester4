@@ -58,6 +58,8 @@ public class TestSocket extends JPanel implements KeyListener {
 	double p1_falling_x, p2_falling_x, p1_falling_y, p2_falling_y;
 	double p1_falling_v_x, p2_falling_v_x, p1_falling_v_y, p2_falling_v_y;
 	
+	long time = 0;
+	
 	public void writeKeyOn(char key) throws IOException {
 		out.writeUTF(key+"_on");
 		out.flush();
@@ -102,16 +104,18 @@ public class TestSocket extends JPanel implements KeyListener {
 		state = (int)stateArray[18];
 		
 		rainbowCtr = (int)stateArray[19];
+		
+		time = (long)stateArray[20];
 		//System.out.println("reading rainbow: "+rainbowCtr);
 		
 		//System.out.println("Rainbow: "+rainbowCtr);
 		for(int i = 0; i < RAINBOW_LEN; ++i) {
 			//rainbow1[i] = new Point();
 			//rainbow2[i] = new Point();
-			rainbow1[i].x = (int) stateArray[20+i*4];
-			rainbow1[i].y = (int) stateArray[21+i*4];
-			rainbow2[i].x = (int) stateArray[22+i*4];
-			rainbow2[i].y = (int) stateArray[23+i*4];
+			rainbow1[i].x = (int) stateArray[21+i*4];
+			rainbow1[i].y = (int) stateArray[22+i*4];
+			rainbow2[i].x = (int) stateArray[23+i*4];
+			rainbow2[i].y = (int) stateArray[24+i*4];
 		}
 	}
 	
@@ -162,27 +166,53 @@ public class TestSocket extends JPanel implements KeyListener {
 	public void run() throws ClassNotFoundException, IOException {
 		reset();
 		double[] stateArray;
-		while(state != GAME_OVER) {
-			stateArray = (double[]) input.readObject();
-			/*for(int i = 0; i < stateArray.length; ++i) {
-				System.out.print(stateArray[i]+",\t");
-			}
-			System.out.println();*/
-			setVars(stateArray);
-			repaint();
-			System.out.println("read");
-			//System.out.println("update");
+		long startRead = System.currentTimeMillis();
+		
+		Thread reader = new Thread() {
+			double[] stateArray;
 			
-			if(state == REMATCH_ASK) {
-				int opt = JOptionPane.showConfirmDialog(null, "Game Over! Play again?", "Game Over", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-					if(opt == JOptionPane.YES_OPTION) {
-						System.out.println("accepted");
-						out.writeUTF("accept");
-					} else {
-						System.out.println("declined");
-						out.writeUTF("decline");
+			public void run() {
+				while(state != GAME_OVER) {
+					try {
+						stateArray = (double[]) input.readObject();
+						setVars(stateArray);
+
+						if(state == REMATCH_ASK) {
+							int opt = JOptionPane.showConfirmDialog(null, "Game Over! Play again?", "Game Over", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+								if(opt == JOptionPane.YES_OPTION) {
+									System.out.println("accepted");
+									out.writeUTF("accept");
+								} else {
+									System.out.println("declined");
+									out.writeUTF("decline");
+								}
+						}
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
+					
+				}
 			}
+		};
+		reader.start();
+		
+		while(state != GAME_OVER) {
+			//stateArray = (double[]) input.readObject();
+			//if(System.currentTimeMillis() - startRead >= 1) {
+				/*for(int i = 0; i < stateArray.length; ++i) {
+					System.out.print(stateArray[i]+",\t");
+				}
+				System.out.println();*/
+			//setVars(stateArray);
+			repaint();
+				//System.out.println("update");
+			//startRead = System.currentTimeMillis();
+			/*} else {
+				System.out.println("Dropped a frame");
+			}*/
+			
 		}
 		
 	}
@@ -290,6 +320,8 @@ public class TestSocket extends JPanel implements KeyListener {
 			rainbow2[i].x = (int) p2_x;
 			rainbow2[i].y = (int) p2_y;
 		}
+		
+		time = System.currentTimeMillis();
 	}
 	
 	@Override
@@ -336,23 +368,7 @@ public class TestSocket extends JPanel implements KeyListener {
 		}
 	}
 	
-	public static void main(String[] args) {
-		String ip = null;
-		int host = JOptionPane.showConfirmDialog(null, "Would you like to host?", "Host?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-		if(host == JOptionPane.YES_OPTION) {
-			Thread hostThread = new Thread() { //TODO make this work
-				public void run() {
-					TestServer.main(null);
-				}
-			};
-			hostThread.start();
-			ip = "127.0.0.1";
-		}
-		else if(host == JOptionPane.NO_OPTION) {
-			ip = JOptionPane.showInputDialog("Enter an ip address:");
-		} else {
-			System.exit(0);
-		}
+	public static void startHost(String ip, int port) {
 		JFrame f1 = new JFrame();
 		TestSocket panel = new TestSocket(ip, 5000); //"10.111.103.150"
 		f1.addKeyListener(panel);
@@ -370,6 +386,11 @@ public class TestSocket extends JPanel implements KeyListener {
 		
 		f1.setVisible(false);
 		f1.dispose();
+	}
+	
+	public static void main(String[] args) {
+		String ip = JOptionPane.showInputDialog("Enter host IP:");
+		startHost(ip, 5000);
 	}
 
 	@Override
