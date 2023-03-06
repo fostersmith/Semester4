@@ -337,8 +337,24 @@ public class TestSocket extends JPanel implements KeyListener {
 	}
 	
 	public static void main(String[] args) {
+		String ip = null;
+		int host = JOptionPane.showConfirmDialog(null, "Would you like to host?", "Host?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		if(host == JOptionPane.YES_OPTION) {
+			Thread hostThread = new Thread() { //TODO make this work
+				public void run() {
+					TestServer.main(null);
+				}
+			};
+			hostThread.start();
+			ip = "127.0.0.1";
+		}
+		else if(host == JOptionPane.NO_OPTION) {
+			ip = JOptionPane.showInputDialog("Enter an ip address:");
+		} else {
+			System.exit(0);
+		}
 		JFrame f1 = new JFrame();
-		TestSocket panel = new TestSocket("192.168.86.21", 5000);
+		TestSocket panel = new TestSocket(ip, 5000); //"10.111.103.150"
 		f1.addKeyListener(panel);
 		f1.add(panel);
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

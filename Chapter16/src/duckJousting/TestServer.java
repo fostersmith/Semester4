@@ -501,8 +501,16 @@ public class TestServer {
 		} catch(IOException e) {e.printStackTrace();}
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) {		
 		TestServer server = new TestServer(5000);
+		
+		Thread clientThread = new Thread() {
+			public void run() {
+				TestSocket.main(null);
+			}
+		};
+		clientThread.start();
+		
 		server.reset();
 		try {
 			int opt = REMATCH;
