@@ -42,3 +42,5 @@ local.properties
 # Typically, this file would be tracked if it contains build/dependency configurations:
 #.project
 /FX/JavaFXSceneBuilder/target/
+/FX/JavaFXNameApplication/target/
+/FX/JavaFXUsingCSS/target/
