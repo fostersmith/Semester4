@@ -29,7 +29,7 @@ public class KookyFace extends Face {
 					throw new InvalidEyeSizeException();
 				gotValidInput = true;
 			} catch(NumberFormatException ex) {
-				JOptionPane.showMessageDialog(null, "Must enter an integer");
+				JOptionPane.showMessageDialog(null, "Must enter an integor");
 			}
 		}
 		

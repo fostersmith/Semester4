@@ -21,7 +21,7 @@
             <Insets />
          </VBox.margin>
       </VBox>
-      <TextArea prefHeight="200.0" prefWidth="200.0" />
+      <TextArea fx:id="textArea" prefHeight="200.0" prefWidth="200.0" />
       <Button fx:id="enter" onAction="#enterPressed" text="Enter" />
    </children>
    <padding>

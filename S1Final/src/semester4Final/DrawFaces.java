@@ -102,4 +102,4 @@ public class DrawFaces extends JFrame implements ActionListener {
 		repaint();
 		noiseLabel.setText(face.makeNoise());		
 	}
-}
+}	`
