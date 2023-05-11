@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+
+<AnchorPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller = "main.PrimaryController">
+   <children>
+      <HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="76.0" prefWidth="600.0" spacing="10.0" AnchorPane.bottomAnchor="20.0">
+         <children>
+            <TextField fx:id="a" />
+            <VBox alignment="CENTER">
+               <children>
+                  <RadioButton fx:id="add" mnemonicParsing="false" selected="true" text="+">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="op" />
+                     </toggleGroup>
+                  </RadioButton>
+                  <RadioButton fx:id="sub" mnemonicParsing="false" text="-" toggleGroup="$op" />
+               </children>
+            </VBox>
+            <TextField fx:id="b" />
+            <Label text="=" />
+            <TextField fx:id="c" />
+         </children>
+      </HBox>
+      <Label fx:id="out" layoutX="327.0" layoutY="72.0" AnchorPane.bottomAnchor="10.0" />
+      <Button layoutX="251.0" layoutY="68.0" mnemonicParsing="false" onAction="#check" text="Check" AnchorPane.bottomAnchor="10.0" />
+   </children>
+</AnchorPane>
