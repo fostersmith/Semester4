@@ -5,33 +5,41 @@
 package main;
 
 import java.util.ArrayList;
-import javafx.scene.Node;
+import javafx.collections.ObservableList;
+import javafx.scene.shape.Polygon;
 
 /**
  *
  * @author fsmith
  */
-public abstract class Entity extends Node {
+public abstract class Entity extends Polygon {
     
     protected double x, y;
     protected double theta, speed;
     protected int health;
     
-    public Entity(double x, double y, double theta){
-        this.x = x;
-        this.y = y;
+    public Entity(double x, double y, double theta, double speed){
+        double[][] basePoints = basePoints();
+        this.getPoints().addAll(new Double[2*basePoints.length]);
+        updatePoints();
         this.theta = theta;
+        this.speed = speed;
         health = maxHealth();
+        moveTo(x,y);
     }
     
+    abstract double[][] basePoints();
+    
     public void moveTo(double x, double y){
-        double adjX = x - getBoundsInLocal().getWidth()/2;
+        /*double adjX = x - getBoundsInLocal().getWidth()/2;
         double adjY = y - getBoundsInLocal().getHeight()/2;
         
         adjX = adjX < 0 ? 0 : (adjX > App.W ? App.W : adjX);
-        adjY = adjY < 0 ? 0 : (adjY > App.H ? App.H : adjY);
-        
-        relocate(adjX, adjY);
+        adjY = adjY < 0 ? 0 : (adjY > App.H ? App.H : adjY);*/
+        this.x = x;
+        this.y = y;
+        this.setTranslateX(x);
+        this.setTranslateY(y);
     }
     
     public void moveBy(double dx, double dy){
@@ -40,6 +48,17 @@ public abstract class Entity extends Node {
     
     public void doMovement(long deltaTime){
         moveBy(deltaTime*speed*Math.cos(theta), deltaTime*speed*Math.sin(theta));
+    }
+    
+    public void updatePoints(){
+        double[][] basePoints = basePoints();
+        for(int i = 0; i < basePoints.length; ++i){
+            double[] p = basePoints[i];
+            double x = p[0] * Math.cos(theta) - p[1] * Math.sin(theta);// + this.x;
+            double y = p[0] * Math.sin(theta) + p[1] * Math.cos(theta);// + this.y;
+            this.getPoints().set(2*i, x);
+            this.getPoints().set(2*i+1, y);
+        }
     }
     
     public double getX(){
@@ -64,7 +83,7 @@ public abstract class Entity extends Node {
     public void setHealth(int health){
         this.health = health;
     }
-    public int getHealth(int health){
+    public int getHealth(){
         return health;
     }
     public void takeDamage(int dmg){
@@ -73,7 +92,8 @@ public abstract class Entity extends Node {
     
     abstract int maxHealth();
     abstract void collision(Entity e);
-    public void update(ArrayList<Entity> entities, long deltaTime){
+    public void update(ArrayList<Entity> entities, long deltaTime, App controller){
         doMovement(deltaTime);
+        updatePoints();
     }
 }

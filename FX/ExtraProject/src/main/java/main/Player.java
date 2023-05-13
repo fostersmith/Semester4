@@ -14,12 +14,14 @@ public class Player extends Entity {
     
     private static final int MAX_HEALTH = 20;
     
-    private boolean leftDown, rightDown, upDown;
-    private static final double turnSpeed = Math.PI/1000;
+    private boolean leftDown = false, rightDown = false, spaceDown = false, upDown = false;
+    private static final double turnSpeed = Math.PI/1E9;
     private boolean hasShot = false;
     
+    private long cooldown = 0;
+    
     public Player(double x, double y, double theta){
-        super(x, y, theta);
+        super(x, y, theta, 0);
     }
     
     @Override
@@ -40,22 +42,44 @@ public class Player extends Entity {
         this.rightDown = rightDown;
     }
     
+    public void setSpaceDown(boolean spaceDown){
+        this.spaceDown = spaceDown;
+    }
+    
     public void setUpDown(boolean upDown){
-        if(upDown == false && this.upDown == true){
-            hasShot = false;
-        }
         this.upDown = upDown;
     }
     
     public void update(ArrayList<Entity> entities, long deltaTime, App controller){
-        super.update(entities, deltaTime);
+        if(upDown){
+            speed = 100/1E9;
+            //System.out.println("speeding");
+        }
+        else{
+            speed = 0;
+        }
+        
+        super.update(entities, deltaTime, controller);
+        
         if(leftDown && !rightDown){
             theta -= turnSpeed*deltaTime;
         } else if (rightDown && !leftDown){
             theta += turnSpeed*deltaTime;
         }
-        if(upDown && !hasShot){
+        
+        
+        if(spaceDown && cooldown <= 0){
             controller.addEntity(new Bullet(x, y, theta));
+            cooldown = (long)(1E8);
         }
+        
+        cooldown -= deltaTime;
     }
+    
+    private static final double[][] basePoints = {{-10, 10}, {-10, -10}, {10, 0}};
+    @Override
+    double[][] basePoints() {
+        return basePoints;
+    }
+
 }

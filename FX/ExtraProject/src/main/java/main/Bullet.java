@@ -10,9 +10,11 @@ package main;
  */
 public class Bullet extends Entity {
     public static final int DAMAGE = 2;
+    public static final double SPEED = 100/1E9;
 
+    
     public Bullet(double x, double y, double theta) {
-        super(x, y, theta);
+        super(x, y, theta, SPEED);
     }
 
     @Override
@@ -25,6 +27,12 @@ public class Bullet extends Entity {
         if(e instanceof Enemy){
             e.takeDamage(DAMAGE);
         }
+    }
+
+    private static final double[][] basePoints = {{-3, 3}, {3, 3}, {3, -3}, {-3, -3}};
+    @Override
+    double[][] basePoints() {
+        return basePoints;
     }
     
     
