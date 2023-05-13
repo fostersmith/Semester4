@@ -1,21 +1,24 @@
 package main;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import javafx.animation.AnimationTimer;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import static javafx.scene.input.KeyCode.LEFT;
 import static javafx.scene.input.KeyCode.RIGHT;
 import static javafx.scene.input.KeyCode.SPACE;
 import static javafx.scene.input.KeyCode.UP;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
 
 /**
  * JavaFX App
@@ -29,8 +32,35 @@ public class App extends Application {
     private static ArrayList<Entity> entities = new ArrayList<>();
     private static Player p = new Player(W/2, H/2, 0);
     
+    private static Scene gameOver = new Scene(new VBox(), W, H);
+    private static Label gameOverLabel = new Label("Game Over");
+    private static Button playAgainButton = new Button("Play Again");
+    
+    private static EventHandler<ActionEvent> playAgainHandler = new EventHandler<>(){
+        public void handle(ActionEvent event){
+            while(entities.size() > 0)
+                destroyEntity(entities.get(0));
+            p = new Player(W/2, H/2, 0);
+            addEntity(p);
+            stage.setScene(scene);
+            timer.start();
+        }
+    };
+    
+    private static AnimationTimer timer;
+    private static Stage stage;
+    
+    static
+    {
+        playAgainButton.setOnAction(playAgainHandler);
+        ((VBox)gameOver.getRoot()).setAlignment(Pos.CENTER);
+        ((VBox)gameOver.getRoot()).getChildren().addAll(gameOverLabel, playAgainButton);
+        
+    }
+    
     @Override
-    public void start(Stage stage) throws IOException {     
+    public void start(Stage stage) throws IOException {   
+        this.stage = stage;
         scene = new Scene(new Group(), W, H);
         addEntity(p);
         scene.setOnKeyPressed(new EventHandler<KeyEvent>(){
@@ -61,7 +91,7 @@ public class App extends Application {
         
         App app = this;
         
-        AnimationTimer timer = new AnimationTimer() {
+        timer = new AnimationTimer() {
             long last = -1;
             @Override
             public void handle(long now) {
@@ -75,12 +105,13 @@ public class App extends Application {
                 for(int i = 0; i < entities.size(); ++i){
                     Entity e = entities.get(i);
                     e.update(entities, deltaTime, app);
-                    for(int j = 0; j < entities.size(); ++j){
+                    for(int j = i; j < entities.size(); ++j){
                         if(j != i){
                             Entity f = entities.get(j);
                             for(int g = 0; g < f.getPoints().size()/2; ++g){
-                                if(e.contains(f.getPoints().get(2*g),f.getPoints().get(2*g+1))){
+                                if(e.contains(f.getPoints().get(2*g) + f.x - e.x,f.getPoints().get(2*g+1) + f.y - e.y)){
                                     e.collision(f);
+                                    f.collision(e);
                                     break;
                                 }
                             }
@@ -88,7 +119,10 @@ public class App extends Application {
                     }
                     
                     if(e.getHealth() <= 0)
-                        destroyEntity(e);
+                        if(e != p)
+                            destroyEntity(e);
+                        else
+                            gameOver();
                     
                     if(e.getX() < 0){
                         e.moveTo(W, e.getY());
@@ -117,14 +151,24 @@ public class App extends Application {
         timer.start();
         
         addEntity(new Enemy(50,50,0));
+        
+        gameOver();
+    }
+    
+    public static void gameOver(){
+        /*Scene gameOver = new Scene(new Group(), W, H);
+        gameOver.*/
+        timer.stop();
+        stage.setScene(gameOver);
+       //((Group)scene.getRoot()).getChildren().add(gameOverBox);
     }
 
-    public void addEntity(Entity e){
+    public static void addEntity(Entity e){
         entities.add(e);
         ((Group)scene.getRoot()).getChildren().add(e);
     }
     
-    public void destroyEntity(Entity e){
+    public static void destroyEntity(Entity e){
         entities.remove(e);
         ((Group)scene.getRoot()).getChildren().remove(e);
         System.gc();

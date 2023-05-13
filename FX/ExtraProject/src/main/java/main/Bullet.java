@@ -26,6 +26,8 @@ public class Bullet extends Entity {
     void collision(Entity e) {
         if(e instanceof Enemy){
             e.takeDamage(DAMAGE);
+            setHealth(0);
+            
         }
     }
 
