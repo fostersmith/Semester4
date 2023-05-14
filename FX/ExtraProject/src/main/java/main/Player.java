@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */
 public class Player extends Entity {
     
-    private static final int MAX_HEALTH = 20;
+    public static final int MAX_HEALTH = 20;
     
     private boolean leftDown = false, rightDown = false, spaceDown = false, upDown = false;
     private static final double turnSpeed = Math.PI/1E9;

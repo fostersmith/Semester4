@@ -5,8 +5,8 @@
 package main;
 
 import java.util.ArrayList;
-import javafx.collections.ObservableList;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
 
 /**
  *
@@ -16,7 +16,8 @@ public abstract class Entity extends Polygon {
     
     protected double x, y;
     protected double theta, speed;
-    protected int health;
+    private int health;
+    protected HealthBar hb;
     
     public Entity(double x, double y, double theta, double speed){
         double[][] basePoints = basePoints();
@@ -25,6 +26,8 @@ public abstract class Entity extends Polygon {
         this.theta = theta;
         this.speed = speed;
         health = maxHealth();
+        hb = new HealthBar(health);
+        //hb = new HealthBar(health);
         moveTo(x,y);
     }
     
@@ -40,6 +43,7 @@ public abstract class Entity extends Polygon {
         this.y = y;
         this.setTranslateX(x);
         this.setTranslateY(y);
+        hb.moveTo(x, y+this.getBoundsInLocal().getHeight());
     }
     
     public void moveBy(double dx, double dy){
@@ -82,6 +86,7 @@ public abstract class Entity extends Polygon {
     
     public void setHealth(int health){
         this.health = health;
+        this.hb.setHealth(health);
     }
     public int getHealth(){
         return health;

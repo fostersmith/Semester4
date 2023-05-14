@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="244.0" prefWidth="323.0" stylesheets="@PhotoFrame.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.PrimaryController">
+   <children>
+      <VBox alignment="CENTER" layoutX="-30.0" spacing="20.0" stylesheets="@PhotoFrame.css" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <Label text="Subject" />
+            <ToggleButton fx:id="subOneP" mnemonicParsing="false" onAction="#calcPrice" selected="true" text="One Person ($40)">
+               <toggleGroup>
+                  <ToggleGroup fx:id="SubjectGroup" />
+               </toggleGroup>
+            </ToggleButton>
+            <ToggleButton fx:id="subMultP" mnemonicParsing="false" onAction="#calcPrice" text="Multiple People ($75)" toggleGroup="$SubjectGroup" />
+            <ToggleButton fx:id="subPandP" mnemonicParsing="false" onAction="#calcPrice" text="Person and Pet ($95)" toggleGroup="$SubjectGroup" />
+         </children>
+      </VBox>
+      <VBox alignment="CENTER" layoutX="168.0" layoutY="14.0" spacing="20.0" stylesheets="@PhotoFrame.css" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <Label text="Session Location" />
+            <ToggleButton fx:id="locStudio" mnemonicParsing="false" onAction="#calcPrice" selected="true" text="Studio">
+               <toggleGroup>
+                  <ToggleGroup fx:id="SessionGroup" />
+               </toggleGroup></ToggleButton>
+            <ToggleButton fx:id="locOnSite" mnemonicParsing="false" onAction="#calcPrice" text="On Site (+$90)" toggleGroup="$SessionGroup" />
+         </children>
+      </VBox>
+      <HBox alignment="CENTER" layoutX="62.0" layoutY="192.0" prefHeight="53.0" prefWidth="200.0" spacing="20.0" stylesheets="@PhotoFrame.css" AnchorPane.bottomAnchor="-1.0">
+         <children>
+            <Button mnemonicParsing="false" onAction="#calcPrice" text="Calculate Price" />
+            <Label fx:id="priceLabel" text="Price: $40" />
+         </children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+      </HBox>
+   </children>
+</AnchorPane>

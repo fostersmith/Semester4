@@ -12,8 +12,8 @@ import java.util.ArrayList;
  */
 public class Enemy extends Entity {
     
-    public static final int MAX_HEALTH = 4;
-    public static final int DAMAGE = 2;
+    public static final int MAX_HEALTH = 6;
+    public static final int DAMAGE = Player.MAX_HEALTH/10;
     
     public static final double TURN_SPEED = Math.PI/5E9;
     public static final double SPEED = 50/1E9;

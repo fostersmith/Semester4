@@ -10,7 +10,7 @@ package main;
  */
 public class Bullet extends Entity {
     public static final int DAMAGE = 2;
-    public static final double SPEED = 100/1E9;
+    public static final double SPEED = 105/1E9;
 
     
     public Bullet(double x, double y, double theta) {

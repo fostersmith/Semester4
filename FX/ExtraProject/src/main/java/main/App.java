@@ -33,13 +33,16 @@ public class App extends Application {
     private static Player p = new Player(W/2, H/2, 0);
     
     private static Scene gameOver = new Scene(new VBox(), W, H);
-    private static Label gameOverLabel = new Label("Game Over");
+    private static Label gameOverLabel = new Label("Game Over. Score: ");
     private static Button playAgainButton = new Button("Play Again");
+    
+    private static int score = -(Player.MAX_HEALTH/Enemy.DAMAGE);
     
     private static EventHandler<ActionEvent> playAgainHandler = new EventHandler<>(){
         public void handle(ActionEvent event){
             while(entities.size() > 0)
                 destroyEntity(entities.get(0));
+            score = 0;
             p = new Player(W/2, H/2, 0);
             addEntity(p);
             stage.setScene(scene);
@@ -119,27 +122,30 @@ public class App extends Application {
                     }
                     
                     if(e.getHealth() <= 0)
-                        if(e != p)
+                        if(e != p){
                             destroyEntity(e);
+                            if(e instanceof Enemy)
+                                ++score;
+                        }
                         else
                             gameOver();
                     
                     if(e.getX() < 0){
-                        e.moveTo(W, e.getY());
+                        e.moveTo(0, e.getY());
                         if(e instanceof Bullet)
                             destroyEntity(e);
                     } else if(e.getX() > W){
-                        e.moveTo(0, e.getY());
+                        e.moveTo(W, e.getY());
                         if(e instanceof Bullet)
                             destroyEntity(e);
                     }
                     
                     if(e.getY() < 0){
-                        e.moveTo(e.getX(), H);
+                        e.moveTo(e.getX(), 0);
                         if(e instanceof Bullet)
                             destroyEntity(e);
                     } else if(e.getY() > H){
-                        e.moveTo(e.getX(), 0);
+                        e.moveTo(e.getX(), H);
                         if(e instanceof Bullet)
                             destroyEntity(e);
                     }
@@ -151,26 +157,29 @@ public class App extends Application {
         timer.start();
         
         addEntity(new Enemy(50,50,0));
-        
-        gameOver();
     }
     
     public static void gameOver(){
         /*Scene gameOver = new Scene(new Group(), W, H);
         gameOver.*/
+        for(Entity e : entities){
+            if(e.getHealth() <= 0 && e instanceof Enemy)
+                ++score;
+        }
         timer.stop();
+        gameOverLabel.setText("Game Over. Score :"+score);
         stage.setScene(gameOver);
        //((Group)scene.getRoot()).getChildren().add(gameOverBox);
     }
 
     public static void addEntity(Entity e){
         entities.add(e);
-        ((Group)scene.getRoot()).getChildren().add(e);
+        ((Group)scene.getRoot()).getChildren().addAll(e, e.hb.base, e.hb);
     }
     
     public static void destroyEntity(Entity e){
         entities.remove(e);
-        ((Group)scene.getRoot()).getChildren().remove(e);
+        ((Group)scene.getRoot()).getChildren().removeAll(e, e.hb, e.hb.base);
         System.gc();
     }
     
