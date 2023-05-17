@@ -46,6 +46,7 @@ public class LinkedList {
 		Node current = head;
 		for(int i = 1; i < index; i++) {
 			if(current.getNext() == null) return false;
+			current = current.getNext();
 		}
 		current.setNext(current.getNext().getNext());
 		listCount--;

@@ -2,10 +2,9 @@ package linkedlist;
 
 import java.io.Serializable;
 import java.util.ListIterator;
+import java.util.function.Consumer;
 
 import javax.swing.JOptionPane;
-
-import org.w3c.dom.Node;
 
 public class DLPositionalListCode implements ListIterator, Serializable {
 
@@ -190,4 +189,55 @@ public class DLPositionalListCode implements ListIterator, Serializable {
 	this.previous = previous;
 	this.next = next;
 	}}
+
+	public static void main(String[] args) {
+		DLPositionalListCode list = new DLPositionalListCode();
+		Consumer<DLPositionalListCode> listDataPrint = new Consumer<DLPositionalListCode>() {
+			@Override
+			public void accept(DLPositionalListCode list) {
+				System.out.println("Has previous: "+list.hasPrevious());
+				System.out.println("Has next: "+list.hasNext());
+				System.out.println("Size: "+list.size());				
+			}
+		};
+		listDataPrint.accept(list);
+		while(list.size() > 0)
+			list.remove();
+		for(char letter = 'a'; letter <= 'z'; ++letter) {
+			list.add((Character)letter);
+		}
+		System.out.println(list);
+		listDataPrint.accept(list);
+		list.previous();
+		System.out.println("Value of previous: "+list.curPos.value);
+		list.set("$");
+		for(int i = 0; i < 5; ++i)
+			list.previous();
+		System.out.println("Current value: "+list.curPos.value);
+		System.out.println("Current index: "+list.currentIndex());
+		System.out.println("Previous index: "+list.previousIndex());
+		System.out.println("Next index: "+list.nextIndex());
+		list.remove();
+		System.out.println("List: "+list);
+		System.out.println("End to start: "+list.toBackwardString());
+		System.out.println("Size: "+list.size());
+		System.out.println("Current value: "+list.curPos.value);
+		list.remove2();
+		System.out.println("List: "+list);
+		System.out.println("End to start: "+list.toBackwardString());
+		System.out.println("Size: "+list.size());
+		System.out.println("Current value: "+list.curPos.value);
+		while(list.hasPrevious())
+			list.previous();
+		while(list.hasNext()) {
+			list.next();
+			list.set("*");
+		}
+		System.out.println(list);
+		for(String s : new String[] {"Happy", "Birthday", "to", "You"})
+			list.addAfter(s);
+		System.out.println(list);
+		System.out.println(list.toBackwardString());
+		
 	}
+}

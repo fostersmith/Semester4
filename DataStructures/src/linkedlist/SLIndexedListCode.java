@@ -1,8 +1,8 @@
 package linkedlist;
 
-import java.io.*;
-import javax.swing.*;
-import java.util.*;
+import java.io.Serializable;
+
+import javax.swing.JOptionPane;
 
 public class SLIndexedListCode implements IndexedList, Serializable {
 
@@ -121,5 +121,22 @@ public class SLIndexedListCode implements IndexedList, Serializable {
 			this.value = value;
 			this.next = next;
 		}
+	}
+	
+	public static void main(String[] args) {
+		SLIndexedListCode list = new SLIndexedListCode();
+		list.locateNode(0);
+		
+		for(Node pointer = list.head; pointer != null; pointer = pointer.next){
+			System.out.println(pointer.value);
+		}
+		
+		list.set(2, "blue");
+		System.out.println(list);
+		list.remove(3);
+		System.out.println("List empty: "+list.isEmpty());
+		list.set(4, "football");
+		System.out.println("List is of size "+list.size());
+		
 	}
 }
