@@ -167,7 +167,7 @@ public class App extends Application {
                 ++score;
         }
         timer.stop();
-        gameOverLabel.setText("Game Over. Score :"+score);
+        gameOverLabel.setText("Game Over. Score: "+score);
         stage.setScene(gameOver);
        //((Group)scene.getRoot()).getChildren().add(gameOverBox);
     }
