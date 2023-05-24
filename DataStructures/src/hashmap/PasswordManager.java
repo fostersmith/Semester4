@@ -1,6 +1,7 @@
 package hashmap;
 
-import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -16,7 +17,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -27,23 +27,99 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-public class PasswordManager extends JPanel {
+public class PasswordManager extends JFrame implements ActionListener {
 
+	// Constants
 	private static final String algorithm = "AES";
 	private static final String dataPath = "passwords.txt";
 	private static final IvParameterSpec iv = generateIV();
 	
+	// Key generated from password
 	private SecretKey key;
-	
+	// Maps site name to encrypted password
 	private HashMap<String, String> encryptedPasswordMap = new HashMap<>();
 	
-	public PasswordManager(int w, int h, String password) {
-		setLayout(new FlowLayout());
-		setSize(w,h);
+	// Swing components
+	JPanel homePanel = new JPanel();
+	JButton addEntryButton = new JButton("Add/Edit Entry");
+	JButton removeEntryButton = new JButton("Remove Entry");
+	JButton getDataButton = new JButton("Get Password");
+	JButton saveButton = new JButton("Save Configuration");
+	JButton homeButton = new JButton("Home");
+	
+	//Entry Modification Screen
+	JPanel modPanel = new JPanel();
+	JLabel siteLabel = new JLabel("Site:  ");
+	JLabel passwordLabel = new JLabel("Password: ");
+	JTextField siteField = new JTextField();
+	JTextField passwordField = new JTextField();
+	JButton modEnterButton = new JButton("Enter");
+	
+	//Entry Removal Screen
+	JPanel removalPanel = new JPanel();
+	JButton removalEnterButton = new JButton("Enter");
+	
+	//Password Retrieval Screen
+	JPanel retrievalPanel = new JPanel();
+	JButton retrievalEnterButton = new JButton("Enter");
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		JButton b = (JButton)e.getSource();
+		
+		if(b == addEntryButton) {
+			switchToScreen(modPanel);
+		} else if(b == removeEntryButton) {
+			switchToScreen(removalPanel);
+		} else if(b == getDataButton) {
+			switchToScreen(retrievalPanel);
+		} else if(b == homeButton) {
+			switchToScreen(homePanel);
+		}
+	}
+	
+	public void switchToScreen(JPanel p) {
+		this.removeAll();
+		this.add(p);
+		repaint();
+	}
+	
+	public PasswordManager(String password) {
+		
+		for(JButton j : new JButton[] {addEntryButton, removeEntryButton, getDataButton, saveButton, homeButton, modEnterButton, removalEnterButton, retrievalEnterButton})
+			j.addActionListener(this);
+		
+		homePanel.add(addEntryButton);
+		homePanel.add(removeEntryButton);
+		homePanel.add(getDataButton);
+		homePanel.add(saveButton);
+		
+		modPanel.add(siteLabel);
+		modPanel.add(siteField);
+		modPanel.add(passwordLabel);
+		modPanel.add(passwordField);
+		modPanel.add(modEnterButton);
+		modPanel.add(modEnterButton);
+		
+		removalPanel.add(siteLabel);
+		removalPanel.add(siteField);
+		removalPanel.add(removalEnterButton);
+		removalPanel.add(homeButton);
+		
+		retrievalPanel.add(siteLabel);
+		retrievalPanel.add(siteField);
+		retrievalPanel.add(retrievalEnterButton);
+		retrievalPanel.add(homeButton);
+		
+		this.add(homePanel);
+		
 		
 		 try {
 			key = getKeyFromPassword(password, "salt");
@@ -56,7 +132,7 @@ public class PasswordManager extends JPanel {
 		 
 		 loadMap(new File(dataPath), encryptedPasswordMap);
 		 
-		 String input;
+		/* String input;
 		 Scanner scanner = new Scanner(System.in);
 		 do {
 			 System.out.print(" >> ");
@@ -76,7 +152,7 @@ public class PasswordManager extends JPanel {
 		 } while(!input.equals("QUIT"));
 		 scanner.close();
 		 
-		 writeMap(new File(dataPath), encryptedPasswordMap);
+		 writeMap(new File(dataPath), encryptedPasswordMap);*/
 	}
 	
 	public static SecretKey getKeyFromPassword(String password, String salt)
@@ -156,10 +232,8 @@ public class PasswordManager extends JPanel {
 	}
 	
 	public static void main(String[] args) {
-		JFrame f1 = new JFrame();
 		String password = JOptionPane.showInputDialog("Password:");
-		PasswordManager panel = new PasswordManager(500, 300, password);
-		f1.add(panel);
+		PasswordManager f1 = new PasswordManager(password);
 		f1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f1.setVisible(true);
 		f1.setSize(500, 300);
