@@ -1,5 +1,7 @@
 package hashmap;
 
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -52,71 +54,126 @@ public class PasswordManager extends JFrame implements ActionListener {
 	JButton removeEntryButton = new JButton("Remove Entry");
 	JButton getDataButton = new JButton("Get Password");
 	JButton saveButton = new JButton("Save Configuration");
-	JButton homeButton = new JButton("Home");
 	
 	//Entry Modification Screen
 	JPanel modPanel = new JPanel();
-	JLabel siteLabel = new JLabel("Site:  ");
-	JLabel passwordLabel = new JLabel("Password: ");
-	JTextField siteField = new JTextField();
-	JTextField passwordField = new JTextField();
+	JLabel modSiteLabel = new JLabel("Site:  ");
+	JLabel modPasswordLabel = new JLabel("Password: ");
+	JTextField modSiteField = new JTextField();
+	JTextField modPasswordField = new JTextField();
 	JButton modEnterButton = new JButton("Enter");
+	JButton modHomeButton = new JButton("Home");
 	
 	//Entry Removal Screen
 	JPanel removalPanel = new JPanel();
+	JLabel removalSiteLabel = new JLabel("Site: ");
+	JTextField removalSiteField = new JTextField();
 	JButton removalEnterButton = new JButton("Enter");
+	JButton removalHomeButton = new JButton("Home");
 	
 	//Password Retrieval Screen
 	JPanel retrievalPanel = new JPanel();
+	JLabel retrievalSiteLabel = new JLabel("Site: ");
+	JTextField retrievalSiteField = new JTextField();
 	JButton retrievalEnterButton = new JButton("Enter");
+	JButton retrievalHomeButton = new JButton("Home");
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JButton b = (JButton)e.getSource();
 		
+		// Screen Switches
 		if(b == addEntryButton) {
 			switchToScreen(modPanel);
 		} else if(b == removeEntryButton) {
 			switchToScreen(removalPanel);
 		} else if(b == getDataButton) {
 			switchToScreen(retrievalPanel);
-		} else if(b == homeButton) {
+		} else if(b == modHomeButton || b == removalHomeButton || b == retrievalHomeButton) {
 			switchToScreen(homePanel);
+		} 
+		// Enter Buttons
+		else if(b == modEnterButton) {
+			String site = modSiteField.getText();
+			String password = modPasswordField.getText();
+			modSiteField.setText("");
+			modPasswordField.setText("");
+			if(!site.equals("") && !password.equals("")) {
+				encryptedPasswordMap.put(site, encrypt(password, key));
+				JOptionPane.showMessageDialog(null, "Success");
+			} else {
+				JOptionPane.showMessageDialog(null, "One or more fields was left blank; please try again");
+			}
+		} else if(b == removalEnterButton) {
+			String site = removalSiteField.getText();
+			removalSiteField.setText("");
+			if(encryptedPasswordMap.containsKey(site)) {
+				encryptedPasswordMap.remove(site);
+				JOptionPane.showMessageDialog(null, "Success");
+			} else {
+				JOptionPane.showMessageDialog(null, "Key not found");
+			}
+		} else if(b == retrievalEnterButton) {
+			String site = retrievalSiteField.getText();
+			retrievalSiteField.setText("");
+			if(encryptedPasswordMap.containsKey(site)) {
+				JOptionPane.showMessageDialog(null, decrypt(encryptedPasswordMap.get(site), key));
+			} else {
+				JOptionPane.showMessageDialog(null, "Key not found");
+			}
+		}
+		// Save Button
+		else if(b == saveButton) {
+			try {
+				writeMap(new File(dataPath), encryptedPasswordMap);
+			} catch(Exception ex) {
+				JOptionPane.showMessageDialog(null, "An Error Ocurred");
+			}
 		}
 	}
 	
 	public void switchToScreen(JPanel p) {
-		this.removeAll();
-		this.add(p);
+		getContentPane().removeAll();
+		add(p);
+		revalidate();
 		repaint();
 	}
 	
 	public PasswordManager(String password) {
 		
-		for(JButton j : new JButton[] {addEntryButton, removeEntryButton, getDataButton, saveButton, homeButton, modEnterButton, removalEnterButton, retrievalEnterButton})
+		for(JButton j : new JButton[] {addEntryButton, removeEntryButton, getDataButton, saveButton, modHomeButton, removalHomeButton, retrievalHomeButton, modEnterButton, removalEnterButton, retrievalEnterButton})
 			j.addActionListener(this);
 		
+		for(JTextField t : new JTextField[] {modSiteField, removalSiteField, retrievalSiteField, modPasswordField})
+			t.setPreferredSize(new Dimension(100, 20));
+
+		
+		homePanel.setLayout(new FlowLayout());
 		homePanel.add(addEntryButton);
 		homePanel.add(removeEntryButton);
 		homePanel.add(getDataButton);
 		homePanel.add(saveButton);
 		
-		modPanel.add(siteLabel);
-		modPanel.add(siteField);
-		modPanel.add(passwordLabel);
-		modPanel.add(passwordField);
+		modPanel.setLayout(new FlowLayout());
+		modPanel.add(modSiteLabel);
+		modPanel.add(modSiteField);
+		modPanel.add(modPasswordLabel);
+		modPanel.add(modPasswordField);
 		modPanel.add(modEnterButton);
 		modPanel.add(modEnterButton);
+		modPanel.add(modHomeButton);
 		
-		removalPanel.add(siteLabel);
-		removalPanel.add(siteField);
+		removalPanel.setLayout(new FlowLayout());
+		removalPanel.add(removalSiteLabel);
+		removalPanel.add(removalSiteField);
 		removalPanel.add(removalEnterButton);
-		removalPanel.add(homeButton);
+		removalPanel.add(removalHomeButton);
 		
-		retrievalPanel.add(siteLabel);
-		retrievalPanel.add(siteField);
+		retrievalPanel.setLayout(new FlowLayout());
+		retrievalPanel.add(retrievalSiteLabel);
+		retrievalPanel.add(retrievalSiteField);
 		retrievalPanel.add(retrievalEnterButton);
-		retrievalPanel.add(homeButton);
+		retrievalPanel.add(retrievalHomeButton);
 		
 		this.add(homePanel);
 		
@@ -210,7 +267,6 @@ public class PasswordManager extends JFrame implements ActionListener {
 			cipher.init(Cipher.DECRYPT_MODE, key);
 			
 			byte[] plaintext = cipher.doFinal(Base64.getDecoder().decode(ciphertext));
-			System.out.println(plaintext);
 			return new String( plaintext );
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
 			throw new IllegalArgumentException();
